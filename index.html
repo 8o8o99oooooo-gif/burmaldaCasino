@@ -56,7 +56,6 @@
         .clicker-area { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; text-align: center; }
         .click-btn { width: 160px; height: 160px; border-radius: 50%; border: 4px solid var(--accent-glow); background: radial-gradient(circle at 30% 30%, #3b1d6e, #130924); font-size: 1.2rem; font-weight: bold; color: var(--accent-glow); cursor: pointer; margin: 18px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(168, 85, 247, 0.4); transition: transform 0.06s; }
         .click-btn:active { transform: scale(0.93); }
-        .click-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .energy-bar-wrap { background: #0d0714; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 15px; }
         .energy-bar { height: 22px; background: #130924; border-radius: 6px; overflow: hidden; position: relative; }
         .energy-fill { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--accent-pink)); transition: width 0.25s; }
@@ -66,10 +65,32 @@
         .shop-info h4 { color: var(--accent-glow); }
         .shop-info p { font-size: 0.8rem; color: var(--text-dim); }
 
+        /* ===== АПГРЕЙДЕР ===== */
+        .upgrader-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 15px 0; }
+        .upg-box { flex: 1; min-height: 120px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; cursor: pointer; font-size: 0.8rem; gap: 6px; }
+        .upg-box.selected { border-color: var(--accent-glow); box-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
+        .circle-wrapper { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+        .circle-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .upg-arrow { position: absolute; inset: 0; display: flex; justify-content: center; transform-origin: 50% 50%; transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1); }
+        .upg-arrow span { color: #fbbf24; font-size: 1.4rem; text-shadow: 0 0 10px #fbbf24; margin-top: -6px; }
+        .circle-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .circle-info .ch-val { font-size: 1.1rem; font-weight: bold; color: #fbbf24; }
+        .picker-list { display: none; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; max-height: 180px; overflow-y: auto; margin-top: 10px; }
+        .picker-list.open { display: block; }
+        .picker-row { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; font-size: 0.85rem; }
+        .picker-row:hover { background: #2e1a4a; }
+        .mult-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+        .mult-btn { flex: 1; min-width: 50px; background: #130924; color: #fff; border: 1px solid var(--border-color); padding: 8px 4px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .mult-btn.active { border-color: var(--accent-glow); color: var(--accent-glow); }
+
         /* ===== ИНВЕНТАРЬ ===== */
         .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
         .inventory-item { background: var(--card-bg); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid var(--border-color); font-size: 0.8rem; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
         .inv-price { color: var(--accent-glow); font-weight: bold; }
+
+        /* ===== СТАТИСТИКА ===== */
+        .stats-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .stats-val { color: var(--accent-glow); font-weight: bold; font-size: 1.1rem; }
 
         /* ===== ИГРЫ И ПОЛНОЭКРАННЫЙ РЕЖИМ ===== */
         .games-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
@@ -88,9 +109,9 @@
 
         /* ===== НАВИГАЦИЯ ===== */
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border-color); z-index: 99; }
-        .nav-btn { background: none; border: none; color: var(--text-dim); font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .nav-btn { background: none; border: none; color: var(--text-dim); font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
         .nav-btn.active { color: var(--accent-glow); font-weight: bold; }
-        .nav-icon { font-size: 1.2rem; }
+        .nav-icon { font-size: 1.1rem; }
 
         /* ===== УВЕДОМЛЕНИЕ МЕЛЛСТРОЯ ===== */
         .mellstroy-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
@@ -133,7 +154,7 @@
 
             <div class="shop-card">
                 <div class="shop-info">
-                    <h4>+5$ За Клику</h4>
+                    <h4>+5$ За Клик</h4>
                     <p>Текущая цена: $<span id="click-cost">100</span></p>
                 </div>
                 <button class="btn" onclick="buyClickUpgrade()">Купить</button>
@@ -151,6 +172,50 @@
             </div>
 
             <div class="cases-grid" id="cases-grid"></div>
+        </div>
+
+        <!-- АПГРЕЙДЕР -->
+        <div id="tab-upgrader" class="tab-content">
+            <h2>Апгрейдер</h2>
+            <p class="sub-dim">Улучшай свои предметы с определенным шансом</p>
+
+            <div class="upgrader-top">
+                <div class="upg-box" id="upg-item-box" onclick="togglePicker()">
+                    <div style="font-size: 1.8rem;" id="upg-emoji">📦</div>
+                    <div id="upg-title">Выберите предмет</div>
+                    <div style="color: var(--accent-glow);" id="upg-price">$0</div>
+                </div>
+
+                <div class="circle-wrapper">
+                    <svg class="circle-svg" viewBox="0 0 36 36">
+                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#130924" stroke-width="3.8"/>
+                        <path id="circle-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-glow)" stroke-width="3.8" stroke-dasharray="50, 100"/>
+                    </svg>
+                    <div class="upg-arrow" id="upg-arrow"><span>▼</span></div>
+                    <div class="circle-info">
+                        <div class="ch-val"><span id="chance-val">50</span>%</div>
+                        <div style="font-size: 0.65rem; color: var(--text-dim);">Шанс</div>
+                    </div>
+                </div>
+
+                <div class="upg-box">
+                    <div style="font-size: 1.8rem;">🎯</div>
+                    <div id="target-title">Цель</div>
+                    <div style="color: var(--accent-glow);" id="target-price">$0</div>
+                </div>
+            </div>
+
+            <div class="mult-row">
+                <button class="mult-btn active" onclick="setMultiplier(1.5, this)">x1.5</button>
+                <button class="mult-btn" onclick="setMultiplier(2, this)">x2</button>
+                <button class="mult-btn" onclick="setMultiplier(3, this)">x3</button>
+                <button class="mult-btn" onclick="setMultiplier(5, this)">x5</button>
+                <button class="mult-btn" onclick="setMultiplier(10, this)">x10</button>
+            </div>
+
+            <button class="btn" style="width: 100%; padding: 12px;" onclick="startUpgrade()">Улучшить</button>
+
+            <div class="picker-list" id="picker-list"></div>
         </div>
 
         <!-- ИГРЫ -->
@@ -178,6 +243,29 @@
             <p class="sub-dim">Ваши выбитые предметы</p>
             <div class="inventory-grid" id="inventory-grid"></div>
         </div>
+
+        <!-- СТАТИСТИКА -->
+        <div id="tab-stats" class="tab-content">
+            <h2>Статистика</h2>
+            <p class="sub-dim">Ваш игровой прогресс</p>
+            
+            <div class="stats-card">
+                <span>Время в игре:</span>
+                <span class="stats-val" id="st-time">0 ч 0 мин</span>
+            </div>
+            <div class="stats-card">
+                <span>Открыто кейсов:</span>
+                <span class="stats-val" id="st-cases">0</span>
+            </div>
+            <div class="stats-card">
+                <span>Всего заработано:</span>
+                <span class="stats-val">$<span id="st-earned">0</span></span>
+            </div>
+            <div class="stats-card">
+                <span>Рекордный баланс:</span>
+                <span class="stats-val">$<span id="st-max-bal">1,000</span></span>
+            </div>
+        </div>
     </div>
 
     <!-- ПОЛНОЭКРАННЫЕ ОКНА ИГР -->
@@ -186,9 +274,9 @@
         <h2>💣 Игра Минёр</h2>
         <p class="sub-dim">Открывай кристаллы и избегай мин!</p>
         <input type="number" id="mines-bet" value="100" placeholder="Ставка">
-        <button class="btn" onclick="startMines()" id="mines-start-btn">Начать игру</button>
+        <button class="btn" onclick="startMines()">Начать игру</button>
         <div class="mines-grid" id="mines-grid"></div>
-        <button class="btn" onclick="cashoutMines()" id="mines-cashout-btn" style="display:none; background: var(--win);">Забрать выигрыш (<span id="mines-win-amount">0</span>$)</button>
+        <button class="btn" onclick="cashoutMines()" id="mines-cashout-btn" style="display:none; background: var(--win); margin-top: 10px;">Забрать выигрыш (<span id="mines-win-amount">0</span>$)</button>
     </div>
 
     <div id="game-overlay-dice" class="fullscreen-game-overlay">
@@ -217,158 +305,6 @@
     <nav>
         <button class="nav-btn active" onclick="switchTab('clicker', this)"><span class="nav-icon">⚡</span>Кликер</button>
         <button class="nav-btn" onclick="switchTab('cases', this)"><span class="nav-icon">📦</span>Кейсы</button>
+        <button class="nav-btn" onclick="switchTab('upgrader', this)"><span class="nav-icon">🔥</span>Апгрейдер</button>
         <button class="nav-btn" onclick="switchTab('games', this)"><span class="nav-icon">🎮</span>Игры</button>
-        <button class="nav-btn" onclick="switchTab('inventory', this)"><span class="nav-icon">🎒</span>Инвентарь</button>
-    </nav>
-
-    <script>
-        // Состояние игры
-        let balance = 1000;
-        let energy = 100;
-        let maxEnergy = 100;
-        let clickPower = 1;
-        let energyUpgradeCost = 50;
-        let clickUpgradeCost = 100;
-        let inventory = [];
-
-        // База данных кейсов (Дорогие кейсы и дорогой дроп)
-        const casesData = [
-            {
-                id: 'suburb',
-                name: 'Премиум Кейс',
-                price: 1000,
-                emoji: '💎',
-                items: [
-                    { name: 'Золотые часы', price: 500 },
-                    { name: 'Кольцо с бриллиантом', price: 1200 },
-                    { name: 'Цепь из белого золота', price: 2500 },
-                    { name: 'Слиток серебра', price: 5000 }
-                ]
-            },
-            {
-                id: 'hi-tech',
-                name: 'Мажор Кейс',
-                price: 5000,
-                emoji: '👑',
-                items: [
-                    { name: 'Айфон VIP Gold', price: 3000 },
-                    { name: 'Спортивный байк', price: 7000 },
-                    { name: 'Ролекс', price: 12000 },
-                    { name: 'Слиток золота', price: 25000 }
-                ]
-            },
-            {
-                id: 'hyper',
-                name: 'Олигарх Кейс',
-                price: 25000,
-                emoji: '🚀',
-                items: [
-                    { name: 'Гелик', price: 15000 },
-                    { name: 'Спорткар', price: 40000 },
-                    { name: 'Яхта', price: 80000 },
-                    { name: 'Частный самолет', price: 200000 }
-                ]
-            }
-        ];
-
-        function updateUI() {
-            document.getElementById('balance').innerText = balance.toLocaleString();
-            document.getElementById('energy-val').innerText = energy;
-            document.getElementById('max-energy-val').innerText = maxEnergy;
-            document.getElementById('energy-fill').style.width = (energy / maxEnergy * 100) + '%';
-            document.getElementById('click-power-disp').innerText = clickPower;
-            document.getElementById('energy-cost').innerText = energyUpgradeCost.toLocaleString();
-            document.getElementById('click-cost').innerText = clickUpgradeCost.toLocaleString();
-        }
-
-        // Переключение вкладок
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            btn.classList.add('active');
-        }
-
-        // Кликер
-        function doClick() {
-            if (energy >= 1) {
-                energy--;
-                balance += clickPower;
-                updateUI();
-            }
-        }
-
-        // Регенерация энергии
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy++;
-                updateUI();
-            }
-        }, 1000);
-
-        // Улучшения (Цена растёт на 10% от ТЕКУЩЕЙ стоимости)
-        function buyEnergyUpgrade() {
-            if (balance >= energyUpgradeCost) {
-                balance -= energyUpgradeCost;
-                maxEnergy += 50;
-                energy += 50;
-                energyUpgradeCost = Math.floor(energyUpgradeCost * 1.10);
-                updateUI();
-            }
-        }
-
-        function buyClickUpgrade() {
-            if (balance >= clickUpgradeCost) {
-                balance -= clickUpgradeCost;
-                clickPower += 5;
-                clickUpgradeCost = Math.floor(clickUpgradeCost * 1.10);
-                updateUI();
-            }
-        }
-
-        // Бонус Меллстроя каждые 90 секунд
-        setInterval(() => {
-            let reward = Math.floor(Math.random() * (5000 - 1000 + 1)) + 1000;
-            balance += reward;
-            document.getElementById('mellstroy-amount').innerText = reward.toLocaleString();
-            document.getElementById('mellstroy-modal').classList.add('active');
-            updateUI();
-        }, 90000);
-
-        function closeMellstroy() {
-            document.getElementById('mellstroy-modal').classList.remove('active');
-        }
-
-        // Генерация кейсов
-        function renderCases() {
-            const grid = document.getElementById('cases-grid');
-            grid.innerHTML = '';
-            casesData.forEach(c => {
-                grid.innerHTML += `
-                    <div class="case-card" onclick="openCase('${c.id}')">
-                        <div class="case-emoji">${c.emoji}</div>
-                        <div class="case-title">${c.name}</div>
-                        <div class="case-price">$${c.price.toLocaleString()}</div>
-                    </div>
-                `;
-            });
-        }
-
-        function openCase(caseId) {
-            const cData = casesData.find(c => c.id === caseId);
-            if (balance < cData.price) return alert('Недостаточно средств!');
-
-            balance -= cData.price;
-            updateUI();
-
-            const roulette = document.getElementById('roulette-container');
-            const track = document.getElementById('roulette-track');
-            roulette.style.display = 'block';
-            track.style.transition = 'none';
-            track.style.transform = 'translateX(0)';
-
-            let itemsTrack = [];
-            for (let i = 0; i < 40; i++) {
-                let randomItem = cData.items[Math.floor(Math.random() * cData.items.length)];
-                itemsTrack.push(randomItem);
-           
+        <button class="na
