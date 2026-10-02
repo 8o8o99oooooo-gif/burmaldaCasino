@@ -1,16 +1,14 @@
-# This is a sample Python script.
+from aiogram.types import WebAppInfo
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Добавь эту кнопку в главное меню
+def main_menu_kb(balance: int):
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🎮 Играть", callback_data="menu_games")
+    builder.button(text="🎁 Ежедневный бонус", callback_data="menu_bonus")
+    # Добавляем кнопку Web App
+    builder.button(
+        text="🌐 Казино (Web App)",
+        web_app=WebAppInfo(url="https://твой-сайт.com/index.html")  # Замени на свой URL
+    )
+    builder.adjust(1)
+    return builder.as_markup()
