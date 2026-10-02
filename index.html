@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CS2 BullDrop Casino App</title>
-  <!-- Telegram WebApp SDK -->
+  <title>CS2 Mini App Casino</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    /* === CSS СТИЛИ === */
     :root {
       --bg-color: #0b0c10;
       --card-bg: #151821;
@@ -18,7 +16,6 @@
       --text-main: #ffffff;
       --text-muted: #8e95a5;
       
-      /* Цвета редкостей */
       --rarity-common: #b0c3d9;
       --rarity-uncommon: #5e98d9;
       --rarity-rare: #4b69ff;
@@ -35,13 +32,14 @@
       user-select: none;
       -webkit-user-select: none;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      touch-action: manipulation;
     }
 
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
-      padding-bottom: 70px;
-      padding-top: 65px;
+      padding-bottom: 80px;
+      padding-top: 70px;
       overflow-x: hidden;
     }
 
@@ -66,6 +64,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      cursor: pointer;
     }
 
     .user-avatar {
@@ -92,7 +91,7 @@
 
     .stats-header {
       display: flex;
-      gap: 12px;
+      gap: 8px;
     }
 
     .stat-badge {
@@ -100,11 +99,11 @@
       border: 1px solid var(--card-border);
       padding: 5px 10px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: bold;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .stat-badge.balance {
@@ -117,7 +116,7 @@
       border-color: rgba(0, 210, 255, 0.3);
     }
 
-    /* BOTTOM NAV */
+    /* NAV */
     .navbar {
       position: fixed;
       bottom: 0;
@@ -142,6 +141,8 @@
       cursor: pointer;
       transition: all 0.2s;
       flex: 1;
+      height: 100%;
+      justify-content: center;
     }
 
     .nav-item .icon { font-size: 20px; }
@@ -170,7 +171,7 @@
       background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
       color: white;
       border: none;
-      padding: 12px 20px;
+      padding: 12px 16px;
       border-radius: 12px;
       font-weight: 700;
       font-size: 14px;
@@ -180,10 +181,11 @@
       letter-spacing: 0.5px;
       box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);
       transition: transform 0.1s, filter 0.2s;
+      outline: none;
     }
 
-    .btn:active { transform: scale(0.96); }
-    .btn:disabled { filter: grayscale(1); opacity: 0.6; cursor: not-allowed; }
+    .btn:active { transform: scale(0.95); }
+    .btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
 
     .btn-secondary {
       background: var(--card-bg);
@@ -202,6 +204,8 @@
       font-weight: bold;
       margin-bottom: 10px;
       outline: none;
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     .input-field:focus { border-color: var(--accent-orange); }
@@ -239,11 +243,6 @@
       overflow: hidden;
     }
 
-    .quick-card::after {
-      content: ''; position: absolute; top:0; right:0; width:40px; height:40px;
-      background: radial-gradient(circle, rgba(255,85,0,0.2) 0%, transparent 70%);
-    }
-
     .quick-card .icon { font-size: 28px; }
     .quick-card .title { font-weight: bold; font-size: 15px; }
     .quick-card .desc { font-size: 11px; color: var(--text-muted); }
@@ -254,12 +253,12 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 0;
+      padding: 10px 0;
     }
 
     .click-target {
-      width: 220px;
-      height: 220px;
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
       background: radial-gradient(circle, #2a2e3d 0%, #151821 100%);
       border: 4px solid var(--accent-orange);
@@ -284,6 +283,7 @@
       pointer-events: none;
       animation: floatUp 0.8s forwards;
       text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+      z-index: 100;
     }
 
     @keyframes floatUp {
@@ -323,10 +323,8 @@
       padding: 15px;
       text-align: center;
       cursor: pointer;
-      transition: border 0.2s;
     }
 
-    .game-card:hover { border-color: var(--accent-orange); }
     .game-card .g-icon { font-size: 36px; margin-bottom: 8px; }
     .game-card .g-title { font-weight: bold; font-size: 14px; }
 
@@ -335,7 +333,7 @@
       border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 15px;
-      margin-top: 15px;
+      margin-top: 10px;
     }
 
     .bet-selector {
@@ -349,13 +347,13 @@
       background: rgba(0,0,0,0.3);
       border: 1px solid var(--card-border);
       color: white;
-      padding: 6px;
+      padding: 8px;
       border-radius: 6px;
       font-size: 12px;
       cursor: pointer;
     }
 
-    /* КЕЙСЫ И РУЛЕТКА */
+    /* КЕЙСЫ */
     .cases-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -373,7 +371,6 @@
 
     .case-icon { font-size: 50px; margin-bottom: 5px; }
 
-    /* Анимация рулетки кейса */
     .roulette-wrapper {
       width: 100%;
       height: 110px;
@@ -448,20 +445,20 @@
     .skin-title { font-size: 11px; font-weight: bold; text-align: center; }
     .skin-price { font-size: 12px; color: var(--neon-yellow); margin: 4px 0; font-weight: bold; }
 
-    /* МИНЫ, ТАУЭР И СЛОТЫ GRID */
+    /* МИНИ-ИГРЫ ГРИДЫ */
     .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 10px 0; }
     .mine-cell { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
     .tower-grid { display: flex; flex-direction: column-reverse; gap: 6px; margin: 10px 0; }
     .tower-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .tower-cell { height: 35px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: bold; }
 
-    /* МОДАЛКА / УВЕДОМЛЕНИЯ */
+    /* TOAST */
     .toast {
       position: fixed;
       top: 70px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(255, 85, 0, 0.9);
+      background: rgba(255, 85, 0, 0.95);
       color: white;
       padding: 8px 16px;
       border-radius: 20px;
@@ -470,6 +467,7 @@
       z-index: 2000;
       display: none;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -487,7 +485,6 @@
     </div>
   </header>
 
-  <!-- УВЕДОМЛЕНИЕ -->
   <div class="toast" id="toast">Сообщение</div>
 
   <!-- 1. ГЛАВНАЯ -->
@@ -495,7 +492,7 @@
     <div class="hero-balance">
       <div class="hero-balance-title">Ваш баланс</div>
       <div class="hero-balance-val" id="main-balance">0</div>
-      <button class="btn" id="btn-passive" style="margin-top: 15px;" onclick="claimPassive()">💰 Собрать доход (0)</button>
+      <button class="btn" id="btn-passive" style="margin-top: 15px;" onclick="claimPassive()">💰 Собрать доход</button>
     </div>
 
     <div class="quick-grid">
@@ -547,7 +544,7 @@
     </div>
   </section>
 
-  <!-- 3. МИНИ-ИГРЫ -->
+  <!-- 3. ИГРЫ -->
   <section id="screen-games" class="screen">
     <div class="games-grid" id="games-menu">
       <div class="game-card" onclick="openGame('coinflip')"><div class="g-icon">🪙</div><div class="g-title">Coinflip</div></div>
@@ -560,9 +557,8 @@
       <div class="game-card" onclick="openGame('blackjack')"><div class="g-icon">🃏</div><div class="g-title">Blackjack</div></div>
     </div>
 
-    <!-- Контейнер выбранной игры -->
     <div id="game-container" style="display: none;">
-      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="closeGame()">⬅️️ Назад к играм</button>
+      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="closeGame()">⬅ Назад к играм</button>
       <div class="game-box" id="game-content"></div>
     </div>
   </section>
@@ -609,9 +605,9 @@
         <div class="roulette-track" id="roulette-track"></div>
       </div>
       <button class="btn" id="btn-open-case" onclick="spinCase()">Открыть</button>
-      <button class="btn btn-secondary" style="margin-top: 5px;" onclick="closeCaseModal()">Закрыть</button>
+      <button class="btn btn-secondary" style="margin-top: 8px;" onclick="closeCaseModal()">Закрыть</button>
       
-      <div style="margin-top: 15px; font-size: 11px; color: var(--text-muted);">
+      <div style="margin-top: 15px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
         <b>Шансы:</b> Common 55% | Uncommon 25% | Rare 12% | Mythical 5% | Legendary 2% | Ancient 0.9% | Immortal 0.1%
       </div>
     </div>
@@ -631,4 +627,10 @@
       <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Макс. баланс:</span><b id="st-max">0</b></div>
       <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Кейсов открыто:</span><b id="st-cases">0</b></div>
       <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Игр сыграно:</span><b id="st-games">0</b></div>
-      <div style
+      <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Кликов сделано:</span><b id="st-clicks">0</b></div>
+    </div>
+  </section>
+
+  <!-- НАВИГАЦИЯ -->
+  <nav class="navbar">
+    <div class="nav-item active" onclick="switchTab('main')"><di
