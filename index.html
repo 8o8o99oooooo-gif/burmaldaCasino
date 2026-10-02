@@ -1,501 +1,566 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mellstroy CS2 Casino</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root {
-      --bg-color: #0b0e14;
-      --card-bg: #151a23;
-      --accent-color: #f39c12;
-      --accent-green: #2ecc71;
-      --accent-red: #e74c3c;
-      --text-color: #ffffff;
-      --text-dim: #8b949e;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonDrop Casino</title>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #151a23;
+            --accent-color: #00ffcc;
+            --accent-pink: #ff007f;
+            --text-color: #ffffff;
+            --text-dim: #8a94a6;
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 70px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
 
-    /* Top Bar */
-    .top-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 15px; background: var(--card-bg); border-bottom: 2px solid #222c3c;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .balance { font-size: 18px; font-weight: bold; color: var(--accent-color); }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 70px;
+        }
 
-    /* Pages */
-    .page { display: none; padding: 15px; }
-    .page.active { display: block; }
+        header {
+            background: var(--card-bg);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+        }
 
-    /* UI Components */
-    .btn {
-      background: linear-gradient(135deg, #f39c12, #d35400);
-      color: #fff; border: none; padding: 12px 20px; border-radius: 8px;
-      font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
-      transition: 0.2s;
-    }
-    .btn:active { transform: scale(0.98); }
-    .btn-secondary { background: #2c3e50; }
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-shadow: 0 0 8px var(--accent-color);
+        }
 
-    /* Case Grid */
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .card { background: var(--card-bg); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #222c3c; }
+        .balance-container {
+            background: #0b0e14;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--accent-color);
+            font-weight: bold;
+        }
 
-    /* Clicker */
-    .click-container { text-align: center; margin-top: 20px; }
-    .coin-btn {
-      width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--accent-color);
-      background: radial-gradient(circle, #f1c40f, #e67e22); color: #fff; font-size: 48px;
-      margin: 20px auto; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 20px rgba(241, 196, 15, 0.4); cursor: pointer; transition: 0.05s;
-    }
-    .coin-btn:active { transform: scale(0.95); }
-    .progress-bar { width: 100%; background: #222c3c; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 5px; }
-    .progress-fill { height: 100%; background: var(--accent-color); width: 100%; transition: width 0.2s; }
+        .balance-value {
+            color: #00ffcc;
+        }
 
-    /* Upgrader */
-    .upgrade-box { background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; }
-    select { width: 100%; padding: 10px; background: #0b0e14; color: #fff; border: 1px solid #222c3c; border-radius: 5px; margin-top: 5px; }
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-    /* Bottom Nav */
-    .navbar {
-      position: fixed; bottom: 0; width: 100%; background: var(--card-bg);
-      display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid #222c3c;
-    }
-    .nav-item { color: var(--text-dim); text-decoration: none; font-size: 11px; text-align: center; cursor: pointer; }
-    .nav-item.active { color: var(--accent-color); font-weight: bold; }
+        .tab-content {
+            display: none;
+        }
 
-    /* Inventory Items */
-    .item-rarity-common { border-bottom: 3px solid #b0c3d9; }
-    .item-rarity-rare { border-bottom: 3px solid #4b69ff; }
-    .item-rarity-epic { border-bottom: 3px solid #d32ce6; }
-    .item-rarity-legendary { border-bottom: 3px solid #eb4b4b; }
-  </style>
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Кейсы */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .case-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #232a36;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .case-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-color);
+        }
+
+        .case-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .case-price {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+        }
+
+        /* Модалка открытия кейса */
+        .roulette-container {
+            width: 100%;
+            height: 120px;
+            background: #000;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--accent-color);
+            margin: 20px 0;
+        }
+
+        .roulette-pointer {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: var(--accent-pink);
+            z-index: 10;
+            box-shadow: 0 0 10px var(--accent-pink);
+        }
+
+        .roulette-track {
+            display: flex;
+            position: absolute;
+            left: 0;
+            top: 10px;
+            transition: transform 5s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        .item-card {
+            width: 100px;
+            height: 100px;
+            background: var(--card-bg);
+            margin: 0 5px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            text-align: center;
+            flex-shrink: 0;
+            border: 1px solid #333;
+        }
+
+        /* Инвентарь */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .inventory-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #232a36;
+            font-size: 0.8rem;
+        }
+
+        .inventory-item button {
+            margin-top: 8px;
+            width: 100%;
+            padding: 4px;
+            background: var(--accent-pink);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Апгрейдер */
+        .upgrader-box {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Кнопки */
+        .btn {
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Нижнее меню */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #232a36;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-btn.active {
+            color: var(--accent-color);
+        }
+
+        /* Редкость */
+        .common { border-color: #b0c3d9; }
+        .rare { border-color: #4b69ff; }
+        .classified { border-color: #d32ce6; }
+        .covert { border-color: #eb4b4b; }
+    </style>
 </head>
 <body>
 
-  <!-- Top Bar -->
-  <div class="top-bar">
-    <div>👑 Mellstroy Casino</div>
-    <div class="balance">💰 <span id="balance">0</span></div>
-  </div>
+    <header>
+        <div class="logo">NEONDROP</div>
+        <div class="balance-container">
+            Баланс: <span id="balance" class="balance-value">1000</span> $
+        </div>
+    </header>
 
-  <!-- Главная -->
-  <div id="p-home" class="page active">
-    <h2>🔥 Главная</h2>
-    <div class="card" style="margin-top: 15px;">
-      <h3>Бонус от Меллстроя</h3>
-      <p style="color: var(--text-dim); font-size: 12px; margin-top: 5px;">Каждую минуту ты получаешь от 1000 до 5000 монет!</p>
-      <p id="timer" style="margin-top: 10px; color: var(--accent-color); font-weight: bold;">До бонуса: 60с</p>
+    <div class="container">
+        <!-- Вкладка: Кейсы -->
+        <section id="cases-tab" class="tab-content active">
+            <h2>Кейсы CS2</h2>
+            <div id="cases-list" class="cases-grid"></div>
+
+            <div id="roulette-section" style="display: none;">
+                <h3 id="current-case-title" style="text-align: center; margin-top: 20px;"></h3>
+                <div class="roulette-container">
+                    <div class="roulette-pointer"></div>
+                    <div id="roulette-track" class="roulette-track"></div>
+                </div>
+                <button id="open-btn" class="btn" onclick="spinCase()">Открыть кейс</button>
+                <button class="btn" style="background: #333; color: #fff;" onclick="closeCase()">Назад</button>
+            </div>
+        </section>
+
+        <!-- Вкладка: Инвентарь -->
+        <section id="inventory-tab" class="tab-content">
+            <h2>Ваш Инвентарь</h2>
+            <div id="inventory-list" class="inventory-grid"></div>
+        </section>
+
+        <!-- Вкладка: Апгрейдер -->
+        <section id="upgrader-tab" class="tab-content">
+            <h2>Upgrader</h2>
+            <div class="upgrader-box">
+                <p>Выберите предмет из инвентаря для улучшения</p>
+                <div id="upgrade-selected" style="margin: 15px 0; font-weight: bold;">Предмет не выбран</div>
+                <button class="btn" onclick="tryUpgrade()">Улучшить (Шанс 50%)</button>
+            </div>
+        </section>
+
+        <!-- Вкладка: Профиль -->
+        <section id="profile-tab" class="tab-content">
+            <h2>Профиль</h2>
+            <div class="upgrader-box" style="text-align: left; margin-top: 15px;">
+                <p>Время в игре: <span id="time-played" style="color: var(--accent-color);">0</span> сек.</p>
+                <p style="margin-top: 10px;">Всего открыто кейсов: <span id="cases-opened" style="color: var(--accent-color);">0</span></p>
+                <button class="btn" style="margin-top: 20px; background: var(--accent-pink); color: #fff;" onclick="addBonus()">Получить бонус (+100$)</button>
+            </div>
+        </section>
     </div>
-  </div>
 
-  <!-- Кликер (Hamster Style) -->
-  <div id="p-clicker" class="page">
-    <h2>⚡ Тапалка CS2</h2>
-    <div class="click-container">
-      <div class="coin-btn" id="tap-btn">🎯</div>
-      <p>Энергия: <span id="energy">100</span> / <span id="max-energy">100</span></p>
-      <div class="progress-bar"><div id="energy-fill" class="progress-fill"></div></div>
-    </div>
-    <div style="margin-top: 20px;">
-      <h3>Улучшения кликера</h3>
-      <button class="btn btn-secondary" onclick="buyUpgrade('click')">Улучшить клик (+5) — <span id="cost-click">100</span>💰 (Текущий: <span id="val-click">10</span>/клик)</button>
-      <button class="btn btn-secondary" onclick="buyUpgrade('energy')">Улучшить макс. энергию (+50) — <span id="cost-energy">150</span>💰</button>
-    </div>
-  </div>
+    <!-- Нижняя навигация -->
+    <nav>
+        <button class="nav-btn active" onclick="switchTab('cases-tab', this)">📦 Кейсы</button>
+        <button class="nav-btn" onclick="switchTab('inventory-tab', this)">🎒 Инвентарь</button>
+        <button class="nav-btn" onclick="switchTab('upgrader-tab', this)">⚡ Апгрейд</button>
+        <button class="nav-btn" onclick="switchTab('profile-tab', this)">👤 Профиль</button>
+    </nav>
 
-  <!-- Кейсы -->
-  <div id="p-cases" class="page">
-    <h2>📦 CS2 Кейсы</h2>
-    <div class="grid" style="margin-top: 15px;">
-      <div class="card">
-        <h3>Ширп Кейс</h3>
-        <p style="color: var(--accent-color);">200 💰</p>
-        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Ширп 90%, Синька 10%</p>
-        <button class="btn" onclick="openCase('cheap', 200)">Открыть</button>
-      </div>
-      <div class="card">
-        <h3>Бомж Кейс</h3>
-        <p style="color: var(--accent-color);">500 💰</p>
-        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Ширп 70%, Синька 25%, Эпик 5%</p>
-        <button class="btn" onclick="openCase('medium', 500)">Открыть</button>
-      </div>
-      <div class="card">
-        <h3>Спортивный</h3>
-        <p style="color: var(--accent-color);">1200 💰</p>
-        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Синька 60%, Эпик 30%, Легендарка 10%</p>
-        <button class="btn" onclick="openCase('sport', 1200)">Открыть</button>
-      </div>
-      <div class="card">
-        <h3>Mellstroy Case</h3>
-        <p style="color: var(--accent-color);">2500 💰</p>
-        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Синька 40%, Эпик 40%, Легендарка 20%</p>
-        <button class="btn" onclick="openCase('rich', 2500)">Открыть</button>
-      </div>
-      <div class="card">
-        <h3>Ножевой Кейс</h3>
-        <p style="color: var(--accent-color);">5000 💰</p>
-        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Эпик 50%, Нож/Дроп 50%</p>
-        <button class="btn" onclick="openCase('knife', 5000)">Открыть</button>
-      </div>
-      <div class="card">
-        <h3>Mellstroy VIP</h3>
-        <p style="color: var(--accent-color);">10000 💰</p>
-        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Только редкие и топовые ножи!</p>
-        <button class="btn" onclick="openCase('vip', 10000)">Открыть</button>
-      </div>
-    </div>
-  </div>
+    <script>
+        // База данных кейсов и скинов
+        const CASES = [
+            {
+                id: 'revolution',
+                title: 'Revolution Case',
+                price: 150,
+                items: [
+                    { name: 'AK-47 | Head Shot', price: 800, rarity: 'covert' },
+                    { name: 'M4A1-S | Emophoria', price: 300, rarity: 'classified' },
+                    { name: 'AWP | Duality', price: 100, rarity: 'rare' },
+                    { name: 'P90 | Neoqueen', price: 30, rarity: 'common' }
+                ]
+            },
+            {
+                id: 'dreams',
+                title: 'Dreams & Nightmares',
+                price: 200,
+                items: [
+                    { name: 'AK-47 | Nightwish', price: 1000, rarity: 'covert' },
+                    { name: 'MP9 | Starlight', price: 250, rarity: 'classified' },
+                    { name: 'Dual Berettas | Melondrama', price: 80, rarity: 'rare' },
+                    { name: 'FAMAS | Rapid Eye', price: 40, rarity: 'common' }
+                ]
+            }
+        ];
 
-  <!-- Апгрейдер -->
-  <div id="p-upgrader" class="page">
-    <h2>📈 Апгрейдер Скинов</h2>
-    <div style="margin-top: 15px;">
-      <div class="upgrade-box">
-        <label>Выберите ваш скин:</label>
-        <select id="upg-my-skin" onchange="calcUpgradeChance()"></select>
-      </div>
-      <div class="upgrade-box">
-        <label>Желаемый скин:</label>
-        <select id="upg-target-skin" onchange="calcUpgradeChance()"></select>
-      </div>
-      <div class="card">
-        <p>Шанс успеха: <span id="upg-chance" style="color: var(--accent-color); font-weight: bold;">0%</span></p>
-        <button class="btn" onclick="runUpgrade()">Улучшить</button>
-      </div>
-    </div>
-  </div>
+        // Состояние приложения
+        let state = {
+            balance: 1000,
+            inventory: [],
+            casesOpened: 0,
+            timePlayed: 0,
+            selectedCase: null,
+            selectedUpgraderItem: null
+        };
 
-  <!-- Мини-игры -->
-  <div id="p-minigames" class="page">
-    <h2>🎮 Мини-Игры</h2>
-    <div class="card" style="margin-top: 10px;">
-      <h3>🎰 Кости Меллстроя</h3>
-      <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 10px;">Угадай: число будет больше 3 или меньше/равно 3?</p>
-      <input type="number" id="dice-bet" placeholder="Ставка 💰" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #0b0e14; color: #fff; border: 1px solid #222c3c; border-radius: 5px;">
-      <div style="display: flex; gap: 10px;">
-        <button class="btn" onclick="playDice('low')">1 - 3 (x2)</button>
-        <button class="btn" onclick="playDice('high')">4 - 6 (x2)</button>
-      </div>
-    </div>
-  </div>
+        // Загрузка состояния из localStorage
+        function loadState() {
+            const saved = localStorage.getItem('neon_drop_state');
+            if (saved) {
+                try {
+                    state = { ...state, ...JSON.parse(saved) };
+                } catch(e) { console.error(e); }
+            }
+            updateUI();
+        }
 
-  <!-- Инвентарь -->
-  <div id="p-inventory" class="page">
-    <h2>🎒 Инвентарь</h2>
-    <div id="inventory-list" class="grid" style="margin-top: 15px;"></div>
-  </div>
+        // Сохранение состояния
+        function saveState() {
+            localStorage.setItem('neon_drop_state', JSON.stringify({
+                balance: state.balance,
+                inventory: state.inventory,
+                casesOpened: state.casesOpened,
+                timePlayed: state.timePlayed
+            }));
+            updateUI();
+        }
 
-  <!-- Профиль / Статистика -->
-  <div id="p-profile" class="page">
-    <h2>👤 Профиль</h2>
-    <div class="card" style="margin-top: 15px; text-align: left;">
-      <p>⏳ <b>Времени в игре:</b> <span id="st-time">0 ч. 0 мин.</span></p>
-      <p style="margin-top: 8px;">📊 <b>Всего заработано:</b> <span id="st-total">0</span> 💰</p>
-      <p style="margin-top: 8px;">🚀 <b>Рекорд баланса:</b> <span id="st-max">0</span> 💰</p>
-      <p style="margin-top: 8px;">📦 <b>Кейсов открыто:</b> <span id="st-cases">0</span></p>
-    </div>
-  </div>
+        // Обновление UI
+        function updateUI() {
+            document.getElementById('balance').innerText = state.balance;
+            document.getElementById('cases-opened').innerText = state.casesOpened;
+            document.getElementById('time-played').innerText = state.timePlayed;
+            renderInventory();
+        }
 
-  <!-- Навигация -->
-  <div class="navbar">
-    <div class="nav-item active" onclick="nav('home', this)">🔥 Главная</div>
-    <div class="nav-item" onclick="nav('clicker', this)">⚡ Кликер</div>
-    <div class="nav-item" onclick="nav('cases', this)">📦 Кейсы</div>
-    <div class="nav-item" onclick="nav('upgrader', this)">📈 Апгрейдер</div>
-    <div class="nav-item" onclick="nav('minigames', this)">🎮 Игры</div>
-    <div class="nav-item" onclick="nav('inventory', this)">🎒 Скины</div>
-    <div class="nav-item" onclick="nav('profile', this)">👤 Профиль</div>
-  </div>
+        // Переключение вкладок
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
 
-  <script>
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-    }
+        // Отрисовка списка кейсов
+        function renderCases() {
+            const container = document.getElementById('cases-list');
+            container.innerHTML = '';
+            CASES.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'case-card';
+                card.innerHTML = `
+                    <div class="case-title">${c.title}</div>
+                    <div class="case-price">${c.price} $</div>
+                `;
+                card.onclick = () => selectCase(c);
+                container.appendChild(card);
+            });
+        }
 
-    // Расширенная база скинов CS2
-    const skinsDB = [
-      { id: 1, name: "P250 | Песчаная буря", price: 100, rarity: "common" },
-      { id: 2, name: "USP-S | Проводник", price: 150, rarity: "common" },
-      { id: 3, name: "AK-47 | Изумрудные завитки", price: 400, rarity: "rare" },
-      { id: 4, name: "Glock-18 | Водяной", price: 600, rarity: "rare" },
-      { id: 5, name: "M4A4 | Безликий", price: 1200, rarity: "epic" },
-      { id: 6, name: "Desert Eagle | Механо-пушка", price: 2000, rarity: "epic" },
-      { id: 7, name: "AWP | Азимов", price: 3500, rarity: "legendary" },
-      { id: 8, name: "AK-47 | Вулканический", price: 6000, rarity: "legendary" },
-      { id: 9, name: "🔪 Керамбит | Градиент", price: 10000, rarity: "legendary" },
-      { id: 10, name: "🔪 Бабочка | Кровавая паутина", price: 25000, rarity: "legendary" }
-    ];
+        // Выбор кейса
+        function selectCase(c) {
+            state.selectedCase = c;
+            document.getElementById('cases-list').style.display = 'none';
+            document.getElementById('roulette-section').style.display = 'block';
+            document.getElementById('current-case-title').innerText = c.title;
+            resetRoulette();
+        }
 
-    // Игровой профиль
-    let state = {
-      balance: 1000,
-      clickPower: 10,
-      energy: 100,
-      maxEnergy: 100,
-      clickUpgradeCost: 100,
-      energyUpgradeCost: 150,
-      inventory: [],
-      stats: { totalEarned: 1000, maxBalance: 1000, casesOpened: 0, timePlayedMinutes: 0 }
-    };
+        // Закрытие кейса
+        function closeCase() {
+            document.getElementById('cases-list').style.display = 'grid';
+            document.getElementById('roulette-section').style.display = 'none';
+        }
 
-    // Автосохранение и Загрузка
-    function save() {
-      localStorage.setItem('mell_cs2_state', JSON.stringify(state));
-    }
+        function resetRoulette() {
+            const track = document.getElementById('roulette-track');
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0)';
+            track.innerHTML = '';
+        }
 
-    function load() {
-      const saved = localStorage.getItem('mell_cs2_state');
-      if (saved) {
-        state = Object.assign(state, JSON.parse(saved));
-      }
-      updateUI();
-    }
+        // Вращение рулетки
+        function spinCase() {
+            const c = state.selectedCase;
+            if (!c || state.balance < c.price) {
+                alert('Недостаточно средств!');
+                return;
+            }
 
-    function addBalance(amount) {
-      state.balance += amount;
-      if (amount > 0) state.stats.totalEarned += amount;
-      if (state.balance > state.stats.maxBalance) state.stats.maxBalance = state.balance;
-      updateUI();
-      save();
-    }
+            state.balance -= c.price;
+            state.casesOpened++;
+            saveState();
 
-    function updateUI() {
-      document.getElementById('balance').innerText = Math.floor(state.balance);
-      document.getElementById('energy').innerText = state.energy;
-      document.getElementById('max-energy').innerText = state.maxEnergy;
-      document.getElementById('energy-fill').style.width = (state.energy / state.maxEnergy * 100) + '%';
-      
-      document.getElementById('val-click').innerText = state.clickPower;
-      document.getElementById('cost-click').innerText = state.clickUpgradeCost;
-      document.getElementById('cost-energy').innerText = state.energyUpgradeCost;
+            const btn = document.getElementById('open-btn');
+            btn.disabled = true;
 
-      // Stats
-      const hours = Math.floor(state.stats.timePlayedMinutes / 60);
-      const minutes = state.stats.timePlayedMinutes % 60;
-      document.getElementById('st-time').innerText = `${hours} ч. ${minutes} мин.`;
-      document.getElementById('st-total').innerText = Math.floor(state.stats.totalEarned);
-      document.getElementById('st-max').innerText = Math.floor(state.stats.maxBalance);
-      document.getElementById('st-cases').innerText = state.stats.casesOpened;
-    }
+            const track = document.getElementById('roulette-track');
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0)';
+            
+            // Генерируем ленту предметов
+            let itemsSequence = [];
+            for (let i = 0; i < 50; i++) {
+                const randomItem = c.items[Math.floor(Math.random() * c.items.length)];
+                itemsSequence.push(randomItem);
+            }
 
-    // Подсчет времени в игре (каждую минуту +1)
-    setInterval(() => {
-      if (!state.stats.timePlayedMinutes) state.stats.timePlayedMinutes = 0;
-      state.stats.timePlayedMinutes++;
-      updateUI();
-      save();
-    }, 60000);
+            const winItem = c.items[Math.floor(Math.random() * c.items.length)];
+            itemsSequence[40] = winItem; // Выигрышный предмет
 
-    // Навигация
-    function nav(pageId, el) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      document.getElementById('p-' + pageId).classList.add('active');
-      el.classList.add('active');
+            track.innerHTML = itemsSequence.map(item => `
+                <div class="item-card ${item.rarity}">
+                    <div>${item.name}</div>
+                    <div style="color: var(--accent-color);">${item.price}$</div>
+                </div>
+            `).join('');
 
-      if (pageId === 'inventory') renderInventory();
-      if (pageId === 'upgrader') initUpgrader();
-    }
+            // Анимация
+            setTimeout(() => {
+                track.style.transition = 'transform 5s cubic-bezier(0.1, 1, 0.1, 1)';
+                const itemWidth = 110; 
+                const targetOffset = -(40 * itemWidth - (document.querySelector('.roulette-container').clientWidth / 2) + 55);
+                track.style.transform = `translateX(${targetOffset}px)`;
+            }, 50);
 
-    // Доход раз в минуту (Меллстрой Бонус)
-    let bonusTimer = 60;
-    setInterval(() => {
-      bonusTimer--;
-      document.getElementById('timer').innerText = `До бонуса: ${bonusTimer}с`;
-      if (bonusTimer <= 0) {
-        const reward = Math.floor(Math.random() * 4001) + 1000;
-        addBalance(reward);
-        alert(`🔥 Меллстрой закинул тебе ${reward} 💰!`);
-        bonusTimer = 60;
-      }
-    }, 1000);
+            setTimeout(() => {
+                state.inventory.push(winItem);
+                saveState();
+                alert(`Вы выиграли: ${winItem.name}!`);
+                btn.disabled = false;
+            }, 5200);
+        }
 
-    // Восстановление энергии
-    setInterval(() => {
-      if (state.energy < state.maxEnergy) {
-        state.energy = Math.min(state.maxEnergy, state.energy + 1);
-        updateUI();
-      }
-    }, 10000);
+        // Отрисовка инвентаря
+        function renderInventory() {
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = '';
+            if (state.inventory.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim);">Инвентарь пуст</p>';
+                return;
+            }
 
-    // Кликер
-    document.getElementById('tap-btn').addEventListener('click', () => {
-      if (state.energy >= 1) {
-        state.energy--;
-        addBalance(state.clickPower);
-      }
-    });
+            state.inventory.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `inventory-item ${item.rarity}`;
+                card.innerHTML = `
+                    <div>${item.name}</div>
+                    <div style="color: var(--accent-color); margin-top:4px;">${item.price}$</div>
+                    <button onclick="sellItem(${index})">Продать</button>
+                    <button style="background: var(--accent-color); color:#000;" onclick="selectForUpgrade(${index})">Апгрейд</button>
+                `;
+                container.appendChild(card);
+            });
+        }
 
-    function buyUpgrade(type) {
-      if (type === 'click' && state.balance >= state.clickUpgradeCost) {
-        addBalance(-state.clickUpgradeCost);
-        state.clickPower += 5;
-        state.clickUpgradeCost = Math.floor(state.clickUpgradeCost * 1.5);
-      } else if (type === 'energy' && state.balance >= state.energyUpgradeCost) {
-        addBalance(-state.energyUpgradeCost);
-        state.maxEnergy += 50;
-        state.energy = state.maxEnergy;
-        state.energyUpgradeCost = Math.floor(state.energyUpgradeCost * 1.6);
-      }
-      updateUI();
-      save();
-    }
+        // Продажа предмета
+        function sellItem(index) {
+            const item = state.inventory[index];
+            state.balance += item.price;
+            state.inventory.splice(index, 1);
+            saveState();
+        }
 
-    // Кейсы
-    function openCase(type, price) {
-      if (state.balance < price) return alert("Недостаточно монет!");
-      addBalance(-price);
-      state.stats.casesOpened++;
+        // Выбор предмета для апгрейда
+        function selectForUpgrade(index) {
+            state.selectedUpgraderItem = state.inventory[index];
+            document.getElementById('upgrade-selected').innerText = `${state.selectedUpgraderItem.name} (${state.selectedUpgraderItem.price}$)`;
+            switchTab('upgrader-tab');
+        }
 
-      let rand = Math.random() * 100;
-      let skin;
+        // Логика апгрейда
+        function tryUpgrade() {
+            if (!state.selectedUpgraderItem) {
+                alert('Сначала выберите предмет в инвентаре!');
+                return;
+            }
 
-      if (type === 'cheap') {
-        skin = rand < 90 ? skinsDB[0] : skinsDB[1];
-      } else if (type === 'medium') {
-        if (rand < 70) skin = skinsDB[0];
-        else if (rand < 95) skin = skinsDB[2];
-        else skin = skinsDB[4];
-      } else if (type === 'sport') {
-        if (rand < 60) skin = skinsDB[2];
-        else if (rand < 90) skin = skinsDB[4];
-        else skin = skinsDB[6];
-      } else if (type === 'rich') {
-        if (rand < 40) skin = skinsDB[3];
-        else if (rand < 80) skin = skinsDB[5];
-        else skin = skinsDB[7];
-      } else if (type === 'knife') {
-        skin = rand < 50 ? skinsDB[5] : skinsDB[8];
-      } else if (type === 'vip') {
-        skin = rand < 60 ? skinsDB[8] : skinsDB[9];
-      }
+            const itemIndex = state.inventory.indexOf(state.selectedUpgraderItem);
+            if (itemIndex === -1) {
+                alert('Предмет не найден!');
+                return;
+            }
 
-      state.inventory.push(skin);
-      save();
-      alert(`🎉 Вам выпало: ${skin.name} (Стоимость: ${skin.price} 💰)!`);
-    }
+            // Удаляем исходный предмет
+            state.inventory.splice(itemIndex, 1);
 
-    // Инвентарь
-    function renderInventory() {
-      const container = document.getElementById('inventory-list');
-      container.innerHTML = '';
-      if (state.inventory.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 2; text-align: center; color: var(--text-dim);">У вас пока нет скинов.</p>';
-        return;
-      }
+            const success = Math.random() < 0.5;
+            if (success) {
+                const upgradedItem = {
+                    name: `Upgraded ${state.selectedUpgraderItem.name}`,
+                    price: Math.round(state.selectedUpgraderItem.price * 1.8),
+                    rarity: 'covert'
+                };
+                state.inventory.push(upgradedItem);
+                alert(`Успех! Вы получили ${upgradedItem.name}!`);
+            } else {
+                alert('Неудача! Предмет сгорел.');
+            }
 
-      state.inventory.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = `card item-rarity-${item.rarity}`;
-        div.innerHTML = `
-          <h4>${item.name}</h4>
-          <p style="color: var(--accent-color); margin: 5px 0;">${item.price} 💰</p>
-          <button class="btn" style="padding: 5px; font-size: 12px;" onclick="sellSkin(${index})">Продать</button>
-        `;
-        container.appendChild(div);
-      });
-    }
+            state.selectedUpgraderItem = null;
+            document.getElementById('upgrade-selected').innerText = 'Предмет не выбран';
+            saveState();
+        }
 
-    function sellSkin(index) {
-      const skin = state.inventory[index];
-      addBalance(skin.price);
-      state.inventory.splice(index, 1);
-      save();
-      renderInventory();
-    }
+        // Бонус
+        function addBonus() {
+            state.balance += 100;
+            saveState();
+            alert('Вам начислено +100$!');
+        }
 
-    // Апгрейдер
-    function initUpgrader() {
-      const mySelect = document.getElementById('upg-my-skin');
-      const targetSelect = document.getElementById('upg-target-skin');
+        // Таймер времени в игре
+        setInterval(() => {
+            state.timePlayed++;
+            document.getElementById('time-played').innerText = state.timePlayed;
+            if (state.timePlayed % 10 === 0) {
+                saveState();
+            }
+        }, 1000);
 
-      mySelect.innerHTML = '';
-      targetSelect.innerHTML = '';
-
-      state.inventory.forEach((item, index) => {
-        mySelect.innerHTML += `<option value="${index}">${item.name} (${item.price}💰)</option>`;
-      });
-
-      skinsDB.forEach((item) => {
-        targetSelect.innerHTML += `<option value="${item.id}">${item.name} (${item.price}💰)</option>`;
-      });
-
-      calcUpgradeChance();
-    }
-
-    function calcUpgradeChance() {
-      if (state.inventory.length === 0) {
-        document.getElementById('upg-chance').innerText = "0%";
-        return 0;
-      }
-
-      const myIndex = document.getElementById('upg-my-skin').value;
-      const targetId = document.getElementById('upg-target-skin').value;
-
-      const mySkin = state.inventory[myIndex];
-      const targetSkin = skinsDB.find(s => s.id == targetId);
-
-      if (!mySkin || !targetSkin) return;
-
-      let chance = (mySkin.price / targetSkin.price) * 100;
-      if (chance > 95) chance = 95; // Максимальный шанс 95%
-      
-      document.getElementById('upg-chance').innerText = chance.toFixed(1) + "%";
-      return chance;
-    }
-
-    function runUpgrade() {
-      if (state.inventory.length === 0) return alert("У вас нет скинов для апгрейда!");
-      
-      const chance = calcUpgradeChance();
-      const myIndex = document.getElementById('upg-my-skin').value;
-      const targetId = document.getElementById('upg-target-skin').value;
-      const targetSkin = skinsDB.find(s => s.id == targetId);
-
-      // Удаляем предмет, задействованный в апгрейде
-      state.inventory.splice(myIndex, 1);
-
-      if (Math.random() * 100 <= chance) {
-        state.inventory.push(targetSkin);
-        alert(`🔥 УСПЕХ! Вы получили ${targetSkin.name}!`);
-      } else {
-        alert("❌ НЕУДАЧА! Скин сгорел!");
-      }
-
-      save();
-      initUpgrader();
-    }
-
-    // Кости
-    function playDice(type) {
-      const betInput = document.getElementById('dice-bet');
-      const bet = parseInt(betInput.value);
-
-      if (isNaN(bet) || bet <= 0 || bet > state.balance) {
-        return alert("Некорректная ставка!");
-      }
-
-      addBalance(-bet);
-      const roll = Math.floor(Math.random() * 6) + 1;
-      const win = (type === 'low' && roll <= 3) || (type === 'high' && roll >= 4);
-
-      if (win) {
-        addBalance(bet * 2);
-        alert(`🎲 Выпало ${roll}! Победа! Вы выиграли ${bet * 2} 💰`);
-      } else {
-        alert(`🎲 Выпало ${roll}! Проигрыш.`);
-      }
-    }
-
-    // Инициализация при старте
-    load();
-  </script>
+        // Инициализация при запуске
+        window.onload = () => {
+            renderCases();
+            loadState();
+        };
+    </script>
 </body>
 </html>
