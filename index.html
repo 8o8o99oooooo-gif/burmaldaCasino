@@ -39,32 +39,11 @@
       transition: 0.2s;
     }
     .btn:active { transform: scale(0.98); }
-    .btn:disabled { background: #555; cursor: not-allowed; }
     .btn-secondary { background: #2c3e50; }
 
-    /* Case Grid & Items */
+    /* Case Grid */
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .card { background: var(--card-bg); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #222c3c; }
-
-    /* Case Roulette Animation */
-    .roulette-wrapper {
-      position: relative; width: 100%; height: 120px; background: #07090d;
-      border: 2px solid var(--accent-color); border-radius: 10px; overflow: hidden; margin-bottom: 15px;
-    }
-    .roulette-marker {
-      position: absolute; left: 50%; top: 0; bottom: 0; width: 4px;
-      background: var(--accent-color); z-index: 10; transform: translateX(-50%);
-      box-shadow: 0 0 10px var(--accent-color);
-    }
-    .roulette-track {
-      display: flex; position: absolute; left: 0; top: 10px; height: 100px;
-      transition: transform 5s cubic-bezier(0.1, 1, 0.1, 1);
-    }
-    .roulette-item {
-      width: 100px; height: 100px; background: var(--card-bg); margin-right: 10px;
-      border-radius: 8px; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; font-size: 11px; text-align: center; padding: 5px; flex-shrink: 0;
-    }
 
     /* Clicker */
     .click-container { text-align: center; margin-top: 20px; }
@@ -78,16 +57,9 @@
     .progress-bar { width: 100%; background: #222c3c; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 5px; }
     .progress-fill { height: 100%; background: var(--accent-color); width: 100%; transition: width 0.2s; }
 
-    /* Mines Game Grid */
-    .mines-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-    .mine-cell {
-      height: 70px; background: #0b0e14; border: 1px solid #222c3c; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer;
-    }
-
     /* Upgrader */
     .upgrade-box { background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; }
-    select, input[type="number"] { width: 100%; padding: 10px; background: #0b0e14; color: #fff; border: 1px solid #222c3c; border-radius: 5px; margin-top: 5px; }
+    select { width: 100%; padding: 10px; background: #0b0e14; color: #fff; border: 1px solid #222c3c; border-radius: 5px; margin-top: 5px; }
 
     /* Bottom Nav */
     .navbar {
@@ -97,7 +69,7 @@
     .nav-item { color: var(--text-dim); text-decoration: none; font-size: 11px; text-align: center; cursor: pointer; }
     .nav-item.active { color: var(--accent-color); font-weight: bold; }
 
-    /* Inventory Items & Rarities */
+    /* Inventory Items */
     .item-rarity-common { border-bottom: 3px solid #b0c3d9; }
     .item-rarity-rare { border-bottom: 3px solid #4b69ff; }
     .item-rarity-epic { border-bottom: 3px solid #d32ce6; }
@@ -140,49 +112,42 @@
   <!-- Кейсы -->
   <div id="p-cases" class="page">
     <h2>📦 CS2 Кейсы</h2>
-    
-    <!-- Рулетка открытия кейса -->
-    <div class="roulette-wrapper" id="roulette-box" style="display: none;">
-      <div class="roulette-marker"></div>
-      <div class="roulette-track" id="roulette-track"></div>
-    </div>
-
     <div class="grid" style="margin-top: 15px;">
       <div class="card">
         <h3>Ширп Кейс</h3>
         <p style="color: var(--accent-color);">200 💰</p>
         <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Ширп 90%, Синька 10%</p>
-        <button class="btn case-btn" onclick="openCase('cheap', 200)">Открыть</button>
+        <button class="btn" onclick="openCase('cheap', 200)">Открыть</button>
       </div>
       <div class="card">
         <h3>Бомж Кейс</h3>
         <p style="color: var(--accent-color);">500 💰</p>
         <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Ширп 70%, Синька 25%, Эпик 5%</p>
-        <button class="btn case-btn" onclick="openCase('medium', 500)">Открыть</button>
+        <button class="btn" onclick="openCase('medium', 500)">Открыть</button>
       </div>
       <div class="card">
         <h3>Спортивный</h3>
         <p style="color: var(--accent-color);">1200 💰</p>
         <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Синька 60%, Эпик 30%, Легендарка 10%</p>
-        <button class="btn case-btn" onclick="openCase('sport', 1200)">Открыть</button>
+        <button class="btn" onclick="openCase('sport', 1200)">Открыть</button>
       </div>
       <div class="card">
         <h3>Mellstroy Case</h3>
         <p style="color: var(--accent-color);">2500 💰</p>
         <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Синька 40%, Эпик 40%, Легендарка 20%</p>
-        <button class="btn case-btn" onclick="openCase('rich', 2500)">Открыть</button>
+        <button class="btn" onclick="openCase('rich', 2500)">Открыть</button>
       </div>
       <div class="card">
         <h3>Ножевой Кейс</h3>
         <p style="color: var(--accent-color);">5000 💰</p>
-        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Эпик 50%, Нож 50%</p>
-        <button class="btn case-btn" onclick="openCase('knife', 5000)">Открыть</button>
+        <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Эпик 50%, Нож/Дроп 50%</p>
+        <button class="btn" onclick="openCase('knife', 5000)">Открыть</button>
       </div>
       <div class="card">
         <h3>Mellstroy VIP</h3>
         <p style="color: var(--accent-color);">10000 💰</p>
         <p style="font-size: 10px; color: var(--text-dim); margin: 5px 0;">Шансы: Только редкие и топовые ножи!</p>
-        <button class="btn case-btn" onclick="openCase('vip', 10000)">Открыть</button>
+        <button class="btn" onclick="openCase('vip', 10000)">Открыть</button>
       </div>
     </div>
   </div>
@@ -209,40 +174,13 @@
   <!-- Мини-игры -->
   <div id="p-minigames" class="page">
     <h2>🎮 Мини-Игры</h2>
-    
-    <!-- Игра 1: Кости -->
     <div class="card" style="margin-top: 10px;">
       <h3>🎰 Кости Меллстроя</h3>
-      <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">Число будет больше 3 или меньше/равно 3?</p>
-      <input type="number" id="dice-bet" placeholder="Ставка 💰">
-      <div style="display: flex; gap: 10px; margin-top: 5px;">
+      <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 10px;">Угадай: число будет больше 3 или меньше/равно 3?</p>
+      <input type="number" id="dice-bet" placeholder="Ставка 💰" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #0b0e14; color: #fff; border: 1px solid #222c3c; border-radius: 5px;">
+      <div style="display: flex; gap: 10px;">
         <button class="btn" onclick="playDice('low')">1 - 3 (x2)</button>
         <button class="btn" onclick="playDice('high')">4 - 6 (x2)</button>
-      </div>
-    </div>
-
-    <!-- Игра 2: Coinflip (Монетка) -->
-    <div class="card" style="margin-top: 15px;">
-      <h3>🪙 Coinflip (Монетка)</h3>
-      <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">Выбери сторону монеты</p>
-      <input type="number" id="coin-bet" placeholder="Ставка 💰">
-      <div style="display: flex; gap: 10px; margin-top: 5px;">
-        <button class="btn" onclick="playCoinflip('heads')">👑 Орел</button>
-        <button class="btn" onclick="playCoinflip('tails')">⚡ Решка</button>
-      </div>
-    </div>
-
-    <!-- Игра 3: Мины -->
-    <div class="card" style="margin-top: 15px;">
-      <h3>💣 Мины (Mines)</h3>
-      <p style="font-size: 12px; color: var(--text-dim);">Найди алмазы и избегай бомбы!</p>
-      <input type="number" id="mines-bet" placeholder="Ставка 💰">
-      <button class="btn" id="mines-start-btn" onclick="startMines()">Начать игру</button>
-      
-      <div id="mines-game-area" style="display: none; margin-top: 10px;">
-        <p>Множитель: <span id="mines-mult" style="color: var(--accent-color); font-weight: bold;">x1.20</span></p>
-        <div class="mines-grid" id="mines-grid"></div>
-        <button class="btn btn-secondary" id="mines-cashout-btn" onclick="cashoutMines()" style="margin-top: 10px;">Забрать выигрыш</button>
       </div>
     </div>
   </div>
@@ -281,19 +219,21 @@
       window.Telegram.WebApp.expand();
     }
 
+    // Расширенная база скинов CS2
     const skinsDB = [
       { id: 1, name: "P250 | Песчаная буря", price: 100, rarity: "common" },
       { id: 2, name: "USP-S | Проводник", price: 150, rarity: "common" },
-      { id: 3, name: "AK-47 | Изумруд", price: 400, rarity: "rare" },
+      { id: 3, name: "AK-47 | Изумрудные завитки", price: 400, rarity: "rare" },
       { id: 4, name: "Glock-18 | Водяной", price: 600, rarity: "rare" },
       { id: 5, name: "M4A4 | Безликий", price: 1200, rarity: "epic" },
-      { id: 6, name: "Deagle | Механо-пушка", price: 2000, rarity: "epic" },
+      { id: 6, name: "Desert Eagle | Механо-пушка", price: 2000, rarity: "epic" },
       { id: 7, name: "AWP | Азимов", price: 3500, rarity: "legendary" },
       { id: 8, name: "AK-47 | Вулканический", price: 6000, rarity: "legendary" },
       { id: 9, name: "🔪 Керамбит | Градиент", price: 10000, rarity: "legendary" },
-      { id: 10, name: "🔪 Бабочка | Паутина", price: 25000, rarity: "legendary" }
+      { id: 10, name: "🔪 Бабочка | Кровавая паутина", price: 25000, rarity: "legendary" }
     ];
 
+    // Игровой профиль
     let state = {
       balance: 1000,
       clickPower: 10,
@@ -305,11 +245,16 @@
       stats: { totalEarned: 1000, maxBalance: 1000, casesOpened: 0, timePlayedMinutes: 0 }
     };
 
-    function save() { localStorage.setItem('mell_cs2_state', JSON.stringify(state)); }
+    // Автосохранение и Загрузка
+    function save() {
+      localStorage.setItem('mell_cs2_state', JSON.stringify(state));
+    }
 
     function load() {
       const saved = localStorage.getItem('mell_cs2_state');
-      if (saved) state = Object.assign(state, JSON.parse(saved));
+      if (saved) {
+        state = Object.assign(state, JSON.parse(saved));
+      }
       updateUI();
     }
 
@@ -331,6 +276,7 @@
       document.getElementById('cost-click').innerText = state.clickUpgradeCost;
       document.getElementById('cost-energy').innerText = state.energyUpgradeCost;
 
+      // Stats
       const hours = Math.floor(state.stats.timePlayedMinutes / 60);
       const minutes = state.stats.timePlayedMinutes % 60;
       document.getElementById('st-time').innerText = `${hours} ч. ${minutes} мин.`;
@@ -339,6 +285,7 @@
       document.getElementById('st-cases').innerText = state.stats.casesOpened;
     }
 
+    // Подсчет времени в игре (каждую минуту +1)
     setInterval(() => {
       if (!state.stats.timePlayedMinutes) state.stats.timePlayedMinutes = 0;
       state.stats.timePlayedMinutes++;
@@ -346,6 +293,7 @@
       save();
     }, 60000);
 
+    // Навигация
     function nav(pageId, el) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -356,7 +304,7 @@
       if (pageId === 'upgrader') initUpgrader();
     }
 
-    // Бонус раз в минуту
+    // Доход раз в минуту (Меллстрой Бонус)
     let bonusTimer = 60;
     setInterval(() => {
       bonusTimer--;
@@ -400,69 +348,38 @@
       save();
     }
 
-    // Открытие Кейса (с анимацией)
-    let isOpening = false;
+    // Кейсы
     function openCase(type, price) {
-      if (isOpening) return;
       if (state.balance < price) return alert("Недостаточно монет!");
-      
-      isOpening = true;
       addBalance(-price);
       state.stats.casesOpened++;
-      
-      document.querySelectorAll('.case-btn').forEach(b => b.disabled = true);
 
       let rand = Math.random() * 100;
-      let wonSkin;
+      let skin;
 
-      if (type === 'cheap') wonSkin = rand < 90 ? skinsDB[0] : skinsDB[1];
-      else if (type === 'medium') wonSkin = rand < 70 ? skinsDB[0] : (rand < 95 ? skinsDB[2] : skinsDB[4]);
-      else if (type === 'sport') wonSkin = rand < 60 ? skinsDB[2] : (rand < 90 ? skinsDB[4] : skinsDB[6]);
-      else if (type === 'rich') wonSkin = rand < 40 ? skinsDB[3] : (rand < 80 ? skinsDB[5] : skinsDB[7]);
-      else if (type === 'knife') wonSkin = rand < 50 ? skinsDB[5] : skinsDB[8];
-      else if (type === 'vip') wonSkin = rand < 60 ? skinsDB[8] : skinsDB[9];
-
-      // Подготовка рулетки
-      const box = document.getElementById('roulette-box');
-      const track = document.getElementById('roulette-track');
-      box.style.display = 'block';
-      track.style.transition = 'none';
-      track.style.transform = 'translateX(0px)';
-      track.innerHTML = '';
-
-      // Генерируем ленту из 30 скинов, где 25-й — выигранный
-      let items = [];
-      for (let i = 0; i < 30; i++) {
-        if (i === 24) {
-          items.push(wonSkin);
-        } else {
-          items.push(skinsDB[Math.floor(Math.random() * skinsDB.length)]);
-        }
+      if (type === 'cheap') {
+        skin = rand < 90 ? skinsDB[0] : skinsDB[1];
+      } else if (type === 'medium') {
+        if (rand < 70) skin = skinsDB[0];
+        else if (rand < 95) skin = skinsDB[2];
+        else skin = skinsDB[4];
+      } else if (type === 'sport') {
+        if (rand < 60) skin = skinsDB[2];
+        else if (rand < 90) skin = skinsDB[4];
+        else skin = skinsDB[6];
+      } else if (type === 'rich') {
+        if (rand < 40) skin = skinsDB[3];
+        else if (rand < 80) skin = skinsDB[5];
+        else skin = skinsDB[7];
+      } else if (type === 'knife') {
+        skin = rand < 50 ? skinsDB[5] : skinsDB[8];
+      } else if (type === 'vip') {
+        skin = rand < 60 ? skinsDB[8] : skinsDB[9];
       }
 
-      items.forEach(skin => {
-        const itemEl = document.createElement('div');
-        itemEl.className = `roulette-item item-rarity-${skin.rarity}`;
-        itemEl.innerHTML = `<div>${skin.name}</div><div style="color:var(--accent-color);">${skin.price}💰</div>`;
-        track.appendChild(itemEl);
-      });
-
-      // Запуск анимации
-      setTimeout(() => {
-        track.style.transition = 'transform 5s cubic-bezier(0.1, 1, 0.1, 1)';
-        // 110px width per item (100px + 10px margin), 24th item offset
-        const offset = 24 * 110 - (box.offsetWidth / 2) + 55;
-        track.style.transform = `translateX(-${offset}px)`;
-      }, 50);
-
-      // Завершение открытия
-      setTimeout(() => {
-        state.inventory.push(wonSkin);
-        save();
-        alert(`🎉 Вам выпало: ${wonSkin.name} (${wonSkin.price} 💰)!`);
-        isOpening = false;
-        document.querySelectorAll('.case-btn').forEach(b => b.disabled = false);
-      }, 5200);
+      state.inventory.push(skin);
+      save();
+      alert(`🎉 Вам выпало: ${skin.name} (Стоимость: ${skin.price} 💰)!`);
     }
 
     // Инвентарь
@@ -470,4 +387,115 @@
       const container = document.getElementById('inventory-list');
       container.innerHTML = '';
       if (state.inventory.length === 0) {
-        container.innerH
+        container.innerHTML = '<p style="grid-column: span 2; text-align: center; color: var(--text-dim);">У вас пока нет скинов.</p>';
+        return;
+      }
+
+      state.inventory.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = `card item-rarity-${item.rarity}`;
+        div.innerHTML = `
+          <h4>${item.name}</h4>
+          <p style="color: var(--accent-color); margin: 5px 0;">${item.price} 💰</p>
+          <button class="btn" style="padding: 5px; font-size: 12px;" onclick="sellSkin(${index})">Продать</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function sellSkin(index) {
+      const skin = state.inventory[index];
+      addBalance(skin.price);
+      state.inventory.splice(index, 1);
+      save();
+      renderInventory();
+    }
+
+    // Апгрейдер
+    function initUpgrader() {
+      const mySelect = document.getElementById('upg-my-skin');
+      const targetSelect = document.getElementById('upg-target-skin');
+
+      mySelect.innerHTML = '';
+      targetSelect.innerHTML = '';
+
+      state.inventory.forEach((item, index) => {
+        mySelect.innerHTML += `<option value="${index}">${item.name} (${item.price}💰)</option>`;
+      });
+
+      skinsDB.forEach((item) => {
+        targetSelect.innerHTML += `<option value="${item.id}">${item.name} (${item.price}💰)</option>`;
+      });
+
+      calcUpgradeChance();
+    }
+
+    function calcUpgradeChance() {
+      if (state.inventory.length === 0) {
+        document.getElementById('upg-chance').innerText = "0%";
+        return 0;
+      }
+
+      const myIndex = document.getElementById('upg-my-skin').value;
+      const targetId = document.getElementById('upg-target-skin').value;
+
+      const mySkin = state.inventory[myIndex];
+      const targetSkin = skinsDB.find(s => s.id == targetId);
+
+      if (!mySkin || !targetSkin) return;
+
+      let chance = (mySkin.price / targetSkin.price) * 100;
+      if (chance > 95) chance = 95; // Максимальный шанс 95%
+      
+      document.getElementById('upg-chance').innerText = chance.toFixed(1) + "%";
+      return chance;
+    }
+
+    function runUpgrade() {
+      if (state.inventory.length === 0) return alert("У вас нет скинов для апгрейда!");
+      
+      const chance = calcUpgradeChance();
+      const myIndex = document.getElementById('upg-my-skin').value;
+      const targetId = document.getElementById('upg-target-skin').value;
+      const targetSkin = skinsDB.find(s => s.id == targetId);
+
+      // Удаляем предмет, задействованный в апгрейде
+      state.inventory.splice(myIndex, 1);
+
+      if (Math.random() * 100 <= chance) {
+        state.inventory.push(targetSkin);
+        alert(`🔥 УСПЕХ! Вы получили ${targetSkin.name}!`);
+      } else {
+        alert("❌ НЕУДАЧА! Скин сгорел!");
+      }
+
+      save();
+      initUpgrader();
+    }
+
+    // Кости
+    function playDice(type) {
+      const betInput = document.getElementById('dice-bet');
+      const bet = parseInt(betInput.value);
+
+      if (isNaN(bet) || bet <= 0 || bet > state.balance) {
+        return alert("Некорректная ставка!");
+      }
+
+      addBalance(-bet);
+      const roll = Math.floor(Math.random() * 6) + 1;
+      const win = (type === 'low' && roll <= 3) || (type === 'high' && roll >= 4);
+
+      if (win) {
+        addBalance(bet * 2);
+        alert(`🎲 Выпало ${roll}! Победа! Вы выиграли ${bet * 2} 💰`);
+      } else {
+        alert(`🎲 Выпало ${roll}! Проигрыш.`);
+      }
+    }
+
+    // Инициализация при старте
+    load();
+  </script>
+</body>
+</html>
