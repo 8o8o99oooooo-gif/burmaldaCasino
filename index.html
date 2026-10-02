@@ -3,308 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Burmaldinka Casino</title>
+    <title>BurmaldinkaCasino</title>
     <style>
         :root {
-            --bg-color: #0d0714;
-            --card-bg: #1a0f2e;
-            --accent-color: #a855f7;
-            --accent-glow: #c084fc;
-            --accent-pink: #e879f9;
+            --bg-color: #0b0e14;
+            --card-bg: #151a23;
+            --accent-color: #00ffcc;
+            --accent-pink: #ff007f;
             --text-color: #ffffff;
-            --text-dim: #a799c4;
-            --win: #22c55e;
-            --lose: #ef4444;
-            --border-color: #2e1a4a;
+            --text-dim: #8a94a6;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 90px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
 
-        header { background: var(--card-bg); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-color); box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.2rem; font-weight: bold; color: var(--accent-glow); text-shadow: 0 0 8px var(--accent-glow); }
-        .balance-container { background: #0d0714; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--accent-color); font-weight: bold; font-size: 1rem; }
-        .balance-value { color: var(--accent-glow); }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 110px;
+        }
 
-        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        h2 { margin-bottom: 5px; color: var(--accent-glow); }
-        .sub-dim { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 12px; }
+        header {
+            background: var(--card-bg);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-        .btn { background: var(--accent-color); color: #fff; border: none; padding: 10px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .btn:hover { background: var(--accent-glow); }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        input[type="number"] { background: #0d0714; border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 10px; outline: none; }
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-shadow: 0 0 8px var(--accent-color);
+        }
 
-        /* ===== КЕЙСЫ ===== */
-        .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 15px; }
-        .case-card { background: var(--card-bg); border-radius: 10px; padding: 15px 10px; text-align: center; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
-        .case-card:hover { transform: translateY(-3px); border-color: var(--accent-color); box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
-        .case-emoji { font-size: 2rem; }
-        .case-title { font-weight: bold; margin: 6px 0 4px; font-size: 0.9rem; }
-        .case-price { color: var(--accent-glow); font-size: 0.9rem; font-weight: bold; }
+        .balance-container {
+            background: #0b0e14;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--accent-color);
+            font-weight: bold;
+            font-size: 1rem;
+        }
 
-        .roulette-container { width: 100%; height: 130px; background: #08040d; border-radius: 10px; position: relative; overflow: hidden; border: 2px solid var(--accent-color); margin: 15px 0 8px; }
-        .roulette-pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 100%; background: #fbbf24; z-index: 10; box-shadow: 0 0 12px #fbbf24; }
-        .roulette-track { display: flex; position: absolute; left: 0; top: 10px; will-change: transform; transition: transform 4s cubic-bezier(0.1, 1, 0.1, 1); }
-        .item-card { width: 100px; height: 110px; background: var(--card-bg); margin: 0 5px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.72rem; text-align: center; flex-shrink: 0; border: 2px solid var(--border-color); padding: 4px; }
-        .item-card .ic-name { font-weight: bold; line-height: 1.15; }
-        .item-card .ic-price { color: var(--accent-glow); margin-top: 4px; font-size: 0.75rem; }
+        .balance-value {
+            color: #00ffcc;
+        }
 
-        /* ===== КЛИКЕР ===== */
-        .clicker-area { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; text-align: center; }
-        .click-btn { width: 160px; height: 160px; border-radius: 50%; border: 4px solid var(--accent-glow); background: radial-gradient(circle at 30% 30%, #3b1d6e, #130924); font-size: 1.2rem; font-weight: bold; color: var(--accent-glow); cursor: pointer; margin: 18px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(168, 85, 247, 0.4); transition: transform 0.06s; }
-        .click-btn:active { transform: scale(0.93); }
-        .energy-bar-wrap { background: #0d0714; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-top: 15px; }
-        .energy-bar { height: 22px; background: #130924; border-radius: 6px; overflow: hidden; position: relative; }
-        .energy-fill { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--accent-pink)); transition: width 0.25s; }
-        .energy-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
-        
-        .shop-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .shop-info h4 { color: var(--accent-glow); }
-        .shop-info p { font-size: 0.8rem; color: var(--text-dim); }
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-        /* ===== АПГРЕЙДЕР ===== */
-        .upgrader-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 15px 0; }
-        .upg-box { flex: 1; min-height: 120px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; cursor: pointer; font-size: 0.8rem; gap: 6px; }
-        .upg-box.selected { border-color: var(--accent-glow); box-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
-        .circle-wrapper { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
-        .circle-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-        .upg-arrow { position: absolute; inset: 0; display: flex; justify-content: center; transform-origin: 50% 50%; transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1); }
-        .upg-arrow span { color: #fbbf24; font-size: 1.4rem; text-shadow: 0 0 10px #fbbf24; margin-top: -6px; }
-        .circle-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-        .circle-info .ch-val { font-size: 1.1rem; font-weight: bold; color: #fbbf24; }
-        .picker-list { display: none; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; max-height: 180px; overflow-y: auto; margin-top: 10px; }
-        .picker-list.open { display: block; }
-        .picker-row { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; font-size: 0.85rem; }
-        .picker-row:hover { background: #2e1a4a; }
-        .mult-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-        .mult-btn { flex: 1; min-width: 50px; background: #130924; color: #fff; border: 1px solid var(--border-color); padding: 8px 4px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .mult-btn.active { border-color: var(--accent-glow); color: var(--accent-glow); }
+        .tab-content {
+            display: none;
+        }
 
-        /* ===== ИНВЕНТАРЬ ===== */
-        .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
-        .inventory-item { background: var(--card-bg); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid var(--border-color); font-size: 0.8rem; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
-        .inv-price { color: var(--accent-glow); font-weight: bold; }
+        .tab-content.active {
+            display: block;
+        }
 
-        /* ===== СТАТИСТИКА ===== */
-        .stats-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .stats-val { color: var(--accent-glow); font-weight: bold; font-size: 1.1rem; }
+        /* Кейсы */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
 
-        /* ===== ИГРЫ И ПОЛНОЭКРАННЫЙ РЕЖИМ ===== */
-        .games-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .game-frame-card { background: var(--card-bg); border: 2px solid var(--accent-color); border-radius: 14px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-        .game-frame-card:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
-        .game-frame-card .icon { font-size: 2.5rem; }
+        .case-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #232a36;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
 
-        .fullscreen-game-overlay { display: none; position: fixed; inset: 0; background: var(--bg-color); z-index: 1000; padding: 20px; flex-direction: column; overflow-y: auto; }
-        .fullscreen-game-overlay.active { display: flex; }
-        .close-game-btn { position: absolute; top: 15px; right: 15px; background: var(--accent-pink); border: none; color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; z-index: 1001; }
+        .case-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-color);
+        }
 
-        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; }
-        .mine-cell { aspect-ratio: 1; background: #130924; border: 1px solid var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
-        .mine-cell.open-gem { background: rgba(34, 197, 94, 0.2); border-color: var(--win); }
-        .mine-cell.open-bomb { background: rgba(239, 68, 68, 0.2); border-color: var(--lose); }
+        .case-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
-        /* ===== НАВИГАЦИЯ ===== */
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border-color); z-index: 99; }
-        .nav-btn { background: none; border: none; color: var(--text-dim); font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
-        .nav-btn.active { color: var(--accent-glow); font-weight: bold; }
-        .nav-icon { font-size: 1.1rem; }
+        .case-price {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+        }
 
-        /* ===== УВЕДОМЛЕНИЕ МЕЛЛСТРОЯ ===== */
-        .mellstroy-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .mellstroy-modal.active { display: flex; }
-        .mellstroy-content { background: var(--card-bg); border: 2px solid var(--accent-glow); border-radius: 16px; padding: 25px; text-align: center; max-width: 350px; width: 100%; box-shadow: 0 0 30px rgba(192, 132, 252, 0.5); }
-        .mellstroy-content h3 { color: var(--accent-pink); font-size: 1.4rem; margin-bottom: 10px; }
-    </style>
-</head>
-<body>
+        /* Рулетка */
+        .roulette-container {
+            width: 100%;
+            height: 120px;
+            background: #000;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--accent-color);
+            margin: 20px 0;
+        }
 
-    <header>
-        <div class="logo">BURMALDINKA</div>
-        <div class="balance-container">Баланс: $<span id="balance" class="balance-value">1000</span></div>
-    </header>
+        .roulette-pointer {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: var(--accent-pink);
+            z-index: 10;
+            box-shadow: 0 0 10px var(--accent-pink);
+        }
 
-    <div class="container">
-        <!-- КЛИКЕР -->
-        <div id="tab-clicker" class="tab-content active">
-            <h2>Кликер</h2>
-            <p class="sub-dim">Жми и зарабатывай монеты!</p>
+        .roulette-track {
+            display: flex;
+            position: absolute;
+            left: 0;
+            top: 10px;
+            transition: transform 5s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        .item-card {
+            width: 100px;
+            height: 100px;
+            background: var(--card-bg);
+            margin: 0 5px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            text-align: center;
+            flex-shrink: 0;
+            border: 1px solid #333;
+        }
+
+        /* Инвентарь */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .inventory-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #232a36;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .inventory-item button {
+            margin-top: 5px;
+            padding: 6px;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Апгрейдер */
+        .upgrader-container {
+            background: var(--card-bg);
+            padding: 20px;
             
-            <div class="clicker-area">
-                <button class="click-btn" id="click-btn" onclick="doClick()">+$<span id="click-power-disp">1</span></button>
-                
-                <div class="energy-bar-wrap">
-                    <div class="energy-bar">
-                        <div class="energy-fill" id="energy-fill" style="width: 100%;"></div>
-                        <div class="energy-text"><span id="energy-val">100</span> / <span id="max-energy-val">100</span> Ед.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="shop-card">
-                <div class="shop-info">
-                    <h4>+50 к Макс. Энергии</h4>
-                    <p>Текущая цена: $<span id="energy-cost">50</span></p>
-                </div>
-                <button class="btn" onclick="buyEnergyUpgrade()">Купить</button>
-            </div>
-
-            <div class="shop-card">
-                <div class="shop-info">
-                    <h4>+5$ За Клик</h4>
-                    <p>Текущая цена: $<span id="click-cost">100</span></p>
-                </div>
-                <button class="btn" onclick="buyClickUpgrade()">Купить</button>
-            </div>
-        </div>
-
-        <!-- КЕЙСЫ -->
-        <div id="tab-cases" class="tab-content">
-            <h2>Кейсы</h2>
-            <p class="sub-dim">Испытай удачу и выбей дорогой дроп!</p>
-
-            <div class="roulette-container" id="roulette-container" style="display: none;">
-                <div class="roulette-pointer"></div>
-                <div class="roulette-track" id="roulette-track"></div>
-            </div>
-
-            <div class="cases-grid" id="cases-grid"></div>
-        </div>
-
-        <!-- АПГРЕЙДЕР -->
-        <div id="tab-upgrader" class="tab-content">
-            <h2>Апгрейдер</h2>
-            <p class="sub-dim">Улучшай свои предметы с определенным шансом</p>
-
-            <div class="upgrader-top">
-                <div class="upg-box" id="upg-item-box" onclick="togglePicker()">
-                    <div style="font-size: 1.8rem;" id="upg-emoji">📦</div>
-                    <div id="upg-title">Выберите предмет</div>
-                    <div style="color: var(--accent-glow);" id="upg-price">$0</div>
-                </div>
-
-                <div class="circle-wrapper">
-                    <svg class="circle-svg" viewBox="0 0 36 36">
-                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#130924" stroke-width="3.8"/>
-                        <path id="circle-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--accent-glow)" stroke-width="3.8" stroke-dasharray="50, 100"/>
-                    </svg>
-                    <div class="upg-arrow" id="upg-arrow"><span>▼</span></div>
-                    <div class="circle-info">
-                        <div class="ch-val"><span id="chance-val">50</span>%</div>
-                        <div style="font-size: 0.65rem; color: var(--text-dim);">Шанс</div>
-                    </div>
-                </div>
-
-                <div class="upg-box">
-                    <div style="font-size: 1.8rem;">🎯</div>
-                    <div id="target-title">Цель</div>
-                    <div style="color: var(--accent-glow);" id="target-price">$0</div>
-                </div>
-            </div>
-
-            <div class="mult-row">
-                <button class="mult-btn active" onclick="setMultiplier(1.5, this)">x1.5</button>
-                <button class="mult-btn" onclick="setMultiplier(2, this)">x2</button>
-                <button class="mult-btn" onclick="setMultiplier(3, this)">x3</button>
-                <button class="mult-btn" onclick="setMultiplier(5, this)">x5</button>
-                <button class="mult-btn" onclick="setMultiplier(10, this)">x10</button>
-            </div>
-
-            <button class="btn" style="width: 100%; padding: 12px;" onclick="startUpgrade()">Улучшить</button>
-
-            <div class="picker-list" id="picker-list"></div>
-        </div>
-
-        <!-- ИГРЫ -->
-        <div id="tab-games" class="tab-content">
-            <h2>Мини-Игры</h2>
-            <p class="sub-dim">Выберите игру для входа в полноэкранный режим</p>
-
-            <div class="games-preview-grid">
-                <div class="game-frame-card" onclick="openGame('mines')">
-                    <div class="icon">💣</div>
-                    <h3>Минёр</h3>
-                    <p class="sub-dim">Угадывай безопасные клетки</p>
-                </div>
-                <div class="game-frame-card" onclick="openGame('dice')">
-                    <div class="icon">🎲</div>
-                    <h3>Кости</h3>
-                    <p class="sub-dim">Больше или меньше</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ИНВЕНТАРЬ -->
-        <div id="tab-inventory" class="tab-content">
-            <h2>Инвентарь</h2>
-            <p class="sub-dim">Ваши выбитые предметы</p>
-            <div class="inventory-grid" id="inventory-grid"></div>
-        </div>
-
-        <!-- СТАТИСТИКА -->
-        <div id="tab-stats" class="tab-content">
-            <h2>Статистика</h2>
-            <p class="sub-dim">Ваш игровой прогресс</p>
-            
-            <div class="stats-card">
-                <span>Время в игре:</span>
-                <span class="stats-val" id="st-time">0 ч 0 мин</span>
-            </div>
-            <div class="stats-card">
-                <span>Открыто кейсов:</span>
-                <span class="stats-val" id="st-cases">0</span>
-            </div>
-            <div class="stats-card">
-                <span>Всего заработано:</span>
-                <span class="stats-val">$<span id="st-earned">0</span></span>
-            </div>
-            <div class="stats-card">
-                <span>Рекордный баланс:</span>
-                <span class="stats-val">$<span id="st-max-bal">1,000</span></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- ПОЛНОЭКРАННЫЕ ОКНА ИГР -->
-    <div id="game-overlay-mines" class="fullscreen-game-overlay">
-        <button class="close-game-btn" onclick="closeGame('mines')">Закрыть ✖</button>
-        <h2>💣 Игра Минёр</h2>
-        <p class="sub-dim">Открывай кристаллы и избегай мин!</p>
-        <input type="number" id="mines-bet" value="100" placeholder="Ставка">
-        <button class="btn" onclick="startMines()">Начать игру</button>
-        <div class="mines-grid" id="mines-grid"></div>
-        <button class="btn" onclick="cashoutMines()" id="mines-cashout-btn" style="display:none; background: var(--win); margin-top: 10px;">Забрать выигрыш (<span id="mines-win-amount">0</span>$)</button>
-    </div>
-
-    <div id="game-overlay-dice" class="fullscreen-game-overlay">
-        <button class="close-game-btn" onclick="closeGame('dice')">Закрыть ✖</button>
-        <h2>🎲 Игра Кости</h2>
-        <p class="sub-dim">Бросай кубик и выигрывай!</p>
-        <input type="number" id="dice-bet" value="100" placeholder="Ставка">
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button class="btn" style="flex: 1;" onclick="playDice('under')">Меньше (1-3)</button>
-            <button class="btn" style="flex: 1;" onclick="playDice('over')">Больше (4-6)</button>
-        </div>
-        <h3 id="dice-result" style="margin-top: 20px; text-align: center;"></h3>
-    </div>
-
-    <!-- УВЕДОМЛЕНИЕ МЕЛЛСТРОЯ -->
-    <div class="mellstroy-modal" id="mellstroy-modal">
-        <div class="mellstroy-content">
-            <h3>🎁 ПОДАРОК ОТ МЕЛЛСТРОЯ!</h3>
-            <p style="margin: 15px 0;">Меллстрой занес тебе щедрый бонус:</p>
-            <h1 style="color: var(--accent-glow); margin-bottom: 20px;">+$<span id="mellstroy-amount">0</span></h1>
-            <button class="btn" onclick="closeMellstroy()">Забрать бабки!</button>
-        </div>
-    </div>
-
-    <!-- НАВИГАЦИЯ -->
-    <nav>
-        <button class="nav-btn active" onclick="switchTab('clicker', this)"><span class="nav-icon">⚡</span>Кликер</button>
-        <button class="nav-btn" onclick="switchTab('cases', this)"><span class="nav-icon">📦</span>Кейсы</button>
-        <button class="nav-btn" onclick="switchTab('upgrader', this)"><span class="nav-icon">🔥</span>Апгрейдер</button>
-        <button class="nav-btn" onclick="switchTab('games', this)"><span class="nav-icon">🎮</span>Игры</button>
-        <button class="na
