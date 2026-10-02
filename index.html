@@ -1,1 +1,165 @@
+<script>
+    // Инициализация Telegram Web App
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
 
+    // Получаем данные пользователя (для отображения, проверка подлинности должна быть на бэкенде)
+    const user = tg.initDataUnsafe?.user;
+    
+    // Баланс (в реальном приложении должен загружаться с сервера при старте)
+    let balance = 1000; 
+
+    // Элементы DOM
+    const balanceEl = document.getElementById('balance');
+    const resultEl = document.getElementById('result');
+    const betInput = document.getElementById('betAmount'); // Опциональный инпут ставки
+
+    // Безопасное получение суммы ставки
+    function getBetAmount(defaultBet) {
+        if (betInput) {
+            const val = parseInt(betInput.value);
+            if (!isNaN(val) && val > 0) return val;
+        }
+        return defaultBet;
+    }
+
+    function updateBalance() {
+        if (balanceEl) {
+            balanceEl.textContent = balance;
+        }
+        // Легкая тактильная отдача при изменении баланса
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+    }
+
+    function showResult(text, isWin) {
+        if (!resultEl) return;
+        resultEl.textContent = text;
+        resultEl.className = 'result ' + (isWin ? 'win' : 'lose');
+        
+        // Тактильная отдача: успех или ошибка
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred(isWin ? 'success' : 'error');
+        }
+
+        setTimeout(() => {
+            resultEl.className = 'result';
+        }, 3000);
+    }
+
+    function playCoinflip() {
+        const bet = getBetAmount(50);
+        if (balance < bet) {
+            showResult('❌ Недостаточно монет!', false);
+            return;
+        }
+
+        balance -= bet;
+        updateBalance();
+
+        // Имитация задержки для реалистичности (можно заменить на CSS-анимацию)
+        setTimeout(() => {
+            // Примечание: в реальном UX выбор "орёл/решка" должен делать пользователь до нажатия
+            const result = Math.random() < 0.5 ? 'орёл' : 'решка';
+            const choice = Math.random() < 0.5 ? 'орёл' : 'решка'; 
+            
+            if (result === choice) {
+                const win = bet * 2;
+                balance += win;
+                showResult(`🎉 Выпало: ${result}\nТы выиграл +${win} 🪙!`, true);
+            } else {
+                showResult(`😢 Выпало: ${result}\nТы проиграл ${bet} 🪙`, false);
+            }
+            updateBalance();
+            
+            // Отправка результата боту для сохранения в БД (раскомментировать при наличии бэкенда)
+            // sendToBot({ game: 'coinflip', bet: bet, result: result, isWin: result === choice });
+        }, 600);
+    }
+
+    function playSlots() {
+        const bet = getBetAmount(100);
+        if (balance < bet) {
+            showResult('❌ Недостаточно монет!', false);
+            return;
+        }
+
+        balance -= bet;
+        updateBalance();
+
+        setTimeout(() => {
+            const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+            const reels = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+
+            let win = 0;
+            let message = `🎰 ${reels.join(' | ')}\n`;
+
+            if (reels[0] === reels[1] && reels[1] === reels[2]) {
+                win = bet * 10; // Джекпот x10 (соответствует названию кнопки)
+                message += `ДЖЕКПОТ! +${win} 🪙`;
+            } else if (reels[0] === reels[1] || reels[1] === reels[2] || reels[0] === reels[2]) {
+                win = Math.floor(bet * 1.5); // Небольшой выигрыш за 2 совпадения
+                message += `Два совпадения! Выигрыш +${win} 🪙`;
+            } else {
+                message += `Нет совпадений 😢`;
+            }
+
+            if (win > 0) {
+                balance += win;
+                showResult(message, true);
+            } else {
+                showResult(message, false);
+            }
+            updateBalance();
+            
+            // sendToBot({ game: 'slots', bet: bet, reels: reels, win: win });
+        }, 800);
+    }
+
+    function playRoulette() {
+        const bet = getBetAmount(75);
+        if (balance < bet) {
+            showResult('❌ Недостаточно монет!', false);
+            return;
+        }
+
+        balance -= bet;
+        updateBalance();
+
+        setTimeout(() => {
+            const result = Math.random() < 0.5 ? 'red' : 'black';
+            const choice = Math.random() < 0.5 ? 'red' : 'black'; // Должно выбираться пользователем
+            
+            const colorEmoji = {red: '🔴', black: '⚫'};
+            const colorName = {red: 'Красное', black: 'Чёрное'};
+
+            if (result === choice) {
+                const win = bet * 2;
+                balance += win;
+                showResult(`🎲 Выпало ${colorEmoji[result]} ${colorName[result]}\nТы выиграл +${win} 🪙!`, true);
+            } else {
+                showResult(`🎲 Выпало ${colorEmoji[result]} ${colorName[result]}\nТы проиграл ${bet} 🪙`, false);
+            }
+            updateBalance();
+            
+            // sendToBot({ game: 'roulette', bet: bet, result: result, isWin: result === choice });
+        }, 600);
+    }
+
+    function sendToBot(data) {
+        if (tg.sendData) {
+            tg.sendData(JSON.stringify(data));
+        } else {
+            console.log('Данные для отправки боту:', data);
+        }
+    }
+
+    // Опционально: сообщить боту о запуске приложения
+    // sendToBot({ action: 'app_ready', userId: user?.id });
+</script>
