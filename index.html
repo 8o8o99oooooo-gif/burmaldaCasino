@@ -37,7 +37,6 @@
             padding-bottom: calc(80px + env(safe-area-inset-bottom));
         }
 
-        /* Утилиты и анимации */
         .glass {
             background: var(--glass);
             backdrop-filter: blur(12px);
@@ -51,7 +50,6 @@
         
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes glow { 0%, 100% { box-shadow: 0 0 5px var(--accent-cyan); } 50% { box-shadow: 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-purple); } }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
@@ -65,8 +63,8 @@
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); }
         .btn-gold { background: linear-gradient(135deg, var(--accent-gold), #f59e0b); color: #000; }
+        .btn-green { background: linear-gradient(135deg, var(--accent-green), #16a34a); color: #fff; }
 
-        /* Верхняя панель */
         .top-bar {
             position: sticky; top: 0; z-index: 100;
             padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top));
@@ -79,29 +77,25 @@
         .balance-box { text-align: right; }
         .balance { font-size: 20px; font-weight: 800; color: var(--accent-gold); display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
         .claim-timer { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--accent-cyan); width: 0%; transition: width 1s linear; }
+        .progress-bar { width: 100px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 4px; overflow: hidden; margin-left: auto; }
+        .progress-fill { height: 100%; background: var(--accent-cyan); width: 0%; transition: width 0.3s linear; }
 
-        /* Контент */
         .content { padding: 16px; animation: slideUp 0.3s ease; }
-        .section-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 22px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
         
-        /* Сетка кейсов */
         .cases-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .case-card { padding: 16px; text-align: center; cursor: pointer; transition: transform 0.2s; position: relative; overflow: hidden; }
         .case-card:active { transform: scale(0.95); }
         .case-icon { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); animation: float 3s ease-in-out infinite; }
         .case-price { font-weight: 700; color: var(--accent-gold); font-size: 18px; }
 
-        /* Игры */
         .games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .game-card { padding: 20px; text-align: center; cursor: pointer; border: 1px solid var(--glass-border); }
         .game-card:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
         .game-icon { font-size: 36px; margin-bottom: 8px; }
 
-        /* Инвентарь */
         .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .skin-card { padding: 10px; text-align: center; position: relative; cursor: pointer; transition: all 0.2s; }
+        .skin-card { padding: 10px; text-align: center; position: relative; cursor: pointer; transition: all 0.2s; border: 1px solid var(--glass-border); }
         .skin-card:active { transform: scale(0.95); }
         .skin-icon { font-size: 32px; margin-bottom: 4px; }
         .skin-name { font-size: 11px; font-weight: 600; line-height: 1.2; margin-bottom: 4px; height: 26px; overflow: hidden; }
@@ -112,17 +106,10 @@
         .rarity-legendary { border-color: var(--rarity-legendary); box-shadow: inset 0 0 15px rgba(251, 191, 36, 0.3); }
         .rarity-mythic { border-color: var(--rarity-mythic); box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.4); animation: glow 2s infinite; }
 
-        /* Профиль */
         .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
         .stat-label { color: var(--text-muted); }
         .stat-value { font-weight: 700; color: var(--accent-cyan); }
-        .achievements-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; }
-        .achievement { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; border-radius: 12px; background: rgba(255,255,255,0.03); position: relative; }
-        .achievement.locked { opacity: 0.3; filter: grayscale(1); }
-        .achievement-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #000; padding: 4px 8px; border-radius: 6px; font-size: 10px; white-space: nowrap; display: none; z-index: 10; }
-        .achievement:hover .achievement-tooltip { display: block; }
 
-        /* Нижняя навигация */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
             background: rgba(10, 10, 20, 0.95); backdrop-filter: blur(20px);
@@ -134,9 +121,8 @@
             color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 12px; transition: all 0.2s;
         }
         .nav-item.active { color: var(--accent-cyan); background: rgba(34, 211, 238, 0.1); }
-        .nav-icon { font-size: 24px; }
+        .nav-icon { font-size: 20px; }
 
-        /* Модалки */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200;
             display: none; align-items: flex-end; justify-content: center;
@@ -151,7 +137,6 @@
         .modal-title { font-size: 20px; font-weight: 800; }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
 
-        /* Открытие кейса */
         .roulette-container {
             width: 100%; height: 120px; background: rgba(0,0,0,0.3); border-radius: 12px;
             position: relative; overflow: hidden; margin: 20px 0; border: 1px solid var(--glass-border);
@@ -162,25 +147,22 @@
         }
         .roulette-strip {
             display: flex; height: 100%; align-items: center; gap: 8px;
-            position: absolute; left: 50%; transform: translateX(0); will-change: transform;
+            position: absolute; left: 0; transform: translateX(0);
+            transition: transform 5s cubic-bezier(0.1, 1, 0.1, 1);
         }
         .roulette-item {
             min-width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 8px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 2px solid transparent; flex-shrink: 0;
+            border: 2px solid transparent; flex-shrink: 0; text-align: center; font-size: 10px;
         }
-        .roulette-item .skin-icon { font-size: 40px; }
 
-        /* Игровые элементы */
         .bet-controls { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
         .bet-input {
             flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
             color: white; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 700; text-align: center;
         }
         .bet-btn { padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.1); border: none; color: white; font-weight: 700; cursor: pointer; }
-        .bet-btn:active { background: rgba(255,255,255,0.2); }
 
-        /* Mines */
         .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 16px 0; }
         .mine-cell {
             aspect-ratio: 1; background: rgba(255,255,255,0.1); border-radius: 8px;
@@ -188,77 +170,21 @@
             cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
         }
         .mine-cell.revealed { background: rgba(34, 197, 94, 0.2); border-color: var(--accent-green); }
-        .mine-cell.bomb { background: rgba(239, 68, 68, 0.2); border-color: var(--accent-red); animation: pulse 0.5s; }
-        .mine-cell:active:not(.revealed):not(.bomb) { transform: scale(0.9); }
+        .mine-cell.bomb { background: rgba(239, 68, 68, 0.2); border-color: var(--accent-red); }
 
-        /* Crash */
-        #crashCanvas { width: 100%; height: 200px; background: rgba(0,0,0,0.3); border-radius: 12px; margin: 16px 0; }
-        .crash-multiplier { font-size: 48px; font-weight: 900; text-align: center; margin: 16px 0; font-variant-numeric: tabular-nums; }
-        .crashed { color: var(--accent-red); }
-        .cashed { color: var(--accent-green); }
-
-        /* Slots */
-        .slots-container { display: flex; justify-content: center; gap: 8px; margin: 20px 0; perspective: 1000px; }
-        .slot-reel {
-            width: 80px; height: 100px; background: rgba(0,0,0,0.5); border-radius: 12px;
-            border: 2px solid var(--accent-purple); overflow: hidden; position: relative;
-        }
-        .slot-strip {
-            position: absolute; width: 100%; display: flex; flex-direction: column; align-items: center;
-            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-        .slot-symbol { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
-
-        /* Coin Flip */
-        .coin-container { perspective: 1000px; width: 150px; height: 150px; margin: 20px auto; }
+        .coin-container { perspective: 1000px; width: 120px; height: 120px; margin: 20px auto; }
         .coin {
             width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-            transition: transform 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 2s ease-out;
         }
         .coin-face {
             position: absolute; width: 100%; height: 100%; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 64px;
+            display: flex; align-items: center; justify-content: center; font-size: 48px;
             backface-visibility: hidden; border: 4px solid var(--accent-gold);
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
         }
         .coin-tails { transform: rotateY(180deg); background: linear-gradient(135deg, #94a3b8, #64748b); border-color: #cbd5e1; }
 
-        /* Roulette Wheel */
-        .roulette-wheel-container { position: relative; width: 280px; height: 280px; margin: 20px auto; }
-        .roulette-wheel {
-            width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--accent-gold);
-            position: relative; transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            background: conic-gradient(
-                #ef4444 0deg 25.7deg, #1e293b 25.7deg 51.4deg, #ef4444 51.4deg 77.1deg, #1e293b 77.1deg 102.8deg,
-                #ef4444 102.8deg 128.5deg, #1e293b 128.5deg 154.2deg, #ef4444 154.2deg 179.9deg, #22c55e 179.9deg 180deg,
-                #1e293b 180deg 205.7deg, #ef4444 205.7deg 231.4deg, #1e293b 231.4deg 257.1deg, #ef4444 257.1deg 282.8deg,
-                #1e293b 282.8deg 308.5deg, #ef4444 308.5deg 334.2deg, #1e293b 334.2deg 360deg
-            );
-        }
-        .roulette-pointer {
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent;
-            border-top: 25px solid var(--accent-gold); z-index: 10; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
-        }
-
-        /* Upgrader */
-        .upgrader-circle {
-            width: 200px; height: 200px; border-radius: 50%; margin: 20px auto; position: relative;
-            background: conic-gradient(var(--accent-green) 0deg, var(--accent-green) var(--chance-deg), rgba(255,255,255,0.1) var(--chance-deg));
-            display: flex; align-items: center; justify-content: center;
-        }
-        .upgrader-inner {
-            width: 160px; height: 160px; border-radius: 50%; background: #12121f;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .upgrader-arrow {
-            position: absolute; top: 50%; left: 50%; width: 4px; height: 90px; background: white;
-            transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg);
-            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99); z-index: 5;
-        }
-
-        /* Toast */
         .toast-container { position: fixed; top: calc(60px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 400px; pointer-events: none; }
         .toast {
             background: rgba(20, 20, 35, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
@@ -267,11 +193,9 @@
         }
         .toast.success { border-left: 4px solid var(--accent-green); }
         .toast.error { border-left: 4px solid var(--accent-red); }
-        .toast.info { border-left: 4px solid var(--accent-cyan); }
 
-        /* Live Feed */
         .live-feed {
-            position: fixed; bottom: calc(80px + env(safe-area-inset-bottom)); left: 0; right: 0;
+            position: fixed; bottom: calc(65px + env(safe-area-inset-bottom)); left: 0; right: 0;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); padding: 8px 0;
             overflow: hidden; white-space: nowrap; border-top: 1px solid var(--glass-border); z-index: 90;
         }
@@ -280,9 +204,6 @@
         .feed-item { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
         .feed-item .win { color: var(--accent-gold); font-weight: 700; }
 
-        /* Утилиты */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
         .mt-2 { margin-top: 8px; }
         .mt-4 { margin-top: 16px; }
         .flex { display: flex; }
@@ -293,7 +214,6 @@
 </head>
 <body>
 
-    <!-- Верхняя панель -->
     <div class="top-bar">
         <div class="user-info">
             <div class="avatar" id="userAvatar">👤</div>
@@ -304,22 +224,17 @@
         </div>
         <div class="balance-box">
             <div class="balance">💰 <span id="balanceDisplay">10000</span></div>
-            <div class="claim-timer" id="claimTimer">До бонуса: 90с</div>
+            <div class="claim-timer" id="claimTimer">Бонус доступен</div>
             <div class="progress-bar"><div class="progress-fill" id="claimProgress"></div></div>
         </div>
     </div>
 
-    <!-- Контент -->
-    <div class="content" id="mainContent">
-        <!-- Динамически заполняется JS -->
-    </div>
+    <div class="content" id="mainContent"></div>
 
-    <!-- Live Feed -->
     <div class="live-feed">
         <div class="feed-track" id="liveFeedTrack"></div>
     </div>
 
-    <!-- Нижняя навигация -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="app.navigate('home')">
             <span class="nav-icon">🏠</span>
@@ -343,12 +258,10 @@
         </div>
     </div>
 
-    <!-- Модалки -->
     <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)app.closeModal()">
         <div class="modal-content" id="modalContent"></div>
     </div>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
@@ -356,5 +269,115 @@
         // ДАННЫЕ И КОНФИГУРАЦИЯ
         // ==========================================
         const SKINS = [
-            // Common (12)
-            {id:1, name:"Ржавый нож", rarity:"common", price:100, 
+            {id:1, name:"Ржавый нож", rarity:"common", price:100, icon:"🔪"},
+            {id:2, name:"Деревянный щит", rarity:"common", price:150, icon:"🛡️"},
+            {id:3, name:"Простой шлем", rarity:"common", price:200, icon:"🪖"},
+            {id:4, name:"Стальной клинок", rarity:"rare", price:500, icon:"⚔️"},
+            {id:5, name:"Дробовик «Гром»", rarity:"rare", price:750, icon:"🔫"},
+            {id:6, name:"Плазменный пистолет", rarity:"rare", price:1000, icon:"🔫"},
+            {id:7, name:"Кибер-винтовка", rarity:"epic", price:2500, icon:"🎯"},
+            {id:8, name:"Неоновый меч", rarity:"epic", price:4000, icon:"🗡️"},
+            {id:9, name:"Золотой АК-47", rarity:"legendary", price:10000, icon:"🔱"},
+            {id:10, name:"Драконий когтевой нож", rarity:"legendary", price:25000, icon:"🐉"},
+            {id:11, name:"Корона Неонового Лорда", rarity:"mythic", price:100000, icon:"👑"}
+        ];
+
+        const CASES = [
+            {id:'starter', name:'Новичок', price:250, icon:'📦', skins:[1,2,3,4]},
+            {id:'advanced', name:'Оружейный', price:1000, icon:'💼', skins:[3,4,5,6,7]},
+            {id:'elite', name:'Элитный', price:5000, icon:'🧰', skins:[6,7,8,9]},
+            {id:'legend', name:'Легендарный', price:20000, icon:'👑', skins:[8,9,10,11]}
+        ];
+
+        // ==========================================
+        // СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+        // ==========================================
+        let state = {
+            balance: 10000,
+            xp: 0,
+            level: 1,
+            inventory: [],
+            stats: { casesOpened: 0, gamesPlayed: 0, totalWon: 0 },
+            lastClaimTime: 0
+        };
+
+        const CLAIM_INTERVAL = 90; // секунды
+
+        // ==========================================
+        // ПРИЛОЖЕНИЕ (ЯДРО)
+        // ==========================================
+        const app = {
+            tg: window.Telegram?.WebApp,
+            
+            init() {
+                if(this.tg) {
+                    this.tg.ready();
+                    this.tg.expand();
+                    if(this.tg.initDataUnsafe?.user) {
+                        document.getElementById('userName').innerText = this.tg.initDataUnsafe.user.first_name;
+                    }
+                }
+                this.loadState();
+                this.updateUI();
+                this.startBonusTimer();
+                this.initLiveFeed();
+                this.navigate('home');
+            },
+
+            saveState() {
+                localStorage.setItem('neon_casino_state', JSON.stringify(state));
+            },
+
+            loadState() {
+                const saved = localStorage.getItem('neon_casino_state');
+                if(saved) {
+                    try {
+                        state = { ...state, ...JSON.parse(saved) };
+                    } catch(e) { console.error(e); }
+                }
+            },
+
+            updateUI() {
+                document.getElementById('balanceDisplay').innerText = state.balance.toLocaleString();
+                document.getElementById('userLevel').innerText = state.level;
+                this.saveState();
+            },
+
+            addXP(amount) {
+                state.xp += amount;
+                const nextLevel = Math.floor(state.xp / 500) + 1;
+                if(nextLevel > state.level) {
+                    state.level = nextLevel;
+                    this.showToast(`Уровень повышен до ${state.level}! 🎉`, 'success');
+                }
+                this.updateUI();
+            },
+
+            showToast(msg, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerText = msg;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            },
+
+            navigate(tab) {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const navIndex = ['home', 'cases', 'games', 'inventory', 'profile'].indexOf(tab);
+                if(navIndex !== -1) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
+
+                const content = document.getElementById('mainContent');
+                content.innerHTML = '';
+
+                switch(tab) {
+                    case 'home': this.renderHome(content); break;
+                    case 'cases': this.renderCases(content); break;
+                    case 'games': this.renderGames(content); break;
+                    case 'inventory': this.renderInventory(content); break;
+                    case 'profile': this.renderProfile(content); break;
+                }
+            },
+
+            openModal(html) {
+                document.getElementById('modalContent').innerH
