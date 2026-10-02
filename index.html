@@ -1,165 +1,319 @@
-<script>
-    // Инициализация Telegram Web App
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
-    // Получаем данные пользователя (для отображения, проверка подлинности должна быть на бэкенде)
-    const user = tg.initDataUnsafe?.user;
-    
-    // Баланс (в реальном приложении должен загружаться с сервера при старте)
-    let balance = 1000; 
-
-    // Элементы DOM
-    const balanceEl = document.getElementById('balance');
-    const resultEl = document.getElementById('result');
-    const betInput = document.getElementById('betAmount'); // Опциональный инпут ставки
-
-    // Безопасное получение суммы ставки
-    function getBetAmount(defaultBet) {
-        if (betInput) {
-            const val = parseInt(betInput.value);
-            if (!isNaN(val) && val > 0) return val;
-        }
-        return defaultBet;
-    }
-
-    function updateBalance() {
-        if (balanceEl) {
-            balanceEl.textContent = balance;
-        }
-        // Легкая тактильная отдача при изменении баланса
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred('light');
-        }
-    }
-
-    function showResult(text, isWin) {
-        if (!resultEl) return;
-        resultEl.textContent = text;
-        resultEl.className = 'result ' + (isWin ? 'win' : 'lose');
-        
-        // Тактильная отдача: успех или ошибка
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.notificationOccurred(isWin ? 'success' : 'error');
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram Casino</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        setTimeout(() => {
-            resultEl.className = 'result';
-        }, 3000);
-    }
-
-    function playCoinflip() {
-        const bet = getBetAmount(50);
-        if (balance < bet) {
-            showResult('❌ Недостаточно монет!', false);
-            return;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--tg-theme-text-color, #fff);
+            overflow-x: hidden;
         }
 
-        balance -= bet;
-        updateBalance();
+        .container {
+            background: var(--tg-theme-secondary-bg-color, rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-        // Имитация задержки для реалистичности (можно заменить на CSS-анимацию)
-        setTimeout(() => {
-            // Примечание: в реальном UX выбор "орёл/решка" должен делать пользователь до нажатия
-            const result = Math.random() < 0.5 ? 'орёл' : 'решка';
-            const choice = Math.random() < 0.5 ? 'орёл' : 'решка'; 
-            
-            if (result === choice) {
-                const win = bet * 2;
-                balance += win;
-                showResult(`🎉 Выпало: ${result}\nТы выиграл +${win} 🪙!`, true);
-            } else {
-                showResult(`😢 Выпало: ${result}\nТы проиграл ${bet} 🪙`, false);
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 26px;
+            color: var(--tg-theme-text-color, #fff);
+        }
+
+        .balance {
+            background: var(--tg-theme-bg-color, rgba(255, 255, 255, 0.2));
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--tg-theme-text-color, #fff);
+            transition: transform 0.2s;
+        }
+
+        .balance.pulse {
+            animation: pulse 0.4s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .bet-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .bet-section label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .bet-input {
+            width: 120px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .games {
+            display: grid;
+            gap: 12px;
+        }
+
+        .game-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+            font-family: inherit;
+        }
+
+        .game-btn:hover { transform: translateY(-2px); }
+        .game-btn:active { transform: translateY(0); }
+        .game-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 16px;
+            display: none;
+            white-space: pre-line;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result.win {
+            background: rgba(76, 175, 80, 0.3);
+            display: block;
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .result.lose {
+            background: rgba(244, 67, 54, 0.3);
+            display: block;
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+
+        .user-info {
+            text-align: center;
+            font-size: 13px;
+            opacity: 0.7;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎰 Telegram Casino</h1>
+        <div class="user-info" id="userInfo"></div>
+
+        <div class="balance" id="balance">💰 <span id="balanceValue">1000</span> 🪙</div>
+
+        <div class="bet-section">
+            <label>Ставка:</label>
+            <input type="number" id="betAmount" class="bet-input" value="50" min="10" max="10000">
+        </div>
+
+        <div class="games">
+            <button class="game-btn" id="btnCoinflip" onclick="playCoinflip()">🪙 Орёл или Решка (x2)</button>
+            <button class="game-btn" id="btnSlots" onclick="playSlots()">🎰 Слоты (до x10)</button>
+            <button class="game-btn" id="btnRoulette" onclick="playRoulette()">🔴⚫ Рулетка (x2)</button>
+        </div>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // === ИНИЦИАЛИЗАЦИЯ TELEGRAM MINI APP ===
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            // Подстраиваем фон под тему Telegram
+            document.body.style.backgroundColor = tg.themeParams.bg_color || '';
+        }
+
+        // Отображаем имя пользователя
+        const user = tg?.initDataUnsafe?.user;
+        if (user) {
+            const name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+            document.getElementById('userInfo').textContent = `Привет, ${name}! 👋`;
+        }
+
+        // === СОСТОЯНИЕ ===
+        let balance = 1000; // В реальном приложении — с сервера
+        let isPlaying = false; // Защита от двойных кликов
+
+        // === УТИЛИТЫ ===
+        const $ = id => document.getElementById(id);
+
+        function getBet() {
+            const val = parseInt($('betAmount').value);
+            return isNaN(val) || val < 10 ? 10 : val;
+        }
+
+        function updateBalance() {
+            $('balanceValue').textContent = balance;
+            const bal = $('balance');
+            bal.classList.remove('pulse');
+            void bal.offsetWidth; // перезапуск анимации
+            bal.classList.add('pulse');
+        }
+
+        function showResult(text, isWin) {
+            const r = $('result');
+            r.textContent = text;
+            r.className = 'result ' + (isWin ? 'win' : 'lose');
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred(isWin ? 'success' : 'error');
             }
+            setTimeout(() => { r.className = 'result'; }, 3500);
+        }
+
+        function vibrate(type = 'light') {
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred(type);
+        }
+
+        function setButtonsDisabled(disabled) {
+            $('btnCoinflip').disabled = disabled;
+            $('btnSlots').disabled = disabled;
+            $('btnRoulette').disabled = disabled;
+        }
+
+        function playGame(logicFn, delay = 600) {
+            if (isPlaying) return;
+            const bet = getBet();
+            if (balance < bet) {
+                showResult('❌ Недостаточно монет!', false);
+                vibrate('heavy');
+                return;
+            }
+            isPlaying = true;
+            setButtonsDisabled(true);
+            balance -= bet;
             updateBalance();
-            
-            // Отправка результата боту для сохранения в БД (раскомментировать при наличии бэкенда)
-            // sendToBot({ game: 'coinflip', bet: bet, result: result, isWin: result === choice });
-        }, 600);
-    }
+            vibrate('light');
 
-    function playSlots() {
-        const bet = getBetAmount(100);
-        if (balance < bet) {
-            showResult('❌ Недостаточно монет!', false);
-            return;
+            setTimeout(() => {
+                logicFn(bet);
+                isPlaying = false;
+                setButtonsDisabled(false);
+            }, delay);
         }
 
-        balance -= bet;
-        updateBalance();
-
-        setTimeout(() => {
-            const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
-            const reels = [
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)]
-            ];
-
-            let win = 0;
-            let message = `🎰 ${reels.join(' | ')}\n`;
-
-            if (reels[0] === reels[1] && reels[1] === reels[2]) {
-                win = bet * 10; // Джекпот x10 (соответствует названию кнопки)
-                message += `ДЖЕКПОТ! +${win} 🪙`;
-            } else if (reels[0] === reels[1] || reels[1] === reels[2] || reels[0] === reels[2]) {
-                win = Math.floor(bet * 1.5); // Небольшой выигрыш за 2 совпадения
-                message += `Два совпадения! Выигрыш +${win} 🪙`;
-            } else {
-                message += `Нет совпадений 😢`;
-            }
-
-            if (win > 0) {
-                balance += win;
-                showResult(message, true);
-            } else {
-                showResult(message, false);
-            }
-            updateBalance();
-            
-            // sendToBot({ game: 'slots', bet: bet, reels: reels, win: win });
-        }, 800);
-    }
-
-    function playRoulette() {
-        const bet = getBetAmount(75);
-        if (balance < bet) {
-            showResult('❌ Недостаточно монет!', false);
-            return;
+        // === ИГРЫ ===
+        function playCoinflip() {
+            playGame((bet) => {
+                const result = Math.random() < 0.5 ? 'орёл' : 'решка';
+                const choice = Math.random() < 0.5 ? 'орёл' : 'решка';
+                if (result === choice) {
+                    const win = bet * 2;
+                    balance += win;
+                    showResult(`🎉 Выпало: ${result}\nТы выиграл +${win} 🪙!`, true);
+                } else {
+                    showResult(`😢 Выпало: ${result}\nТы проиграл ${bet} 🪙`, false);
+                }
+                updateBalance();
+            });
         }
 
-        balance -= bet;
-        updateBalance();
-
-        setTimeout(() => {
-            const result = Math.random() < 0.5 ? 'red' : 'black';
-            const choice = Math.random() < 0.5 ? 'red' : 'black'; // Должно выбираться пользователем
-            
-            const colorEmoji = {red: '🔴', black: '⚫'};
-            const colorName = {red: 'Красное', black: 'Чёрное'};
-
-            if (result === choice) {
-                const win = bet * 2;
-                balance += win;
-                showResult(`🎲 Выпало ${colorEmoji[result]} ${colorName[result]}\nТы выиграл +${win} 🪙!`, true);
-            } else {
-                showResult(`🎲 Выпало ${colorEmoji[result]} ${colorName[result]}\nТы проиграл ${bet} 🪙`, false);
-            }
-            updateBalance();
-            
-            // sendToBot({ game: 'roulette', bet: bet, result: result, isWin: result === choice });
-        }, 600);
-    }
-
-    function sendToBot(data) {
-        if (tg.sendData) {
-            tg.sendData(JSON.stringify(data));
-        } else {
-            console.log('Данные для отправки боту:', data);
+        function playSlots() {
+            playGame((bet) => {
+                const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+                const reels = [
+                    symbols[Math.floor(Math.random() * symbols.length)],
+                    symbols[Math.floor(Math.random() * symbols.length)],
+                    symbols[Math.floor(Math.random() * symbols.length)]
+                ];
+                let win = 0;
+                let message = `🎰 ${reels.join(' | ')}\n`;
+                if (reels[0] === reels[1] && reels[1] === reels[2]) {
+                    win = bet * 10;
+                    message += `ДЖЕКПОТ! +${win} 🪙`;
+                } else if (reels[0] === reels[1] || reels[1] === reels[2] || reels[0] === reels[2]) {
+                    win = Math.floor(bet * 1.5);
+                    message += `Два совпадения! +${win} 🪙`;
+                } else {
+                    message += `Нет совпадений 😢`;
+                }
+                if (win > 0) balance += win;
+                showResult(message, win > 0);
+                updateBalance();
+            }, 900);
         }
-    }
 
-    // Опционально: сообщить боту о запуске приложения
-    // sendToBot({ action: 'app_ready', userId: user?.id });
-</script>
+        function playRoulette() {
+            playGame((bet) => {
+                const result = Math.random() < 0.5 ? 'red' : 'black';
+                const choice = Math.random() < 0.5 ? 'red' : 'black';
+                const emoji = { red: '🔴', black: '⚫' };
+                const name = { red: 'Красное', black: 'Чёрное' };
+                if (result === choice) {
+                    const win = bet * 2;
+                    balance += win;
+                    showResult(`🎲 Выпало ${emoji[result]} ${name[result]}\nТы выиграл +${win} 🪙!`, true);
+                } else {
+                    showResult(`🎲 Выпало ${emoji[result]} ${name[result]}\nТы проиграл ${bet} 🪙`, false);
+                }
+                updateBalance();
+            });
+        }
+
+        // Отправка данных боту (опционально)
+        function sendToBot(data) {
+            if (tg?.sendData) tg.sendData(JSON.stringify(data));
+        }
+    </script>
+</body>
+</html>
