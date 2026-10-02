@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Casino</title>
+  <!-- SDK Telegram Mini App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1c1c1e;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .slots {
+      display: flex;
+      font-size: 3.5rem;
+      background: #2c2c2e;
+      padding: 20px;
+      border-radius: 16px;
+      gap: 15px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      background-color: #f39c12;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🎰 Mini Casino</h2>
+
+  <div class="slots">
+    <span id="s1">🍒</span>
+    <span id="s2">🍋</span>
+    <span id="s3">7️⃣</span>
+  </div>
+
+  <button onclick="spin()">Крутить!</button>
+  <p id="result"></p>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Разворачивает Mini App на весь экран
+
+    const symbols = ['🍒', '🍋', '7️⃣', '🔔', '💎'];
+
+    function spin() {
+      const res1 = symbols[Math.floor(Math.random() * symbols.length)];
+      const res2 = symbols[Math.floor(Math.random() * symbols.length)];
+      const res3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+      document.getElementById('s1').innerText = res1;
+      document.getElementById('s2').innerText = res2;
+      document.getElementById('s3').innerText = res3;
+
+      const resultElement = document.getElementById('result');
+
+      if (res1 === res2 && res2 === res3) {
+        resultElement.innerText = '🎉 ДЖЕКПОТ!';
+        resultElement.style.color = '#2ecc71';
+      } else if (res1 === res2  res2 === res3  res1 === res3) {
+        resultElement.innerText = '✨ Небольшой выигрыш!';
+        resultElement.style.color = '#f1c40f';
+      } else {
+        resultElement.innerText = '❌ Не повезло, попробуй еще!';
+        resultElement.style.color = '#e74c3c';
+      }
+    }
+  </script>
+</body>
+</html>
