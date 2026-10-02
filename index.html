@@ -1,405 +1,634 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>NeonDrop Casino</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-:root{
-  --bg:#0a0a14;--accent-purple:#a855f7;--accent-cyan:#22d3ee;--accent-gold:#fbbf24;
-  --accent-red:#ef4444;--accent-green:#22c55e;
-  --glass:rgba(255,255,255,.05);--glass-border:rgba(255,255,255,.1);
-  --text:#fff;--text-muted:#94a3b8;
-  --r-common:#94a3b8;--r-rare:#3b82f6;--r-epic:#a855f7;--r-legend:#fbbf24;--r-mythic:#ef4444;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;
-  background:#0a0a14;background-image:linear-gradient(135deg,#1a0033 0%,#001a33 100%);
-  color:var(--text);min-height:100vh;overflow-x:hidden;
-  padding-bottom:calc(140px + env(safe-area-inset-bottom));}
-.glass{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid var(--glass-border);border-radius:16px}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes glow{0%,100%{box-shadow:0 0 5px var(--accent-cyan)}50%{box-shadow:0 0 20px var(--accent-cyan),0 0 40px var(--accent-purple)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes spinCoin{0%{transform:rotateY(0)}100%{transform:rotateY(1800deg)}}
-@keyframes popIn{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CS2 BullDrop Casino App</title>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    /* === CSS СТИЛИ === */
+    :root {
+      --bg-color: #0b0c10;
+      --card-bg: #151821;
+      --card-border: #262b3a;
+      --accent-orange: #ff5500;
+      --accent-red: #ff2a2a;
+      --neon-yellow: #ffb700;
+      --text-main: #ffffff;
+      --text-muted: #8e95a5;
+      
+      /* Цвета редкостей */
+      --rarity-common: #b0c3d9;
+      --rarity-uncommon: #5e98d9;
+      --rarity-rare: #4b69ff;
+      --rarity-mythical: #d32ce6;
+      --rarity-legendary: #eb4b4b;
+      --rarity-ancient: #e4ae39;
+      --rarity-immortal: #e41616;
+    }
 
-.btn{background:linear-gradient(135deg,var(--accent-purple),#7c3aed);color:#fff;border:none;
-  padding:12px 20px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;
-  transition:transform .15s;width:100%;font-family:inherit}
-.btn:active{transform:scale(.96)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-secondary{background:rgba(255,255,255,.1);border:1px solid var(--glass-border)}
-.btn-gold{background:linear-gradient(135deg,var(--accent-gold),#f59e0b);color:#000}
-.btn-green{background:linear-gradient(135deg,var(--accent-green),#16a34a)}
-.btn-red{background:linear-gradient(135deg,var(--accent-red),#dc2626)}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
 
-.top-bar{position:sticky;top:0;z-index:100;padding:12px 16px;
-  padding-top:calc(12px + env(safe-area-inset-top));
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(10,10,20,.85);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--glass-border)}
-.user-info{display:flex;align-items:center;gap:10px}
-.avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-purple);
-  display:flex;align-items:center;justify-content:center;font-size:20px;
-  border:2px solid var(--accent-cyan)}
-.balance-box{text-align:right}
-.balance{font-size:18px;font-weight:800;color:var(--accent-gold);
-  display:flex;align-items:center;gap:4px;justify-content:flex-end}
-.claim-timer{font-size:11px;color:var(--text-muted);margin-top:2px}
-.progress-bar{width:100px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;
-  margin-top:4px;overflow:hidden;margin-left:auto}
-.progress-fill{height:100%;background:var(--accent-cyan);width:0%;transition:width .3s linear}
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding-bottom: 70px;
+      padding-top: 65px;
+      overflow-x: hidden;
+    }
 
-.content{padding:16px;animation:slideUp .3s ease}
-.section-title{font-size:22px;font-weight:800;margin:0 0 16px;display:flex;align-items:center;gap:8px}
+    /* ШАПКА */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(21, 24, 33, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+      z-index: 1000;
+    }
 
-.cases-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.case-card{padding:16px;text-align:center;cursor:pointer;transition:transform .2s;position:relative}
-.case-card:active{transform:scale(.95)}
-.case-icon{font-size:48px;margin-bottom:8px;animation:float 3s ease-in-out infinite;display:block}
-.case-name{font-weight:700;font-size:14px;margin-bottom:4px}
-.case-price{font-weight:700;color:var(--accent-gold);font-size:16px}
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.games-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.game-card{padding:20px 12px;text-align:center;cursor:pointer;transition:transform .15s}
-.game-card:active{transform:scale(.95);background:rgba(255,255,255,.08)}
-.game-icon{font-size:34px;margin-bottom:6px;display:block}
-.game-name{font-size:13px;font-weight:700}
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid var(--accent-orange);
+      box-shadow: 0 0 10px rgba(255, 85, 0, 0.4);
+    }
 
-.inventory-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.skin-card{padding:8px;text-align:center;cursor:pointer;transition:transform .15s;
-  border:1px solid var(--glass-border);border-radius:12px}
-.skin-card:active{transform:scale(.95)}
-.skin-icon{font-size:30px;display:block;margin-bottom:2px}
-.skin-name{font-size:10px;font-weight:600;line-height:1.15;height:24px;overflow:hidden;margin-bottom:2px}
-.skin-price{font-size:11px;color:var(--accent-gold);font-weight:700}
-.r-common{border-color:var(--r-common);box-shadow:inset 0 0 8px rgba(148,163,184,.2)}
-.r-rare{border-color:var(--r-rare);box-shadow:inset 0 0 10px rgba(59,130,246,.25)}
-.r-epic{border-color:var(--r-epic);box-shadow:inset 0 0 12px rgba(168,85,247,.3)}
-.r-legend{border-color:var(--r-legend);box-shadow:inset 0 0 15px rgba(251,191,36,.35)}
-.r-mythic{border-color:var(--r-mythic);box-shadow:inset 0 0 20px rgba(239,68,68,.45);animation:glow 2s infinite}
+    .user-name {
+      font-size: 14px;
+      font-weight: 700;
+      max-width: 90px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-.stat-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--glass-border)}
-.stat-row:last-child{border-bottom:none}
-.stat-label{color:var(--text-muted);font-size:14px}
-.stat-value{font-weight:700;color:var(--accent-cyan)}
+    .stats-header {
+      display: flex;
+      gap: 12px;
+    }
 
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
-  background:rgba(10,10,20,.95);backdrop-filter:blur(20px);
-  border-top:1px solid var(--glass-border);
-  display:flex;justify-content:space-around;
-  padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;
-  color:var(--text-muted);font-size:10px;font-weight:600;cursor:pointer;
-  padding:6px 12px;border-radius:10px;transition:all .2s}
-.nav-item.active{color:var(--accent-cyan);background:rgba(34,211,238,.1)}
-.nav-icon{font-size:20px}
+    .stat-badge {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--card-border);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;
-  display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
-.modal-overlay.active{display:flex}
-.modal-content{background:#12121f;width:100%;max-height:90vh;border-radius:24px 24px 0 0;
-  padding:20px;overflow-y:auto;border-top:1px solid var(--glass-border);animation:slideUp .3s ease}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.modal-title{font-size:20px;font-weight:800}
-.close-btn{background:none;border:none;color:var(--text-muted);font-size:26px;cursor:pointer;line-height:1;padding:0}
+    .stat-badge.balance {
+      color: var(--neon-yellow);
+      border-color: rgba(255, 183, 0, 0.3);
+    }
 
-.roulette-container{width:100%;height:120px;background:rgba(0,0,0,.35);border-radius:12px;
-  position:relative;overflow:hidden;margin:16px 0;border:1px solid var(--glass-border)}
-.roulette-line{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--accent-gold);
-  transform:translateX(-50%);z-index:10;box-shadow:0 0 10px var(--accent-gold)}
-.roulette-strip{display:flex;height:100%;align-items:center;gap:6px;
-  position:absolute;left:0;top:0;will-change:transform}
-.roulette-item{width:90px;height:90px;border-radius:10px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;border:2px solid var(--glass-border);
-  background:rgba(255,255,255,.05);flex-shrink:0;font-size:28px}
-.roulette-item small{font-size:9px;margin-top:2px;font-weight:700}
+    .stat-badge.energy {
+      color: #00d2ff;
+      border-color: rgba(0, 210, 255, 0.3);
+    }
 
-.bet-controls{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap}
-.bet-input{flex:1;min-width:80px;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);
-  color:#fff;padding:10px;border-radius:10px;font-size:15px;font-weight:700;text-align:center;font-family:inherit}
-.bet-btn{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.1);
-  border:none;color:#fff;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit}
-.bet-btn:active{transform:scale(.95)}
+    /* BOTTOM NAV */
+    .navbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: rgba(21, 24, 33, 0.98);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+    }
 
-.mines-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
-.mine-cell{aspect-ratio:1;background:rgba(255,255,255,.08);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;
-  transition:all .15s;border:1px solid transparent}
-.mine-cell:active{transform:scale(.92)}
-.mine-cell.revealed{background:rgba(34,197,94,.15);border-color:var(--accent-green)}
-.mine-cell.bomb{background:rgba(239,68,68,.25);border-color:var(--accent-red)}
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+    }
 
-.coin-container{perspective:1000px;width:110px;height:110px;margin:16px auto}
-.coin{width:100%;height:100%;position:relative;transform-style:preserve-3d}
-.coin.spinning{animation:spinCoin 2s ease-out forwards}
-.coin-face{position:absolute;inset:0;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:44px;backface-visibility:hidden;
-  border:4px solid var(--accent-gold);background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-weight:900}
-.coin-tails{transform:rotateY(180deg);background:linear-gradient(135deg,#94a3b8,#64748b);
-  border-color:#cbd5e1;color:#fff}
+    .nav-item .icon { font-size: 20px; }
 
-.slots{display:flex;gap:8px;justify-content:center;margin:16px 0}
-.slot{width:70px;height:80px;background:rgba(0,0,0,.4);border:2px solid var(--glass-border);
-  border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;
-  overflow:hidden;position:relative}
-.slot.spin{animation:shake .1s infinite}
+    .nav-item.active {
+      color: var(--accent-orange);
+      transform: translateY(-2px);
+    }
 
-.toast-container{position:fixed;top:calc(70px + env(safe-area-inset-top));left:50%;
-  transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;
-  width:90%;max-width:400px;pointer-events:none}
-.toast{background:rgba(20,20,35,.95);backdrop-filter:blur(10px);
-  border:1px solid var(--glass-border);padding:12px 16px;border-radius:12px;
-  display:flex;align-items:center;gap:10px;animation:slideUp .3s ease;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:13px;font-weight:600}
-.toast.success{border-left:4px solid var(--accent-green)}
-.toast.error{border-left:4px solid var(--accent-red)}
-.toast.info{border-left:4px solid var(--accent-cyan)}
+    /* ЭКРАНЫ */
+    .screen {
+      display: none;
+      padding: 15px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
 
-.live-feed{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom));left:0;right:0;
-  background:rgba(0,0,0,.65);backdrop-filter:blur(6px);padding:6px 0;overflow:hidden;
-  white-space:nowrap;border-top:1px solid var(--glass-border);z-index:90}
-.feed-track{display:inline-flex;gap:24px;animation:scroll 30s linear infinite;padding-left:100%}
-@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
-.feed-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)}
-.feed-item .win{color:var(--accent-gold);font-weight:700}
-.feed-item .name{color:var(--accent-cyan);font-weight:600}
+    .screen.active { display: block; }
 
-.mt-2{margin-top:8px}.mt-4{margin-top:16px}.mb-2{margin-bottom:8px}
-.flex{display:flex}.gap-2{gap:8px}.justify-between{justify-content:space-between}
-.items-center{align-items:center}.text-center{text-align:center}
-.big-result{font-size:32px;font-weight:900;text-align:center;margin:12px 0;animation:popIn .4s}
-.hint{font-size:12px;color:var(--text-muted);text-align:center;margin:8px 0}
-</style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* КНОПКИ И ВВОД */
+    .btn {
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);
+      transition: transform 0.1s, filter 0.2s;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { filter: grayscale(1); opacity: 0.6; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: none;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    .input-field:focus { border-color: var(--accent-orange); }
+
+    /* ГЛАВНАЯ */
+    .hero-balance {
+      text-align: center;
+      padding: 25px 10px;
+      background: linear-gradient(180deg, rgba(255,85,0,0.1) 0%, rgba(0,0,0,0) 100%);
+      border-radius: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,85,0,0.2);
+    }
+
+    .hero-balance-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
+    .hero-balance-val { font-size: 36px; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 15px rgba(255,183,0,0.3); }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .quick-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quick-card::after {
+      content: ''; position: absolute; top:0; right:0; width:40px; height:40px;
+      background: radial-gradient(circle, rgba(255,85,0,0.2) 0%, transparent 70%);
+    }
+
+    .quick-card .icon { font-size: 28px; }
+    .quick-card .title { font-weight: bold; font-size: 15px; }
+    .quick-card .desc { font-size: 11px; color: var(--text-muted); }
+
+    /* КЛИКЕР */
+    .clicker-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .click-target {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #2a2e3d 0%, #151821 100%);
+      border: 4px solid var(--accent-orange);
+      box-shadow: 0 0 30px rgba(255, 85, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      cursor: pointer;
+      margin: 20px 0;
+      position: relative;
+      transition: transform 0.05s ease;
+    }
+
+    .click-target:active { transform: scale(0.93); }
+
+    .floating-text {
+      position: absolute;
+      color: var(--neon-yellow);
+      font-weight: 900;
+      font-size: 24px;
+      pointer-events: none;
+      animation: floatUp 0.8s forwards;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+    }
+
+    .upgrades-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .upgrade-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 12px 15px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ИГРЫ */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .game-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: border 0.2s;
+    }
+
+    .game-card:hover { border-color: var(--accent-orange); }
+    .game-card .g-icon { font-size: 36px; margin-bottom: 8px; }
+    .game-card .g-title { font-weight: bold; font-size: 14px; }
+
+    .game-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .bet-selector {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .bet-btn {
+      flex: 1;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* КЕЙСЫ И РУЛЕТКА */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .case-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .case-icon { font-size: 50px; margin-bottom: 5px; }
+
+    /* Анимация рулетки кейса */
+    .roulette-wrapper {
+      width: 100%;
+      height: 110px;
+      background: #000;
+      border: 2px solid var(--accent-orange);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+
+    .roulette-pointer {
+      position: absolute;
+      top: 0; bottom: 0; left: 50%;
+      width: 4px;
+      background: var(--accent-red);
+      z-index: 10;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px var(--accent-red);
+    }
+
+    .roulette-track {
+      display: flex;
+      position: absolute;
+      left: 0; top: 10px;
+      height: 90px;
+      transition: transform 4s cubic-bezier(0.1, 1, 0.1, 1);
+    }
+
+    .roulette-item {
+      width: 90px;
+      height: 90px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      margin: 0 4px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      border-bottom: 4px solid var(--rarity-common);
+      text-align: center;
+      padding: 2px;
+    }
+
+    /* ИНВЕНТАРЬ */
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .skin-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skin-card .rarity-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+    }
+
+    .skin-emoji { font-size: 32px; margin: 8px 0; }
+    .skin-title { font-size: 11px; font-weight: bold; text-align: center; }
+    .skin-price { font-size: 12px; color: var(--neon-yellow); margin: 4px 0; font-weight: bold; }
+
+    /* МИНЫ, ТАУЭР И СЛОТЫ GRID */
+    .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 10px 0; }
+    .mine-cell { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+    .tower-grid { display: flex; flex-direction: column-reverse; gap: 6px; margin: 10px 0; }
+    .tower-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .tower-cell { height: 35px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: bold; }
+
+    /* МОДАЛКА / УВЕДОМЛЕНИЯ */
+    .toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 85, 0, 0.9);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+  </style>
 </head>
 <body>
 
-<div class="top-bar">
-  <div class="user-info">
-    <div class="avatar" id="userAvatar">👤</div>
-    <div>
-      <div style="font-weight:700;font-size:14px" id="userName">Игрок</div>
-      <div style="font-size:11px;color:var(--accent-cyan)">Ур. <span id="userLevel">1</span> · XP <span id="userXP">0</span></div>
+  <!-- ШАПКА -->
+  <header class="header">
+    <div class="user-info" onclick="switchTab('profile')">
+      <div class="user-avatar" id="hdr-avatar">U</div>
+      <div class="user-name" id="hdr-username">User</div>
     </div>
-  </div>
-  <div class="balance-box">
-    <div class="balance">💰 <span id="balanceDisplay">10000</span></div>
-    <div class="claim-timer" id="claimTimer">Бонус готов</div>
-    <div class="progress-bar"><div class="progress-fill" id="claimProgress"></div></div>
-  </div>
-</div>
+    <div class="stats-header">
+      <div class="stat-badge balance">💵 <span id="hdr-balance">0</span></div>
+      <div class="stat-badge energy">⚡ <span id="hdr-energy">100/100</span></div>
+    </div>
+  </header>
 
-<div class="content" id="mainContent"></div>
+  <!-- УВЕДОМЛЕНИЕ -->
+  <div class="toast" id="toast">Сообщение</div>
 
-<div class="live-feed"><div class="feed-track" id="liveFeedTrack"></div></div>
+  <!-- 1. ГЛАВНАЯ -->
+  <section id="screen-main" class="screen active">
+    <div class="hero-balance">
+      <div class="hero-balance-title">Ваш баланс</div>
+      <div class="hero-balance-val" id="main-balance">0</div>
+      <button class="btn" id="btn-passive" style="margin-top: 15px;" onclick="claimPassive()">💰 Собрать доход (0)</button>
+    </div>
 
-<div class="bottom-nav">
-  <div class="nav-item active" data-tab="home"><span class="nav-icon">🏠</span><span>Главная</span></div>
-  <div class="nav-item" data-tab="cases"><span class="nav-icon">🎁</span><span>Кейсы</span></div>
-  <div class="nav-item" data-tab="games"><span class="nav-icon">🎮</span><span>Игры</span></div>
-  <div class="nav-item" data-tab="inventory"><span class="nav-icon">🎒</span><span>Инвентарь</span></div>
-  <div class="nav-item" data-tab="profile"><span class="nav-icon">📊</span><span>Профиль</span></div>
-</div>
+    <div class="quick-grid">
+      <div class="quick-card" onclick="switchTab('clicker')">
+        <div class="icon">👆</div>
+        <div class="title">Кликер</div>
+        <div class="desc">Жми и зарабатывай</div>
+      </div>
+      <div class="quick-card" onclick="switchTab('games')">
+        <div class="icon">🎮</div>
+        <div class="title">Игры</div>
+        <div class="desc">8 мини-игр CS2</div>
+      </div>
+      <div class="quick-card" onclick="switchTab('cases')">
+        <div class="icon">📦</div>
+        <div class="title">Кейсы</div>
+        <div class="desc">Испытай удачу</div>
+      </div>
+      <div class="quick-card" onclick="switchTab('upgrader')">
+        <div class="icon">⬆️</div>
+        <div class="title">Апгрейдер</div>
+        <div class="desc">Умножь скины</div>
+      </div>
+    </div>
+  </section>
 
-<div class="modal-overlay" id="modalOverlay"><div class="modal-content" id="modalContent"></div></div>
-<div class="toast-container" id="toastContainer"></div>
+  <!-- 2. КЛИКЕР -->
+  <section id="screen-clicker" class="screen">
+    <div class="clicker-container">
+      <div class="click-target" id="click-target" onclick="handleTap(event)">🎯</div>
+      <div style="font-size: 14px; color: var(--text-muted);">Сила клика: <b id="click-power-val" style="color:white">10</b></div>
 
-<script>
-/* ============================================================
-   ДАННЫЕ
-   ============================================================ */
-const SKINS = [
-  {id:1,  name:"Ржавый нож",         rarity:"common",  price:100,   icon:"🔪"},
-  {id:2,  name:"Деревянный щит",     rarity:"common",  price:150,   icon:"🛡️"},
-  {id:3,  name:"Простой шлем",       rarity:"common",  price:200,   icon:"🪖"},
-  {id:4,  name:"Кожаные перчатки",   rarity:"common",  price:180,   icon:"🧤"},
-  {id:5,  name:"Стальной клинок",    rarity:"rare",    price:600,   icon:"⚔️"},
-  {id:6,  name:"Дробовик «Гром»",    rarity:"rare",    price:800,   icon:"🔫"},
-  {id:7,  name:"Неоновый пистолет",  rarity:"rare",    price:1000,  icon:"💥"},
-  {id:8,  name:"Кибер-винтовка",     rarity:"epic",    price:2500,  icon:"🎯"},
-  {id:9,  name:"Плазменный меч",     rarity:"epic",    price:4000,  icon:"🗡️"},
-  {id:10, name:"Золотой АК-47",      rarity:"legend",  price:10000, icon:"🔱"},
-  {id:11, name:"Драконий нож",       rarity:"legend",  price:25000, icon:"🐉"},
-  {id:12, name:"Корона Лорда",       rarity:"mythic",  price:100000,icon:"👑"}
-];
-const RARITY_NAME = {common:"Обычный",rare:"Редкий",epic:"Эпический",legend:"Легендарный",mythic:"Мифический"};
-const RARITY_CLASS = {common:"r-common",rare:"r-rare",epic:"r-epic",legend:"r-legend",mythic:"r-mythic"};
-const RARITY_WEIGHT = {common:60, rare:25, epic:10, legend:4, mythic:1};
+      <div class="upgrades-list">
+        <div class="upgrade-card">
+          <div>
+            <div style="font-weight: bold;">💪 Улучшить клик (+5)</div>
+            <div style="font-size: 12px; color: var(--neon-yellow);" id="up-click-cost">1,000 монет</div>
+          </div>
+          <button class="btn" style="width: auto;" onclick="buyClickUpgrade()">Прокачать</button>
+        </div>
+        <div class="upgrade-card">
+          <div>
+            <div style="font-weight: bold;">⚡ Макс. Энергия (+10)</div>
+            <div style="font-size: 12px; color: var(--neon-yellow);" id="up-energy-cost">500 монет</div>
+          </div>
+          <button class="btn" style="width: auto;" onclick="buyEnergyUpgrade()">Прокачать</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-const CASES = [
-  {id:'starter', name:'Новичок',    price:250,   icon:'📦', skins:[1,2,3,4,5]},
-  {id:'gun',     name:'Оружейный',  price:1000,  icon:'💼', skins:[4,5,6,7,8]},
-  {id:'elite',   name:'Элитный',    price:5000,  icon:'🧰', skins:[7,8,9,10]},
-  {id:'royal',   name:'Королевский',price:20000, icon:'👑', skins:[9,10,11,12]},
-];
+  <!-- 3. МИНИ-ИГРЫ -->
+  <section id="screen-games" class="screen">
+    <div class="games-grid" id="games-menu">
+      <div class="game-card" onclick="openGame('coinflip')"><div class="g-icon">🪙</div><div class="g-title">Coinflip</div></div>
+      <div class="game-card" onclick="openGame('dice')"><div class="g-icon">🎲</div><div class="g-title">Dice</div></div>
+      <div class="game-card" onclick="openGame('crash')"><div class="g-icon">💥</div><div class="g-title">Crash</div></div>
+      <div class="game-card" onclick="openGame('mines')"><div class="g-icon">💣</div><div class="g-title">Mines</div></div>
+      <div class="game-card" onclick="openGame('roulette')"><div class="g-icon">🎡</div><div class="g-title">Рулетка</div></div>
+      <div class="game-card" onclick="openGame('tower')"><div class="g-icon">🏰</div><div class="g-title">Tower</div></div>
+      <div class="game-card" onclick="openGame('slots')"><div class="g-icon">🎰</div><div class="g-title">Slots</div></div>
+      <div class="game-card" onclick="openGame('blackjack')"><div class="g-icon">🃏</div><div class="g-title">Blackjack</div></div>
+    </div>
 
-const GAMES = [
-  {id:'roulette', name:'Рулетка',  icon:'🎡'},
-  {id:'mines',    name:'Мины',     icon:'💣'},
-  {id:'coin',     name:'Монетка',  icon:'🪙'},
-  {id:'dice',     name:'Кубик',    icon:'🎲'},
-  {id:'slots',    name:'Слоты',    icon:'🎰'},
-  {id:'darts',    name:'Дартс',    icon:'🎯'},
-];
+    <!-- Контейнер выбранной игры -->
+    <div id="game-container" style="display: none;">
+      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="closeGame()">⬅️️ Назад к играм</button>
+      <div class="game-box" id="game-content"></div>
+    </div>
+  </section>
 
-const CLAIM_INTERVAL = 90; // сек
-const CLAIM_AMOUNT   = 1500;
-const MIN_BET        = 10;
+  <!-- 4. АПГРЕЙДЕР -->
+  <section id="screen-upgrader" class="screen">
+    <h3 style="margin-bottom: 10px;">Апгрейдер скинов</h3>
+    <div class="game-box">
+      <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+        <div style="flex:1; text-align: center;">
+          <div style="font-size: 12px; color: var(--text-muted);">Ставка</div>
+          <select id="upg-source" class="input-field" onchange="calcUpgradeChance()" style="margin-top:5px; font-size:12px;"></select>
+        </div>
+        <div style="font-size: 20px;">➔</div>
+        <div style="flex:1; text-align: center;">
+          <div style="font-size: 12px; color: var(--text-muted);">Цель</div>
+          <select id="upg-target" class="input-field" onchange="calcUpgradeChance()" style="margin-top:5px; font-size:12px;"></select>
+        </div>
+      </div>
 
-/* ============================================================
-   СОСТОЯНИЕ
-   ============================================================ */
-let state = {
-  balance: 10000,
-  xp: 0,
-  level: 1,
-  inventory: [],             // [{uid, skinId}]
-  stats: { gamesPlayed:0, casesOpened:0, totalWon:0, totalBet:0 },
-  lastClaimTime: 0,
-  muted: false
-};
+      <div style="text-align: center; margin: 15px 0;">
+        <div style="font-size: 14px;">Шанс успеха:</div>
+        <div style="font-size: 32px; font-weight: 900; color: var(--neon-yellow);" id="upg-chance">0%</div>
+      </div>
 
-function saveState(){
-  try{ localStorage.setItem('neon_casino_v2', JSON.stringify(state)); }catch(e){}
-}
-function loadState(){
-  try{
-    const raw = localStorage.getItem('neon_casino_v2');
-    if(raw) state = Object.assign(state, JSON.parse(raw));
-  }catch(e){}
-}
+      <button class="btn" id="btn-do-upgrade" onclick="runUpgrade()">🚀 АПГРЕЙД</button>
+    </div>
+  </section>
 
-/* ============================================================
-   УТИЛИТЫ
-   ============================================================ */
-const $  = id => document.getElementById(id);
-const rand = (a,b)=> Math.random()*(b-a)+a;
-const randInt = (a,b)=> Math.floor(rand(a,b+1));
-const uid = ()=> Date.now()+Math.floor(Math.random()*99999);
+  <!-- 5. ИНВЕНТАРЬ -->
+  <section id="screen-inventory" class="screen">
+    <h3 style="margin-bottom: 10px;">Мой Инвентарь (<span id="inv-count">0</span>)</h3>
+    <div class="inventory-grid" id="inventory-list"></div>
+  </section>
 
-function getSkin(id){ return SKINS.find(s=>s.id===id); }
-function getCase(id){ return CASES.find(c=>c.id===id); }
-function getInvItem(uidVal){ return state.inventory.find(i=>i.uid===uidVal); }
+  <!-- 6. КЕЙСЫ -->
+  <section id="screen-cases" class="screen">
+    <div class="cases-grid" id="cases-list"></div>
 
-function fmt(n){ return Math.floor(n).toLocaleString('ru-RU'); }
+    <div class="game-box" id="case-modal" style="display:none; margin-top:15px;">
+      <h3 id="case-modal-title">Открытие кейса</h3>
+      <div class="roulette-wrapper">
+        <div class="roulette-pointer"></div>
+        <div class="roulette-track" id="roulette-track"></div>
+      </div>
+      <button class="btn" id="btn-open-case" onclick="spinCase()">Открыть</button>
+      <button class="btn btn-secondary" style="margin-top: 5px;" onclick="closeCaseModal()">Закрыть</button>
+      
+      <div style="margin-top: 15px; font-size: 11px; color: var(--text-muted);">
+        <b>Шансы:</b> Common 55% | Uncommon 25% | Rare 12% | Mythical 5% | Legendary 2% | Ancient 0.9% | Immortal 0.1%
+      </div>
+    </div>
+  </section>
 
-/* ============================================================
-   TELEGRAM
-   ============================================================ */
-const tg = window.Telegram?.WebApp;
-if(tg){
-  try{ tg.ready(); tg.expand(); tg.setHeaderColor?.('#0a0a14'); tg.setBackgroundColor?.('#0a0a14'); }catch(e){}
-  const u = tg.initDataUnsafe?.user;
-  if(u){
-    $('userName').textContent = u.first_name || 'Игрок';
-    $('userAvatar').textContent = u.photo_url ? '👤' : (u.first_name?.[0]?.toUpperCase() || '👤');
-  }
-}
-function haptic(type='light'){
-  try{
-    if(type==='success') tg?.HapticFeedback?.notificationOccurred('success');
-    else if(type==='error') tg?.HapticFeedback?.notificationOccurred('error');
-    else tg?.HapticFeedback?.impactOccurred(type);
-  }catch(e){}
-}
+  <!-- 7. ПРОФИЛЬ -->
+  <section id="screen-profile" class="screen">
+    <div class="game-box" style="text-align: center;">
+      <div class="user-avatar" style="width: 70px; height: 70px; font-size: 28px; margin: 0 auto 10px;" id="prof-avatar">U</div>
+      <h2 id="prof-username">User</h2>
+      <div style="color: var(--neon-yellow); font-size: 18px; font-weight: bold; margin-top: 5px;" id="prof-balance">0 💵</div>
+    </div>
 
-/* ============================================================
-   UI ОБНОВЛЕНИЕ
-   ============================================================ */
-function updateUI(){
-  $('balanceDisplay').textContent = fmt(state.balance);
-  $('userLevel').textContent = state.level;
-  $('userXP').textContent = state.xp;
-  saveState();
-}
-
-function addXP(amount){
-  state.xp += amount;
-  const newLevel = Math.floor(state.xp/500)+1;
-  if(newLevel > state.level){
-    state.level = newLevel;
-    state.balance += 1000 * newLevel;
-    showToast(`🎉 Уровень ${newLevel}! Бонус +${fmt(1000*newLevel)}`, 'success');
-  }
-  updateUI();
-}
-
-function addBalance(n){
-  state.balance = Math.max(0, Math.round(state.balance + n));
-  updateUI();
-}
-
-function showToast(msg, type='info'){
-  const c = $('toastContainer');
-  const t = document.createElement('div');
-  t.className = 'toast '+type;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; }, 2400);
-  setTimeout(()=> t.remove(), 2800);
-}
-
-/* ============================================================
-   ЗВУК (Web Audio)
-   ============================================================ */
-let audioCtx;
-function beep(freq=440, dur=0.1, type='sine', vol=0.06){
-  if(state.muted) return;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type; o.frequency.value = freq;
-    g.gain.value = vol;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+dur);
-    o.stop(audioCtx.currentTime+dur);
-  }catch(e){}
-}
-function sndWin(){ beep(660,.1,'triangle'); setTimeout(()=>beep(880,.15,'triangle'),90); setTimeout(()=>beep(1320,.2,'triangle'),200); }
-function sndLose(){ beep(220,.15,'sawtooth'); setTimeout(()=>beep(160,.25,'sawtooth'),120); }
-function sndClick(){ beep(500,.05,'square',0.04); }
-
-/* ============================================================
-   МОДАЛКИ
-   ============================================================ */
-function openModal(html){
-  $('modalContent').innerHTML = html;
-  $('modalOverlay').classList.add('active');
-}
-function closeModal(){
-  $('modalOverlay').classList.remove('active');
-}
-$('modalOverlay').addEventListener('click', e=>{
-  if(e.target === $('modalOverlay')) closeModal();
-});
-
-/* ============================================================
-   НАВИГАЦИЯ
-   ============================================================ */
-let currentTab = 'home';
-document.querySelectorAll('.nav-item').forEach(el=>{
-  el.addEventListener('click', ()=>{
-    haptic('light'); sndClick();
-    navigate(el.dataset.tab);
-  });
-});
-
-function navigate(tab){
-  currentTab = tab;
-  document.querySelectorAll('.nav-item').forEach(el=>{
-    el.classList.toggle('active', el.dataset.tab === tab);
-  });
-  const c = $('mainContent');
-  c.innerHTML = '';
-  if(tab==='home') renderHome(c);
-  else if(tab==='cases') renderCases(c);
-  else if(tab==='games') renderGames(c);
-  else if(tab==='inventory') renderInventory(c);
-  else if(tab==='profile') renderProfile(c);
-  window.scroll
+    <div class="game-box" style="margin-top: 15px;">
+      <h4 style="margin-bottom: 10px; border-bottom: 1px solid var(--card-border); padding-bottom: 5px;">Статистика</h4>
+      <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Всего заработано:</span><b id="st-earned">0</b></div>
+      <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Макс. баланс:</span><b id="st-max">0</b></div>
+      <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Кейсов открыто:</span><b id="st-cases">0</b></div>
+      <div style="display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px;"><span>Игр сыграно:</span><b id="st-games">0</b></div>
+      <div style
