@@ -1,95 +1,256 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram Casino</title>
-  <!-- SDK Telegram Mini App -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #1c1c1e;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .slots {
-      display: flex;
-      font-size: 3.5rem;
-      background: #2c2c2e;
-      padding: 20px;
-      border-radius: 16px;
-      gap: 15px;
-      margin-bottom: 25px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    }
-    button {
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      background-color: #f39c12;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-    button:active {
-      transform: scale(0.95);
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 1.3rem;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
+import asyncio
+import logging
+import random
+from aiogram import Bot, Dispatcher, Router, F
+from aiogram.filters import Command
+from aiogram.types import Message, CallbackQuery
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-  <h2>🎰 Mini Casino</h2>
+# --- НАСТРОЙКИ ---
+BOT_TOKEN = "8691327822:AAFBuwwT1T7TnkfJs6wFekwUCPThYPTW_pQ"
+START_BALANCE = 1000
+DAILY_BONUS = 500
 
-  <div class="slots">
-    <span id="s1">🍒</span>
-    <span id="s2">🍋</span>
-    <span id="s3">7️⃣</span>
-  </div>
+logging.basicConfig(level=logging.INFO)
+router = Router()
 
-  <button onclick="spin()">Крутить!</button>
-  <p id="result"></p>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand(); // Разворачивает Mini App на весь экран
+# --- "БАЗА ДАННЫХ" (словарь в памяти) ---
+class UserManager:
+    def init(self):
+        self.users = {}
 
-    const symbols = ['🍒', '🍋', '7️⃣', '🔔', '💎'];
+    def get_user(self, user_id: int):
+        if user_id not in self.users:
+            self.users[user_id] = {
+                "balance": START_BALANCE,
+                "session": {"game": None, "bet": 0}
+            }
+        return self.users[user_id]
 
-    function spin() {
-      const res1 = symbols[Math.floor(Math.random() * symbols.length)];
-      const res2 = symbols[Math.floor(Math.random() * symbols.length)];
-      const res3 = symbols[Math.floor(Math.random() * symbols.length)];
+    def update_balance(self, user_id: int, amount: int):
+        self.users[user_id]["balance"] += amount
 
-      document.getElementById('s1').innerText = res1;
-      document.getElementById('s2').innerText = res2;
-      document.getElementById('s3').innerText = res3;
+db = UserManager()
 
-      const resultElement = document.getElementById('result');
 
-      if (res1 === res2 && res2 === res3) {
-        resultElement.innerText = '🎉 ДЖЕКПОТ!';
-        resultElement.style.color = '#2ecc71';
-      } else if (res1 === res2  res2 === res3  res1 === res3) {
-        resultElement.innerText = '✨ Небольшой выигрыш!';
-        resultElement.style.color = '#f1c40f';
-      } else {
-        resultElement.innerText = '❌ Не повезло, попробуй еще!';
-        resultElement.style.color = '#e74c3c';
-      }
-    }
-  </script>
-</body>
-</html>
+# --- КЛАВИАТУРЫ ---
+def main_menu_kb(balance: int):
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🎮 Играть", callback_data="menu_games")
+    builder.button(text="🎁 Ежедневный бонус", callback_data="menu_bonus")
+    builder.adjust(1)
+    return builder.as_markup()
+
+def games_menu_kb():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🪙 Орёл или Решка (x2)", callback_data="game_coinflip")
+    builder.button(text="🎰 Слоты (до x10)", callback_data="game_slots")
+    builder.button(text="🔴⚫ Рулетка (x2)", callback_data="game_roulette")
+    builder.button(text="🔙 Главное меню", callback_data="menu_main")
+    builder.adjust(1)
+    return builder.as_markup()
+
+def bet_menu_kb(game_name: str):
+    builder = InlineKeyboardBuilder()
+    builder.button(text="10 🪙", callback_data=f"bet_{game_name}_10")
+    builder.button(text="50 🪙", callback_data=f"bet_{game_name}_50")
+    builder.button(text="100 🪙", callback_data=f"bet_{game_name}_100")
+    builder.button(text="💎 ALL-IN", callback_data=f"bet_{game_name}_all")
+    builder.button(text="🔙 Назад", callback_data="menu_games")
+    builder.adjust(3, 1, 1)
+    return builder.as_markup()
+
+def coinflip_choice_kb():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🦅 Орёл", callback_data="play_coinflip_орел")
+    builder.button(text="🌿 Решка", callback_data="play_coinflip_решка")
+    builder.adjust(2)
+    return builder.as_markup()
+
+def roulette_choice_kb():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🔴 Красное", callback_data="play_roulette_red")
+    builder.button(text="⚫ Чёрное", callback_data="play_roulette_black")
+    builder.adjust(2)
+    return builder.as_markup()
+
+
+# --- /start ---
+@router.message(Command("start"))
+async def cmd_start(message: Message):
+    user = db.get_user(message.from_user.id)
+    text = (f"👋 Привет, <b>{message.from_user.full_name}</b>!\n\n"
+            f"Добро пожаловать в <b>Telegram Casino</b> 🎰\n"
+            f"💰 Твой баланс: <b>{user['balance']} 🪙</b>\n\n"
+            f"Выбери действие:")
+    await message.answer(text, reply_markup=main_menu_kb(user["balance"]), parse_mode="HTML")
+
+
+# --- МЕНЮ ---
+@router.callback_query(F.data == "menu_main")
+async def process_menu_main(callback: CallbackQuery):
+    user = db.get_user(callback.from_user.id)
+    text = f"💰 Баланс: <b>{user['balance']} 🪙</b>\n\nВыбери действие:"
+    await callback.message.edit_text(text, reply_markup=main_menu_kb(user["balance"]), parse_mode="HTML")
+    await callback.answer()
+
+@router.callback_query(F.data == "menu_games")
+async def process_menu_games(callback: CallbackQuery):
+    await callback.message.edit_text("🎮 <b>Выбери игру:</b>", reply_markup=games_menu_kb(), parse_mode="HTML")
+    await callback.answer()
+
+@router.callback_query(F.data == "menu_bonus")
+async def process_menu_bonus(callback: CallbackQuery):
+    db.update_balance(callback.from_user.id, DAILY_BONUS)
+    user = db.get_user(callback.from_user.id)
+    await callback.answer(f"🎁 +{DAILY_BONUS} 🪙! Баланс: {user['balance']}", show_alert=True)
+    # --- ВЫБОР ИГРЫ ---
+@router.callback_query(F.data.startswith("game_"))
+async def process_select_game(callback: CallbackQuery):
+    game = callback.data.split("_")[1]
+    user = db.get_user(callback.from_user.id)
+    user["session"]["game"] = game
+
+    if user["balance"] <= 0:
+        await callback.answer("❌ У тебя нет монет! Получи бонус в главном меню.", show_alert=True)
+        return
+
+    names = {"coinflip": "🪙 Орёл/Решка", "slots": "🎰 Слоты", "roulette": "🎲 Рулетка"}
+    text = f"<b>{names[game]}</b>\n💰 Баланс: <b>{user['balance']} 🪙</b>\n\nВыбери ставку:"
+    await callback.message.edit_text(text, reply_markup=bet_menu_kb(game), parse_mode="HTML")
+    await callback.answer()
+
+
+# --- ВЫБОР СТАВКИ ---
+@router.callback_query(F.data.startswith("bet_"))
+async def process_select_bet(callback: CallbackQuery):
+    _, game, bet_str = callback.data.split("_")
+    user = db.get_user(callback.from_user.id)
+
+    bet = user["balance"] if bet_str == "all" else int(bet_str)
+
+    if bet > user["balance"] or bet <= 0:
+        await callback.answer("❌ Недостаточно монет!", show_alert=True)
+        return
+
+    user["session"]["bet"] = bet
+    db.update_balance(callback.from_user.id, -bet)  # сразу списываем
+
+    if game == "coinflip":
+        await callback.message.edit_text(
+            f"🪙 Ставка: <b>{bet} 🪙</b>\n\nВыбирай сторону:",
+            reply_markup=coinflip_choice_kb(), parse_mode="HTML"
+        )
+    elif game == "slots":
+        await play_slots(callback, bet)
+    elif game == "roulette":
+        await callback.message.edit_text(
+            f"🎲 Ставка: <b>{bet} 🪙</b>\n\nСтавь на цвет:",
+            reply_markup=roulette_choice_kb(), parse_mode="HTML"
+        )
+    await callback.answer()
+
+
+# --- ЛОГИКА ИГР ---
+
+# 1) Орёл или Решка
+@router.callback_query(F.data.startswith("play_coinflip_"))
+async def play_coinflip(callback: CallbackQuery):
+    user = db.get_user(callback.from_user.id)
+    bet = user["session"]["bet"]
+    choice = callback.data.split("_")[2]
+
+    result = random.choice(["орел", "решка"])
+    win = choice == result
+
+    if win:
+        win_amount = bet * 2
+        db.update_balance(callback.from_user.id, win_amount)
+        text = f"🎉 Выпало: <b>{result.capitalize()}</b>\nТы выиграл <b>+{win_amount} 🪙</b>!"
+    else:
+        text = f"😢 Выпало: <b>{result.capitalize()}</b>\nТы проиграл <b>{bet} 🪙</b>."
+
+    user["session"]["bet"] = 0
+    user = db.get_user(callback.from_user.id)
+    await callback.message.edit_text(
+        text + f"\n\n💰 Баланс: <b>{user['balance']} 🪙</b>",
+        reply_markup=games_menu_kb(), parse_mode="HTML"
+    )
+    await callback.answer()
+
+
+# 2) Слоты
+async def play_slots(callback: CallbackQuery, bet: int):
+    symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣']
+    reels = [random.choice(symbols) for _ in range(3)]
+    result_str = f"| {' | '.join(reels)} |"
+
+    # Подсчёт выигрыша
+    if reels[0] == reels[1] == reels[2]:
+        if reels[0] == '7️⃣':
+            mult = 10
+        elif reels[0] == '💎':
+            mult = 7
+        else:
+            mult = 5
+        win_amount = bet * mult
+        status = f"🎉 ДЖЕКПОТ! x{mult}"
+    elif reels[0] == reels[1] or reels[1] == reels[2] or reels[0] == reels[2]:
+        win_amount = bet  # возврат ставки
+        status = "🔁 Два совпадения — ставка возвращена"
+    else:
+        win_amount = 0
+        status = "😢 Нет совпадений"
+
+    user = db.get_user(callback.from_user.id)
+    if win_amount > 0:
+        db.update_balance(callback.from_user.id, win_amount)
+
+    user = db.get_user(callback.from_user.id)
+    text = (f"🎰 <b>{result_str}</b>\n\n"
+            f"{status}\n"
+            f"{'Выиграно: <b>+' + str(win_amount) + ' 🪙</b>' if win_amount > 0 else 'Проиграно: <b>' + str(bet) + ' 🪙</b>'}\n\n"
+            f"💰 Баланс: <b>{user['balance']} 🪙</b>")
+
+    await callback.message.edit_text(text, reply_markup=games_menu_kb(), parse_mode="HTML")
+      # 3) Рулетка
+@router.callback_query(F.data.startswith("play_roulette_"))
+async def play_roulette(callback: CallbackQuery):
+    user = db.get_user(callback.from_user.id)
+    bet = user["session"]["bet"]
+    choice = callback.data.split("_")[2]  # red / black
+
+    # Упрощённая рулетка: 50/50
+    result = random.choice(["red", "black"])
+    win = choice == result
+
+    color_emoji = {"red": "🔴", "black": "⚫"}
+    color_name = {"red": "Красное", "black": "Чёрное"}
+
+    if win:
+        win_amount = bet * 2
+        db.update_balance(callback.from_user.id, win_amount)
+        status = f"🎉 Выпало {color_emoji[result]} <b>{color_name[result]}</b> — ты угадал!\nВыиграно: <b>+{win_amount} 🪙</b>"
+    else:
+        status = f"😢 Выпало {color_emoji[result]} <b>{color_name[result]}</b>\nПроиграно: <b>{bet} 🪙</b>"
+
+    user["session"]["bet"] = 0
+    user = db.get_user(callback.from_user.id)
+    await callback.message.edit_text(
+        status + f"\n\n💰 Баланс: <b>{user['balance']} 🪙</b>",
+        reply_markup=games_menu_kb(), parse_mode="HTML"
+    )
+    await callback.answer()
+
+
+# --- ЗАПУСК ---
+async def main():
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher()
+    dp.include_router(router)
+    print("✅ Бот запущен!")
+    await dp.start_polling(bot)
+
+if name == "main":
+    asyncio.run(main())
