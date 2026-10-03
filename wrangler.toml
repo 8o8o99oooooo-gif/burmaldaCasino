@@ -1,8 +1,0 @@
-name = "burmaldinka-leaderboard"
-main = "worker.js"
-compatibility_date = "2024-11-01"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "burmaldinka"
-database_id = "ВСТАВЬТЕ_ID_БАЗЫ"
