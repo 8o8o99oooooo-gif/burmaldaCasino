@@ -533,7 +533,78 @@
         .ix-card .ix-price { font-size: 0.66rem; color: var(--accent-color); font-weight: bold; }
         .ix-card.locked { filter: grayscale(1) brightness(0.55); opacity: 0.4; box-shadow: none; }
         .ix-st { position: absolute; top: 4px; right: 5px; font-size: 0.55rem; font-weight: 800; color: #000; background: #facc15; border-radius: 6px; padding: 1px 5px; }
-    </style>
+    
+/* ===== РЕДИЗАЙН: неоновое стекло ===== */
+:root{--neon:rgba(167,139,250,.42);--ease:cubic-bezier(.22,1,.36,1)}
+html{scroll-behavior:smooth}
+body{background:#09060f;position:relative}
+body::before{content:"";position:fixed;inset:-25%;z-index:-1;pointer-events:none;background:radial-gradient(38% 38% at 18% 18%,rgba(139,92,246,.34),transparent),radial-gradient(34% 34% at 82% 28%,rgba(56,189,248,.2),transparent),radial-gradient(40% 40% at 55% 88%,rgba(236,72,153,.2),transparent);animation:rd-aur 26s ease-in-out infinite alternate}
+@keyframes rd-aur{to{transform:translate3d(5%,4%,0) rotate(10deg) scale(1.12)}}
+button{transition:transform .25s var(--ease),box-shadow .3s var(--ease),filter .3s,opacity .25s}
+header,nav{background:rgba(14,9,24,.55);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
+header{border-bottom:1px solid var(--neon);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+nav{border-top:1px solid var(--neon)}
+.logo,h2,.case-view-title{background:linear-gradient(90deg,#fff,#c4b5fd 45%,#f0abfc 75%,#7dd3fc);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rd-flow 9s linear infinite alternate}
+@keyframes rd-flow{to{background-position:100% 0}}
+.case-card,.shop-card,.clicker-area,.case-contents,.game-card,.game-menu-card,.stat-card,.click-stat,.cb-box,.energy-bar-wrap,.upg-box{background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02)),rgba(20,13,34,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-color:var(--neon);box-shadow:0 8px 28px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.1),0 0 14px rgba(139,92,246,.12);transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s}
+.case-card:hover,.game-menu-card:hover,.stat-card:hover,.shop-card:hover{transform:translateY(-4px);border-color:#c4b5fd;box-shadow:0 14px 36px rgba(0,0,0,.45),0 0 0 1px rgba(196,181,253,.45),0 0 30px rgba(139,92,246,.55)}
+.case-card{position:relative;overflow:hidden;animation:rd-in .6s var(--ease) backwards}
+.case-card:nth-child(2n){animation-delay:.06s}.case-card:nth-child(3n){animation-delay:.12s}
+.case-card::after{content:"";position:absolute;top:-60%;left:-90%;width:55%;height:220%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.32),transparent);transform:rotate(16deg);transition:left .9s var(--ease);pointer-events:none}
+.case-card:hover::after{left:140%}
+@media(hover:none){.case-card::after{animation:rd-glare 5.5s ease-in-out infinite}.case-card:nth-child(2n)::after{animation-delay:1.4s}.case-card:nth-child(3n)::after{animation-delay:2.8s}}
+@keyframes rd-glare{0%,60%{left:-90%}100%{left:140%}}
+@keyframes rd-in{from{opacity:0;transform:translateY(16px) scale(.96)}}
+@keyframes rd-fade{from{opacity:0}}
+.btn:not(.btn-gray):not(.sell-drop-btn),.shop-btn{background:linear-gradient(110deg,#7c3aed,#c026d3 55%,#f472b6);background-size:220% 100%;color:#fff;border:1px solid rgba(255,255,255,.18);transition:transform .3s var(--ease),box-shadow .35s var(--ease),background-position .6s var(--ease),opacity .2s}
+.btn:hover:not(:disabled),.shop-btn:hover:not(:disabled),.opt-chip:hover{background-position:100% 0;transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,255,255,.28),0 0 28px rgba(217,70,239,.6),0 10px 24px rgba(124,58,237,.45)}
+.btn:active:not(:disabled),.shop-btn:active:not(:disabled){transform:scale(.97)}
+.nav-btn{transition:all .35s var(--ease)}.nav-btn:hover{transform:translateY(-3px);color:#e9d5ff}.nav-btn:active{transform:scale(.92)}
+.nav-btn.active{box-shadow:0 0 20px rgba(167,139,250,.4),inset 0 0 12px rgba(167,139,250,.15)}
+.tab-content.active{animation:rd-fade .4s ease backwards}
+:where(.tab-content.active)>*{animation:rd-in .55s var(--ease) backwards}
+.tab-content.active>:nth-child(2){animation-delay:.05s}.tab-content.active>:nth-child(3){animation-delay:.1s}.tab-content.active>:nth-child(4){animation-delay:.15s}.tab-content.active>:nth-child(n+5){animation-delay:.2s}
+.toast{background:rgba(24,16,40,.78);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-color:var(--neon);animation:rd-toast .4s var(--ease)}
+@keyframes rd-toast{from{opacity:0;transform:translate(-50%,-14px) scale(.94)}}
+.cb-fill,.energy-fill{transition:width .4s var(--ease)}
+.balance-value{display:inline-block}.balance-value.up{animation:rd-bu .5s var(--ease)}.balance-value.dn{animation:rd-bd .5s var(--ease)}
+@keyframes rd-bu{40%{transform:scale(1.2);color:#4ade80}}@keyframes rd-bd{40%{transform:scale(.92);color:#f87171}}
+/* полоса уровня */
+header{background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(14,9,24,.55);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
+.container{padding-top:68px}.toast{top:124px}
+#lvl{--rc:#94a3b8;position:absolute;left:10px;right:10px;top:calc(100% + 6px);display:flex;align-items:center;gap:12px;padding:6px 14px 6px 8px;border-radius:16px;border:1px solid color-mix(in srgb,var(--rc) 55%,transparent);background:linear-gradient(120deg,color-mix(in srgb,var(--rc) 18%,transparent),rgba(14,9,24,.6) 65%);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 18px color-mix(in srgb,var(--rc) 30%,transparent);transition:border-color .6s,box-shadow .6s}
+#lvl .bdg{position:relative;flex:none;width:34px;height:34px;display:grid;place-items:center;font-size:1.1rem;border-radius:50%;border:2px solid var(--rc);background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--rc) 40%,#1b1230),#0d0818);box-shadow:0 0 14px var(--rc)}
+#lvl .bdg b{position:absolute;right:-7px;bottom:-5px;min-width:20px;padding:1px 5px;border-radius:9px;background:var(--rc);color:#0b0614;font-size:.62rem;font-weight:800;text-align:center}
+#lvl .mid{flex:1;min-width:0}
+#lvl .top{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px;font-size:.72rem;font-weight:700;white-space:nowrap}
+#lvl .rn{color:var(--rc)}#lvl .nx{color:#c4b5fd;font-weight:600}#lvl.near .nx{color:#fde68a}
+#lvl .bar{height:12px;border-radius:12px;background:rgba(255,255,255,.07);box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+#lvl .bar i{position:relative;display:block;height:100%;width:0;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 45%,#7c3aed),var(--rc));box-shadow:0 0 12px var(--rc);transition:width .8s var(--ease)}
+#lvl .bar i::before{content:"";position:absolute;inset:0;background:linear-gradient(45deg,rgba(255,255,255,.22) 25%,transparent 25% 50%,rgba(255,255,255,.22) 50% 75%,transparent 75%);background-size:16px 16px;animation:rd-str .8s linear infinite}
+#lvl .bar i::after{content:"";position:absolute;inset:0 0 55%;background:linear-gradient(rgba(255,255,255,.4),transparent)}
+@keyframes rd-str{to{background-position:16px 0}}
+#lvl.near .bar i{animation:rd-pulse .9s ease-in-out infinite}
+@keyframes rd-pulse{50%{box-shadow:0 0 22px #fbbf24,0 0 4px #fff;filter:brightness(1.25)}}
+#lvl.up{animation:rd-up 1.1s var(--ease)}
+@keyframes rd-up{30%{transform:scale(1.03);box-shadow:0 0 36px var(--rc)}}
+#cmb.on{border-color:#f0abfc;box-shadow:0 0 22px rgba(217,70,239,.45)}
+#cmb .bar{position:relative}#cmb .bar::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.45)}
+@media(prefers-reduced-motion:reduce){#lvl .bar i,#lvl .bar i::before{animation:none!important}}
+/* кликер: комбо и криты */
+#cmb{display:flex;align-items:center;gap:12px;margin:14px 0 6px;padding:10px 14px;border-radius:14px;border:1px solid var(--neon);background:rgba(0,0,0,.28);text-align:left}
+#cmb .x{min-width:56px;font-size:1.8rem;font-weight:900;line-height:1;background:linear-gradient(180deg,#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+#cmb.pop .x{animation:rd-pop .35s var(--ease)}@keyframes rd-pop{40%{transform:scale(1.45)}}
+#cmb .m{flex:1;font-size:.72rem;color:var(--text-dim)}
+#cmb .bar{height:8px;border-radius:8px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0 4px}
+#cmb .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#a78bfa,#f472b6);box-shadow:0 0 10px rgba(167,139,250,.8);transition:width .12s linear}
+#cmb button{background:none;border:0;font-size:1.2rem;cursor:pointer}
+#click-btn{filter:hue-rotate(calc(var(--h,0)*50deg)) brightness(calc(1 + var(--h,0)*.3))}
+.click-float.crit{font-size:2.1rem;color:#fda4af;text-shadow:0 0 18px #fb7185,0 0 4px #fff}
+.container.shake{animation:rd-shake .45s}
+@keyframes rd-shake{10%,50%,90%{transform:translate(-6px,3px)}30%,70%{transform:translate(6px,-3px)}}
+@media(prefers-reduced-motion:reduce){body::before,.logo,h2,.case-card,.case-card::after,#lvl .bar i,.container.shake,:where(.tab-content.active),:where(.tab-content.active)>*{animation:none!important}}
+</style>
 </head>
 <body>
 
@@ -590,13 +661,12 @@
                     <button id="click-btn" class="click-btn" onclick="doClick(event)">КЛИК<br>+1 $</button>
                 </div>
                 <div class="click-stats">
-                    <div class="click-stat"><b id="total-clicks">0</b><span>всего кликов</span></div>
                     <div class="click-stat"><b id="clk-per">+1 $</b><span>за клик</span></div>
                     <div class="click-stat"><b id="clk-max">50</b><span>макс. энергия</span></div>
                     <div class="click-stat"><b id="clk-passive">+0 $</b><span>в секунду</span></div>
                 </div>
                 <div class="cb-box">
-                    <div class="cb-head"><span>🎁 Бонус: случайный скин до 100 000 $ за 300 кликов</span><b><span id="cb-count">0</span> / 300</b></div>
+                    <div class="cb-head"><span>🎁 Бонус: случайный скин до 80 000 $ за 300 кликов</span><b><span id="cb-count">0</span> / 300</b></div>
                     <div class="cb-bar"><div class="cb-fill" id="cb-fill"></div></div>
                     <div class="cb-sub" id="cb-sub"></div>
                 </div>
@@ -724,7 +794,7 @@
             <div id="fuse-result" class="upgrade-result"></div>
             <div class="upg-panel">
                 <div class="upg-panel-title">🎁 Возможные награды</div>
-                <div class="gm-sub" style="margin-bottom:8px;">Цена награды: от 30% до 250% от общей стоимости твоих 3 скинов.</div>
+                <div class="gm-sub" style="margin-bottom:8px;">Цена награды: от 30% до 250% от общей стоимости твоих 3 скинов. Шанс у всех наград одинаковый.</div>
                 <div id="fuse-outcomes" class="fo-list"></div>
             </div>
         </section>
@@ -1771,7 +1841,6 @@
             spawnClickFloat(ev);
             state.stats.clicks++;
             clickBonusStep();
-            $('total-clicks').textContent = fmt(state.stats.clicks);
             $('profile-clicks').textContent = fmt(state.stats.clicks);
             updateBalance();
             updateEnergyBar();
@@ -2470,20 +2539,12 @@
 
         function fuseTotal() { return fuse.slots.reduce((a, it) => a + (it ? it.price : 0), 0); }
 
-        // Награды: цена от 30% до 250% общей стоимости. Шансы подобраны так, чтобы средняя награда была ~92% от вложенного.
+        // Награды: цена от 30% до 250% общей стоимости. У всех наград одинаковый шанс.
         function fuseOutcomes(T) {
             if (T <= 0) return [];
             const c = getCatalog().filter(it => it.price >= T * 0.3 && it.price <= T * 2.5);
             if (!c.length) return [];
-            const target = T * 0.92;
-            const ev = p => { let sw = 0, sv = 0; c.forEach(it => { const w = Math.pow(it.price / T, -p); sw += w; sv += w * it.price; }); return sv / sw; };
-            let lo = -4, hi = 8, p;
-            if (ev(lo) <= target) p = lo;
-            else if (ev(hi) >= target) p = hi;
-            else { for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (ev(mid) > target) lo = mid; else hi = mid; } p = (lo + hi) / 2; }
-            const ws = c.map(it => Math.pow(it.price / T, -p));
-            const sum = ws.reduce((a, b) => a + b, 0);
-            return c.map((it, i) => ({ it, chance: ws[i] / sum * 100 })).sort((a, b) => b.it.price - a.it.price);
+            return c.map(it => ({ it, chance: 100 / c.length })).sort((a, b) => b.it.price - a.it.price);
         }
         function fusePickOutcome(outs) {
             let r = Math.random() * 100;
@@ -3042,7 +3103,7 @@
 
 
         // ================== БОНУС ЗА КЛИКИ (300 кликов) ==================
-        const CLICK_BONUS_MAX = 300, CLICK_BONUS_PRICE_CAP = 100000;
+        const CLICK_BONUS_MAX = 300, CLICK_BONUS_PRICE_CAP = 80000;
         let _skinNotifyTimer = null;
 
         function showSkinNotify(skin, title) {
@@ -3275,7 +3336,6 @@
         renderFuse();
         if (loaded) {
             $('profile-clicks').textContent = fmt(state.stats.clicks);
-            $('total-clicks').textContent = fmt(state.stats.clicks);
             $('cases-opened').textContent = state.stats.casesOpened;
             showToast('✅ Прогресс загружен!');
         }
@@ -3283,5 +3343,59 @@
         updateProfileStats();
         saveGame();
     </script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+/* звук: тон растёт вместе с комбо */
+let ac,mute=false;try{mute=localStorage.getItem('rd_mute')==='1'}catch(e){}
+function tone(f,d=.14,type='triangle',v=.11,when=0){if(mute)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();const t=ac.currentTime+when,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+const PENT=[0,2,4,7,9],hz=n=>261.63*Math.pow(2,(12*Math.floor(n/5)+PENT[n%5])/12);
+const chord=(base,steps,d,type,v,gap)=>steps.forEach((s,i)=>tone(base*Math.pow(2,s/12),d,type,v,i*gap));
+/* плавный счётчик баланса */
+let shown=state.balance,raf=0;
+window.updateBalance=function(){const el=$('balance'),to=state.balance,from=shown,t0=performance.now();cancelAnimationFrame(raf);
+ if(from!==to){el.classList.remove('up','dn');void el.offsetWidth;el.classList.add(to>from?'up':'dn')}
+ const step=()=>{const k=Math.min(1,(performance.now()-t0)/450);shown=from+(to-from)*(1-Math.pow(1-k,3));el.textContent=fmt(shown);if(k<1)raf=requestAnimationFrame(step)};step()};
+/* полоса уровня под шапкой */
+const RANKS=[[20,'👑','Бог','#fbbf24'],[10,'💻','Хакер','#34d399'],[5,'😎','Про','#60a5fa'],[1,'🌱','Нуб','#94a3b8']],rank=l=>RANKS.find(r=>l>=r[0]);
+const lv=document.createElement('div');lv.id='lvl';
+lv.innerHTML='<div class="bdg"><span id="lvl-e"></span><b id="lvl-l"></b></div><div class="mid"><div class="top"><span class="rn" id="lvl-r"></span><span class="nx" id="lvl-n"></span></div><div class="bar"><i id="lvl-f"></i></div></div>';
+document.querySelector('header').appendChild(lv);
+let lastL=null;
+function paintLvl(){const li=levelInfo(state.stats.totalEarned),r=rank(li.level),p=li.cur/li.need,left=fmt(li.need-li.cur)+' $';
+ lv.style.setProperty('--rc',r[3]);$('lvl-e').textContent=r[1];$('lvl-l').textContent=li.level;
+ $('lvl-r').textContent=r[2]+' · '+Math.floor(p*100)+'%';$('lvl-f').style.width=(p*100)+'%';
+ $('lvl-n').textContent=p>=.85?'🔥 ещё '+left+'!':'до ур. '+(li.level+1)+': '+left;
+ lv.classList.toggle('near',p>=.85);
+ if(lastL!==null&&li.level>lastL){lv.classList.remove('up');void lv.offsetWidth;lv.classList.add('up');
+  showToast(rank(lastL)!==r?r[1]+' Новое звание: '+r[2]+'!':'🎉 Уровень '+li.level);chord(392,[0,4,7,12],.3,'triangle',.1,.09)}
+ lastL=li.level}
+const _up=window.updateProfileStats;
+window.updateProfileStats=function(){_up.apply(this,arguments);paintLvl()};
+paintLvl();
+/* кликер: комбо до x5, криты 8% (×5) */
+let cmb=0,last=0,mx=1,on=false;const mult=()=>on?2:1;
+const box=document.createElement('div');box.id='cmb';
+box.innerHTML='<div class="x" id="cmb-x">x1</div><div class="m"><b>Комбо</b>: кликай быстрее, множитель до x2<div class="bar"><i id="cmb-f"></i></div>Крит: 8% шанс, награда ×2</div><button id="cmb-s" title="Звук"></button>';
+const st=document.querySelector('.click-stats');st.parentNode.insertBefore(box,st);
+const paintMute=()=>$('cmb-s').textContent=mute?'🔇':'🔊';paintMute();
+$('cmb-s').onclick=()=>{mute=!mute;try{localStorage.setItem('rd_mute',mute?'1':'0')}catch(e){}paintMute()};
+function paintCmb(){if(!on&&cmb>=5)on=true;else if(on&&cmb<3)on=false;box.classList.toggle('on',on);const m=mult();if(m!==mx){mx=m;$('cmb-x').textContent='x'+m;box.classList.remove('pop');void box.offsetWidth;box.classList.add('pop')}
+ $('cmb-f').style.width=Math.min(100,cmb/10*100)+'%';$('click-btn').style.setProperty('--h',m-1)}
+setInterval(()=>{if(cmb>0&&performance.now()-last>500){cmb=Math.max(0,cmb-.6);paintCmb()}},100);
+const _dc=window.doClick;
+window.doClick=function(ev){
+ const e0=clicker.energy;_dc.call(this,ev);if(clicker.energy>=e0)return;
+ const now=performance.now(),gap=now-last;last=now;
+ cmb=Math.min(10,cmb+(gap<350?1:gap<600?.5:0));paintCmb();
+ const m=mult(),crit=Math.random()<.08,base=clickValue(),total=base*m*(crit?2:1);
+ if(total>base)addMoney(total-base);
+ const f=$('click-wrap').lastElementChild;
+ if(f&&f.classList.contains('click-float')){f.textContent=(crit?'КРИТ! ':'')+'+'+fmt(total)+' $';f.classList.toggle('crit',crit)}
+ tone(hz(Math.floor(cmb)),.13);
+ if(crit){chord(523.25,[0,4,7,12],.35,'sawtooth',.05,.03);const c=document.querySelector('.container');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');setTimeout(()=>c.classList.remove('shake'),460);if(navigator.vibrate)navigator.vibrate(40)}
+ paintCmb()};
+})();
+</script>
 </body>
 </html>
