@@ -669,7 +669,60 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
 .inv-lock.on{opacity:1;background:linear-gradient(135deg,#f59e0b,#fbbf24)!important;border-color:#fde68a!important;box-shadow:0 0 12px rgba(251,191,36,.6)}
 .inv-card.locked{border-color:#fbbf24!important;box-shadow:0 0 0 1px rgba(251,191,36,.55),0 6px 16px rgba(0,0,0,.4)}
 .inv-btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.6)}
+/* ===== МОБИЛЬНАЯ НАВИГАЦИЯ: 4 крупные кнопки + «Ещё» ===== */
+.nav-more,#more-sheet{display:none}
+@media (max-width:700px){
+ body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+ nav{gap:3px;justify-content:stretch;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));touch-action:manipulation}
+ nav .nav-btn.nav-sub{display:none}
+ nav .nav-btn.nav-main,nav .nav-btn.nav-more{display:flex;flex:1 1 0;min-width:0;min-height:62px;padding:6px 2px;gap:4px;border-radius:16px;font-size:.76rem;line-height:1.1}
+ nav .nav-btn .nav-icon{font-size:1.7rem;line-height:1}
+ nav .nav-btn span:not(.nav-icon){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.7rem;letter-spacing:-.1px}
+ nav .nav-btn.active::before{content:"";position:absolute;top:-9px;left:24%;right:24%;height:3px;border-radius:0 0 4px 4px;background:var(--accent-color);box-shadow:0 0 10px var(--accent-color)}
+ nav .nav-btn.has-dot::after{top:6px;right:18%}
+ nav .nav-more .nav-chev{position:absolute;top:3px;left:20%;font-size:.7rem;line-height:1;color:var(--text-dim);pointer-events:none}
+ #more-sheet{display:block;position:fixed;inset:0;z-index:990;pointer-events:none;visibility:hidden;transition:visibility 0s .28s}
+ body.more-open #more-sheet{pointer-events:auto;visibility:visible;transition-delay:0s}
+ .ms-back{position:absolute;inset:0;background:rgba(5,3,10,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;transition:opacity .25s}
+ body.more-open .ms-back{opacity:1}
+ .ms-panel{position:absolute;left:0;right:0;bottom:var(--navh,80px);max-width:600px;margin:0 auto;padding:8px 14px 16px;border-radius:24px 24px 0 0;background:linear-gradient(180deg,#261b42,#171126);border:1px solid rgba(167,139,250,.35);border-bottom:0;box-shadow:0 -12px 40px rgba(0,0,0,.6);transform:translateY(40px);opacity:0;transition:transform .28s cubic-bezier(.2,.9,.3,1),opacity .2s}
+ body.more-open .ms-panel{transform:none;opacity:1}
+ .ms-grab{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);margin:2px auto 10px}
+ .ms-title{font-weight:800;color:#e9d5ff;margin:0 2px 10px;font-size:.95rem}
+ .ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .ms-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:100px;padding:14px;border-radius:18px;border:1px solid rgba(167,139,250,.28);background:linear-gradient(160deg,rgba(124,58,237,.24),rgba(30,20,52,.92));color:#fff;text-align:left;cursor:pointer;touch-action:manipulation}
+ .ms-tile:active{transform:scale(.96)}
+ .ms-tile .ms-ico{font-size:2.1rem;line-height:1.1}
+ .ms-tile b{font-size:1.02rem;margin-top:4px}
+ .ms-tile small{font-size:.72rem;color:var(--text-dim)}
+ .ms-tile.active{border-color:#c4b5fd;box-shadow:0 0 18px rgba(167,139,250,.5),inset 0 0 14px rgba(167,139,250,.15)}
+ .ms-tile.has-dot::after{content:"";position:absolute;top:12px;right:12px;width:11px;height:11px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444}
+}
+/* шапка не должна быть шире экрана телефона */
+@media (max-width:700px){
+ html{overflow-x:clip}
+ header{padding:10px 10px;gap:8px}
+ header .logo{flex:1 1 0;min-width:0;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ header>div:last-child{flex:0 1 auto;min-width:0;gap:6px!important}
+ header .balance-container{min-width:0;padding:6px 10px;font-size:.88rem;overflow:hidden;text-overflow:ellipsis}
+ header #mellstroy-timer{font-size:.74rem!important;padding:6px 8px}
+}
+
+/* ===== ЛИДЕРЫ ===== */
+.lb-chips{display:flex;gap:6px;margin:12px 0}
+.lb-chip{flex:1;padding:9px 4px;border-radius:10px;border:1px solid #232a36;background:var(--card-bg);color:var(--text-dim);font-weight:bold;font-size:.78rem;cursor:pointer}
+.lb-chip.active{color:var(--accent-color);border-color:var(--accent-color)}
+.lb-row{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;background:var(--card-bg);border:1px solid #232a36;border-radius:12px}
+.lb-row.me{border-color:var(--accent-color);background:rgba(167,139,250,.12)}
+.lb-rank{width:32px;text-align:center;font-weight:bold;color:var(--text-dim)}
+.lb-ava{width:36px;height:36px;border-radius:50%;background:var(--accent-pink);display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0}
+.lb-main{flex:1;min-width:0}
+.lb-name{font-weight:bold;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-sub{font-size:.72rem;color:var(--text-dim)}
+.lb-val{font-weight:bold;color:var(--accent-color);white-space:nowrap}
+.lb-note{text-align:center;color:var(--text-dim);font-size:.85rem;padding:14px}
 </style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -1173,6 +1226,20 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
             <div id="inventory-list" class="inventory-grid"></div>
         </section>
 
+        <!-- ЛИДЕРЫ -->
+        <section id="leaderboard-tab" class="tab-content">
+            <h2>🏆 Таблица лидеров</h2>
+            <div class="sub-dim" id="lb-total">Лучшие игроки</div>
+            <div class="lb-chips" id="lb-chips">
+                <button class="lb-chip active" data-s="earned">💎 Заработано</button>
+                <button class="lb-chip" data-s="cases">📦 Кейсы</button>
+                <button class="lb-chip" data-s="clicks">👆 Клики</button>
+            </div>
+            <div id="lb-me"></div>
+            <div id="lb-list"></div>
+            <button class="btn" id="lb-refresh" style="margin-top:10px;">🔄 Обновить</button>
+        </section>
+
         <!-- ПРОФИЛЬ -->
         <section id="profile-tab" class="tab-content">
             <h2>Профиль</h2>
@@ -1232,6 +1299,7 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
         <button class="nav-btn" onclick="openTab('games-tab', this)"><span class="nav-icon">🎮</span><span>Игры</span></button>
         <button class="nav-btn" onclick="openTab('inventory-tab', this)"><span class="nav-icon">🎒</span><span>Инвентарь</span></button>
         <button class="nav-btn" onclick="openTab('profile-tab', this)"><span class="nav-icon">👤</span><span>Профиль</span></button>
+        <button class="nav-btn" onclick="openTab('leaderboard-tab', this)"><span class="nav-icon">🏆</span><span>Лидеры</span></button>
     </nav>
 
     <div class="fuse-fx" id="fuse-fx"><div id="fuse-fx-stage"></div><div id="fuse-fx-big" style="display:none;"><div class="fx-title">🔮 ФЬЮЗ</div></div><div class="fx-result" id="fuse-fx-res"></div><div class="fx-hint" id="fuse-fx-hint">нажми, чтобы закрыть</div><div id="fuse-fx-flash"></div></div>
@@ -3805,6 +3873,121 @@ document.querySelectorAll('.cf-skin .cf-side').forEach(b=>b.onclick=()=>{if(cfBu
   else{$('coinflip-result').innerHTML=`<span style="color:var(--lose)">${name} — проигрыш. ${nmH(stake)} потерян</span>`;showToast('💀 Скин потерян')}
   renderInventory();saveGame()},1450)});
 renderInventory();
+})();
+</script>
+<script>
+/* мобильная навигация: главные вкладки внизу, остальные — в шторке «Ещё» */
+(()=>{
+const nav=document.querySelector('nav');if(!nav)return;
+const MAIN=['cases-tab','clicker-tab','games-tab','inventory-tab'];
+const INFO={'upgrader-tab':'Улучши скин','fuse-tab':'3 скина → 1','quests-tab':'Награды и кейсы','profile-tab':'Статистика и уровень','leaderboard-tab':'Топ игроков'};
+const btnBy={};
+nav.querySelectorAll('.nav-btn').forEach(b=>{
+ const m=(b.getAttribute('onclick')||'').match(/'([\w-]+-tab)'/);if(!m)return;
+ b.dataset.tab=m[1];btnBy[m[1]]=b;b.classList.add(MAIN.includes(m[1])?'nav-main':'nav-sub')});
+const ico=b=>b.querySelector('.nav-icon').textContent,lbl=b=>b.querySelector('span:not(.nav-icon)').textContent;
+const subs=Object.keys(btnBy).filter(id=>!MAIN.includes(id));
+const DEF='<i class="nav-chev">▴</i><span class="nav-icon">☰</span><span>Ещё</span>';
+const more=document.createElement('button');more.className='nav-btn nav-more';more.id='nav-more';
+more.setAttribute('aria-haspopup','true');more.innerHTML=DEF;nav.appendChild(more);
+const sheet=document.createElement('div');sheet.id='more-sheet';
+sheet.innerHTML='<div class="ms-back"></div><div class="ms-panel"><div class="ms-grab"></div><div class="ms-title">Разделы</div><div class="ms-grid">'+
+ subs.map(id=>`<button class="ms-tile" data-tab="${id}"><span class="ms-ico">${ico(btnBy[id])}</span><b>${lbl(btnBy[id])}</b><small>${INFO[id]||''}</small></button>`).join('')+'</div></div>';
+nav.after(sheet);
+const open=()=>{document.documentElement.style.setProperty('--navh',nav.offsetHeight+'px');document.body.classList.add('more-open')};
+const close=()=>document.body.classList.remove('more-open');
+more.addEventListener('click',()=>document.body.classList.contains('more-open')?close():open());
+sheet.querySelector('.ms-back').addEventListener('click',close);
+sheet.querySelectorAll('.ms-tile').forEach(t=>t.addEventListener('click',()=>{close();btnBy[t.dataset.tab].click()}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+window.addEventListener('resize',()=>{if(innerWidth>700)close()});
+let y0=null;const pn=sheet.querySelector('.ms-panel');
+pn.addEventListener('touchstart',e=>{y0=e.touches[0].clientY},{passive:true});
+pn.addEventListener('touchmove',e=>{if(y0!==null&&e.touches[0].clientY-y0>50){y0=null;close()}},{passive:true});
+nav.addEventListener('click',e=>{if(e.target.closest('.nav-btn')&&navigator.vibrate)try{navigator.vibrate(8)}catch(_){}});
+let last=null;
+function sync(){
+ const a=document.querySelector('.tab-content.active'),id=a&&a.id,b=id&&!MAIN.includes(id)?btnBy[id]:null;
+ more.classList.toggle('active',!!b);
+ more.innerHTML=b?`<i class="nav-chev">▴</i><span class="nav-icon">${ico(b)}</span><span>${lbl(b)}</span>`:DEF;
+ sheet.querySelectorAll('.ms-tile').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+ const q=document.getElementById('nav-quests'),has=!!(q&&q.classList.contains('has-dot'));
+ more.classList.toggle('has-dot',has);
+ const qt=sheet.querySelector('.ms-tile[data-tab="quests-tab"]');if(qt)qt.classList.toggle('has-dot',has);
+ if(id&&id!==last){if(last!==null)window.scrollTo({top:0,behavior:'instant'});last=id}
+}
+const _o=window.openTab;
+window.openTab=function(){const r=_o.apply(this,arguments);sync();return r};
+const q=document.getElementById('nav-quests');
+if(q)new MutationObserver(sync).observe(q,{attributes:true,attributeFilter:['class']});
+sync();
+})();
+</script>
+<script>
+/* ===== ТАБЛИЦА ЛИДЕРОВ ===== */
+(()=>{
+const API='https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev'; // <-- адрес вашего Worker
+const tg=window.Telegram&&Telegram.WebApp;
+if(tg){try{tg.ready();tg.expand()}catch(e){}}
+const initData=(tg&&tg.initData)||'';
+const tgUser=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
+let sort='earned',lastSent='',busy=false;
+const $l=id=>document.getElementById(id);
+const unit={earned:' $',cases:'',clicks:''};
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const post=(p,b)=>fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({initData},b)),keepalive:true}).then(r=>r.json());
+
+function send(){
+ if(!initData||API.includes('YOUR-WORKER'))return Promise.resolve();
+ const s=state.stats,p={earned:s.totalEarned,cases:s.casesOpened,clicks:s.clicks,level:levelInfo(s.totalEarned).level},k=JSON.stringify(p);
+ if(k===lastSent)return Promise.resolve();
+ lastSent=k;
+ return post('/api/score',p).catch(()=>{lastSent=''});
+}
+function row(r){
+ const d=el('div','lb-row'+(r.me?' me':''));
+ d.append(el('div','lb-rank',r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank));
+ d.append(el('div','lb-ava',(r.name||'?').charAt(0).toUpperCase()));
+ const m=el('div','lb-main');
+ m.append(el('div','lb-name',r.name+(r.me?' (ты)':'')),el('div','lb-sub','⭐ Ур. '+r.level+(r.username?' · @'+r.username:'')));
+ d.append(m,el('div','lb-val',fmt(r.value)+unit[sort]));
+ return d;
+}
+async function load(){
+ if(busy)return;busy=true;
+ const list=$l('lb-list'),me=$l('lb-me');
+ list.replaceChildren(el('div','lb-note','Загрузка…'));
+ try{
+  await send();
+  const j=await post('/api/top',{sort});
+  list.replaceChildren(...(j.top.length?j.top.map(row):[el('div','lb-note','Пока никого нет — стань первым!')]));
+  $l('lb-total').textContent='Игроков в рейтинге: '+fmt(j.total);
+  me.replaceChildren();
+  if(j.me&&!j.top.some(r=>r.me))me.append(row({rank:j.me.rank,name:tgUser.first_name||'Ты',level:j.me.level,value:j.me.value,me:true}));
+  else if(!initData)me.append(el('div','lb-note','Открой игру через Telegram, чтобы попасть в рейтинг'));
+ }catch(e){
+  list.replaceChildren(el('div','lb-note','Не удалось загрузить рейтинг. Проверь интернет и нажми «Обновить».'));
+ }
+ busy=false;
+}
+$l('lb-chips').addEventListener('click',e=>{
+ const b=e.target.closest('.lb-chip');if(!b||busy)return;
+ sort=b.dataset.s;
+ $l('lb-chips').querySelectorAll('.lb-chip').forEach(x=>x.classList.toggle('active',x===b));
+ load();
+});
+$l('lb-refresh').onclick=load;
+
+const _open=window.openTab;
+window.openTab=function(id){
+ const r=_open.apply(this,arguments);
+ if(id==='leaderboard-tab'&&$l(id).classList.contains('active'))load();
+ return r;
+};
+setTimeout(send,3000);
+setInterval(send,30000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)send()});
+window.addEventListener('pagehide',send);
 })();
 </script>
 </body>
