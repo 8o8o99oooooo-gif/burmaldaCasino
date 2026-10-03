@@ -721,6 +721,14 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
 .lb-sub{font-size:.72rem;color:var(--text-dim)}
 .lb-val{font-weight:bold;color:var(--accent-color);white-space:nowrap}
 .lb-note{text-align:center;color:var(--text-dim);font-size:.85rem;padding:14px}
+.lb-admin{background:var(--card-bg);border:1px dashed var(--accent-color);border-radius:12px;padding:12px;margin-bottom:12px}
+.lb-admin-t{font-weight:bold;font-size:.9rem;margin-bottom:8px;color:var(--accent-color)}
+.lb-a-btns{display:flex;gap:6px}
+.ad-in{width:100%;margin:6px 0;padding:10px;border-radius:8px;border:1px solid #232a36;background:#0b0e14;color:#fff;font-size:.9rem;user-select:text;-webkit-user-select:text}
+.ad-block{border-top:1px solid #232a36;padding-top:10px;margin-top:10px}
+.ad-search{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.ad-search .ad-in{margin:0;flex:1}
+.ad-chk{display:flex;align-items:center;gap:6px;font-size:.85rem;margin:4px 0 6px}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -1240,6 +1248,34 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
             <button class="btn" id="lb-refresh" style="margin-top:10px;">🔄 Обновить</button>
         </section>
 
+        <!-- АДМИН -->
+        <section id="admin-tab" class="tab-content">
+            <h2>🛠 Админ-панель</h2>
+            <div class="sub-dim" id="ad-total">Игроки</div>
+            <div class="lb-admin" id="ad-actions" style="display:none">
+                <div class="lb-admin-t" id="ad-sel">Игрок не выбран</div>
+                <b>💰 Деньги</b>
+                <input class="ad-in" id="ad-money" type="number" inputmode="numeric" placeholder="Сумма, $">
+                <div class="lb-a-btns"><button class="lb-chip" id="ad-give">➕ Выдать</button><button class="lb-chip" id="ad-take">➖ Списать</button></div>
+                <div class="ad-block"><b>🔫 Скин</b>
+                    <input class="ad-in" id="ad-sf" placeholder="Фильтр по названию">
+                    <select class="ad-in" id="ad-skin" size="6"></select>
+                    <label class="ad-chk"><input type="checkbox" id="ad-stt"> StatTrak™</label>
+                    <input class="ad-in" id="ad-skin-n" type="number" inputmode="numeric" value="1" placeholder="Количество">
+                    <button class="lb-chip" id="ad-skin-go" style="width:100%">Выдать скин</button>
+                </div>
+                <div class="ad-block"><b>📦 Кейс</b>
+                    <select class="ad-in" id="ad-case"></select>
+                    <input class="ad-in" id="ad-case-n" type="number" inputmode="numeric" value="1" placeholder="Количество">
+                    <button class="lb-chip" id="ad-case-go" style="width:100%">Выдать кейс</button>
+                </div>
+                <div class="lb-note" id="ad-r"></div>
+            </div>
+            <div class="ad-search"><input class="ad-in" id="ad-q" placeholder="Поиск: имя, @username или ID"><button class="lb-chip" id="ad-go" style="flex:0 0 52px">🔍</button></div>
+            <button class="lb-chip" id="ad-me" style="width:100%;margin-bottom:8px">👤 Выбрать себя</button>
+            <div id="ad-list"></div>
+        </section>
+
         <!-- ПРОФИЛЬ -->
         <section id="profile-tab" class="tab-content">
             <h2>Профиль</h2>
@@ -1300,6 +1336,7 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
         <button class="nav-btn" onclick="openTab('inventory-tab', this)"><span class="nav-icon">🎒</span><span>Инвентарь</span></button>
         <button class="nav-btn" onclick="openTab('profile-tab', this)"><span class="nav-icon">👤</span><span>Профиль</span></button>
         <button class="nav-btn" onclick="openTab('leaderboard-tab', this)"><span class="nav-icon">🏆</span><span>Лидеры</span></button>
+        <button class="nav-btn" onclick="openTab('admin-tab', this)"><span class="nav-icon">🛠</span><span>Админ</span></button>
     </nav>
 
     <div class="fuse-fx" id="fuse-fx"><div id="fuse-fx-stage"></div><div id="fuse-fx-big" style="display:none;"><div class="fx-title">🔮 ФЬЮЗ</div></div><div class="fx-result" id="fuse-fx-res"></div><div class="fx-hint" id="fuse-fx-hint">нажми, чтобы закрыть</div><div id="fuse-fx-flash"></div></div>
@@ -3880,7 +3917,7 @@ renderInventory();
 (()=>{
 const nav=document.querySelector('nav');if(!nav)return;
 const MAIN=['cases-tab','clicker-tab','games-tab','inventory-tab'];
-const INFO={'upgrader-tab':'Улучши скин','fuse-tab':'3 скина → 1','quests-tab':'Награды и кейсы','profile-tab':'Статистика и уровень','leaderboard-tab':'Топ игроков'};
+const INFO={'upgrader-tab':'Улучши скин','fuse-tab':'3 скина → 1','quests-tab':'Награды и кейсы','profile-tab':'Статистика и уровень','leaderboard-tab':'Топ игроков','admin-tab':'Игроки, деньги, скины, кейсы'};
 const btnBy={};
 nav.querySelectorAll('.nav-btn').forEach(b=>{
  const m=(b.getAttribute('onclick')||'').match(/'([\w-]+-tab)'/);if(!m)return;
@@ -3924,20 +3961,28 @@ sync();
 })();
 </script>
 <script>
-/* ===== ТАБЛИЦА ЛИДЕРОВ ===== */
+/* ===== ТАБЛИЦА ЛИДЕРОВ + АДМИН-ПОДАРКИ ===== */
 (()=>{
-const API='https://burmaldinka-leaderboard.8o8o99oooooo.workers.dev'; // <-- адрес вашего Worker
+const API='https://burmaldinka-leaderboard.8o8o99oooooo.workers.dev';
+const ADMIN_UI_ID=5640021640; // только чтобы показать вкладку; права проверяет сервер
 const tg=window.Telegram&&Telegram.WebApp;
 if(tg){try{tg.ready();tg.expand()}catch(e){}}
 const initData=(tg&&tg.initData)||'';
 const tgUser=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
-let sort='earned',lastSent='',busy=false;
+const IS_ADMIN=tgUser.id===ADMIN_UI_ID;
+let sort='earned',lastSent='',busy=false,sendErr='';
 const $l=id=>document.getElementById(id);
 const unit={earned:' $',cases:'',clicks:''};
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const post=(p,b)=>fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({initData},b)),keepalive:true}).then(r=>r.json());
 
-let sendErr='';
+/* вкладка админа видна только админу */
+if(!IS_ADMIN){
+ document.querySelectorAll('.ms-tile[data-tab="admin-tab"]').forEach(t=>t.remove());
+ const s=$l('admin-tab');if(s)s.remove();
+}
+
+/* ---------- отправка очков ---------- */
 function send(){
  if(!initData){sendErr='noinit';return Promise.resolve()}
  const s=state.stats,p={earned:s.totalEarned,cases:s.casesOpened,clicks:s.clicks,level:levelInfo(s.totalEarned).level},k=JSON.stringify(p);
@@ -3945,6 +3990,8 @@ function send(){
  lastSent=k;
  return post('/api/score',p).then(r=>{sendErr=r&&r.ok?'':((r&&r.error)||'fail');if(sendErr)lastSent=''}).catch(()=>{sendErr='net';lastSent=''});
 }
+
+/* ---------- рейтинг ---------- */
 function row(r){
  const d=el('div','lb-row'+(r.me?' me':''));
  d.append(el('div','lb-rank',r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank));
@@ -3980,12 +4027,124 @@ $l('lb-chips').addEventListener('click',e=>{
 });
 $l('lb-refresh').onclick=load;
 
+/* ---------- получение подарков от админа ---------- */
+let pBusy=false;
+const catFind=n=>getCatalog().find(x=>x.name===n);
+async function pull(){
+ if(!initData||pBusy)return;pBusy=true;
+ try{
+  const j=await post('/api/pending',{});
+  if(j&&j.items&&j.items.length){
+   state.giftIds=state.giftIds||[];
+   const ids=[],got=[];let money=0;
+   for(const g of j.items){
+    ids.push(g.id);
+    if(state.giftIds.includes(g.id))continue;
+    state.giftIds.push(g.id);
+    const n=Math.trunc(Number(g.amount))||0;
+    if(g.kind==='money'){money+=n}
+    else if(g.kind==='skin'&&n>0){
+     const base=catFind(g.item);
+     if(base){for(let i=0;i<Math.min(n,100);i++){const it={...base};state.inventory.push(g.st?makeST(it):it)}got.push(n+'× '+(g.st?'StatTrak™ ':'')+base.name)}
+    }else if(g.kind==='case'&&n>0){
+     const c=CASES.find(x=>x.id===g.item);
+     if(c){addCaseToInventory(c.id,Math.min(n,1000));got.push(n+'× '+c.title)}
+    }
+   }
+   if(state.giftIds.length>300)state.giftIds=state.giftIds.slice(-300);
+   if(money){state.balance=Math.max(0,state.balance+money);got.unshift((money>0?'+':'−')+fmt(Math.abs(money))+' $')}
+   if(got.length){updateBalance();try{renderInventory()}catch(e){}saveGame();showToast('🎁 От администратора: '+got.join(', '))}
+   await post('/api/ack',{ids});
+  }
+ }catch(e){}
+ pBusy=false;
+}
+
+/* ---------- вкладка «Админ» ---------- */
+let picked=null,adInit=false;
+const ERRS={forbidden:'⛔ Сервер не считает вас админом. Проверьте, что в worker.js в ADMIN_ID стоит ваш Telegram ID, и задеплойте Worker.','not found':'⚠️ Worker не обновлён: вставьте новый worker.js в Cloudflare и нажмите Deploy.','player not found':'Игрок не найден (он должен хотя бы раз открыть игру).','bad amount':'Неверное количество или сумма.','bad item':'Не выбран предмет.','bad kind':'Неверный тип подарка.','auth':'⚠️ Сервер не принял подпись Telegram.','bad signature':'⚠️ Подпись Telegram не прошла проверку: токен бота в Cloudflare не совпадает с ботом игры.','no initData':'⚠️ Открой игру через Telegram.'};
+const errText=e=>ERRS[e]||('⚠️ Ошибка: '+e);
+function fillSkins(){
+ const f=$l('ad-sf').value.trim().toLowerCase();
+ const items=getCatalog().filter(x=>!f||x.name.toLowerCase().includes(f)).slice(0,200);
+ $l('ad-skin').replaceChildren(...items.map(x=>{const o=el('option',null,x.name+' — '+fmt(x.price)+' $');o.value=x.name;return o}));
+ if(items.length)$l('ad-skin').selectedIndex=0;
+}
+function pickPlayer(id,name){
+ picked={id,name};
+ $l('ad-sel').textContent='Выбран: '+name+' (ID '+id+')';
+ $l('ad-actions').style.display='block';
+ $l('ad-r').textContent='';
+ $l('ad-list').querySelectorAll('.lb-row').forEach(r=>r.classList.toggle('me',+r.dataset.id===id));
+ $l('ad-actions').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function pRow(p){
+ const d=el('div','lb-row'+(picked&&picked.id===p.id?' me':''));
+ d.dataset.id=p.id;
+ d.append(el('div','lb-ava',(p.name||'?').charAt(0).toUpperCase()));
+ const m=el('div','lb-main');
+ m.append(el('div','lb-name',p.name),el('div','lb-sub','ID '+p.id+(p.username?' · @'+p.username:'')+' · ⭐'+p.level+' · '+fmt(p.earned)+' $'));
+ d.append(m);
+ d.onclick=()=>pickPlayer(p.id,p.name);
+ return d;
+}
+async function aLoad(){
+ const list=$l('ad-list');
+ if(!initData){list.replaceChildren(el('div','lb-note',errText('no initData')));return}
+ list.replaceChildren(el('div','lb-note','Загрузка…'));
+ try{
+  const j=await post('/api/admin/players',{q:$l('ad-q').value.trim()});
+  if(j.error){list.replaceChildren(el('div','lb-note',errText(j.error)));return}
+  $l('ad-total').textContent='Игроков всего: '+fmt(j.total)+(j.players.length<j.total?' (показано '+j.players.length+')':'');
+  list.replaceChildren(...(j.players.length?j.players.map(pRow):[el('div','lb-note','Никого не найдено')]));
+ }catch(e){list.replaceChildren(el('div','lb-note','⚠️ Нет связи с сервером'))}
+}
+function aOpen(){
+ if(!adInit){
+  adInit=true;
+  fillSkins();
+  $l('ad-case').replaceChildren(...CASES.map(c=>{const o=el('option',null,c.title+' — '+fmt(c.price)+' $');o.value=c.id;return o}));
+  $l('ad-sf').oninput=fillSkins;
+  $l('ad-go').onclick=aLoad;
+  $l('ad-q').onkeydown=e=>{if(e.key==='Enter')aLoad()};
+  $l('ad-me').onclick=()=>{if(tgUser.id)pickPlayer(tgUser.id,tgUser.first_name||'Я')};
+  $l('ad-give').onclick=()=>money(1);
+  $l('ad-take').onclick=()=>money(-1);
+  $l('ad-skin-go').onclick=()=>{const it=$l('ad-skin').value;if(!it){$l('ad-r').textContent='Выбери скин в списке';return}gift('skin',it,Math.trunc(Number($l('ad-skin-n').value)),$l('ad-stt').checked)};
+  $l('ad-case-go').onclick=()=>gift('case',$l('ad-case').value,Math.trunc(Number($l('ad-case-n').value)),false);
+ }
+ aLoad();
+}
+function money(sign){
+ const n=Math.trunc(Number($l('ad-money').value));
+ if(!(n>0)){$l('ad-r').textContent='Введи сумму больше нуля';return}
+ gift('money','',sign*n,false);
+}
+async function gift(kind,item,amount,st){
+ const r=$l('ad-r');
+ if(!picked){r.textContent='Сначала выбери игрока';return}
+ if(!Number.isFinite(amount)||amount===0){r.textContent='Укажи количество';return}
+ r.textContent='Отправка…';
+ try{
+  const j=await post('/api/admin/gift',{target:picked.id,kind,item,amount,st});
+  if(j.ok){
+   r.textContent='✅ Отправлено игроку '+j.name+'. Он получит подарок при открытии игры (до 30 сек).';
+   if(picked.id===tgUser.id)pull();
+  }else r.textContent=errText(j.error);
+ }catch(e){r.textContent='⚠️ Нет связи с сервером'}
+}
+
+/* ---------- хуки ---------- */
 const _open=window.openTab;
 window.openTab=function(id){
  const r=_open.apply(this,arguments);
  if(id==='leaderboard-tab'&&$l(id).classList.contains('active'))load();
+ if(IS_ADMIN&&id==='admin-tab'&&$l(id).classList.contains('active'))aOpen();
  return r;
 };
+setTimeout(pull,4000);
+setInterval(pull,30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
 setTimeout(send,3000);
 setInterval(send,30000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)send()});
