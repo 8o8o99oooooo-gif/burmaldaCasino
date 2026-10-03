@@ -3937,12 +3937,13 @@ const unit={earned:' $',cases:'',clicks:''};
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const post=(p,b)=>fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({initData},b)),keepalive:true}).then(r=>r.json());
 
+let sendErr='';
 function send(){
- if(!initData||API.includes('YOUR-WORKER'))return Promise.resolve();
+ if(!initData){sendErr='noinit';return Promise.resolve()}
  const s=state.stats,p={earned:s.totalEarned,cases:s.casesOpened,clicks:s.clicks,level:levelInfo(s.totalEarned).level},k=JSON.stringify(p);
  if(k===lastSent)return Promise.resolve();
  lastSent=k;
- return post('/api/score',p).catch(()=>{lastSent=''});
+ return post('/api/score',p).then(r=>{sendErr=r&&r.ok?'':((r&&r.error)||'fail');if(sendErr)lastSent=''}).catch(()=>{sendErr='net';lastSent=''});
 }
 function row(r){
  const d=el('div','lb-row'+(r.me?' me':''));
@@ -3964,7 +3965,8 @@ async function load(){
   $l('lb-total').textContent='Игроков в рейтинге: '+fmt(j.total);
   me.replaceChildren();
   if(j.me&&!j.top.some(r=>r.me))me.append(row({rank:j.me.rank,name:tgUser.first_name||'Ты',level:j.me.level,value:j.me.value,me:true}));
-  else if(!initData)me.append(el('div','lb-note','Открой игру через Telegram, чтобы попасть в рейтинг'));
+  const M={noinit:'⚠️ Telegram не передал данные пользователя (initData пуст). Открой игру через кнопку меню бота или Mini App-ссылку.',auth:'⚠️ Сервер не принял подпись Telegram (ошибка auth). Проверь BOT_TOKEN в Cloudflare — он должен быть от того же бота, через которого открыта игра.','bad data':'⚠️ Сервер отклонил данные результата.',net:'⚠️ Не удалось отправить твой результат на сервер.'};
+  if(sendErr)me.append(el('div','lb-note',M[sendErr]||('⚠️ Ошибка: '+sendErr)));
  }catch(e){
   list.replaceChildren(el('div','lb-note','Не удалось загрузить рейтинг. Проверь интернет и нажми «Обновить».'));
  }
