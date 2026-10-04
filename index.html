@@ -850,7 +850,7 @@ button:focus-visible,.game-input:focus-visible,.nav-btn:focus-visible{outline:2p
 select.game-input{cursor:pointer}
 .bet-q{border-radius:10px!important}
 /* списки */
-.picker-list{border-radius:14px;overflow:hidden}
+.picker-list{border-radius:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
 .picker-row{transition:background .2s}.picker-row:hover{background:rgba(167,139,250,.14)}
 .picker-row.ugsel{background:rgba(167,139,250,.22);box-shadow:inset 3px 0 0 #a78bfa}
 .cc-row{transition:background .2s}
@@ -868,20 +868,34 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 /* уважение к reduced motion */
 @media (prefers-reduced-motion:reduce){.tab-content.active{animation:none}.case-card:hover,.game-menu-card:hover{transform:none!important}}
 @media (max-width:420px){.iv-chip{font-size:.7rem;padding:5px 8px}h2{font-size:1.3rem}.cases-grid,.inventory-grid{gap:10px!important}}
-/* профиль игрока */
+/* профиль игрока (из таблицы лидеров) */
 .lb-pod,.lb-row,.lb-me-card{cursor:pointer}
-.pm-ov{position:fixed;inset:0;z-index:9700;background:rgba(5,3,10,.82);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;animation:ui-fade .25s}
-.pm-box{position:relative;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;background:linear-gradient(170deg,#20183a,#120d20);border:1px solid var(--bd-hi);border-radius:24px 24px 0 0;padding:18px 14px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.6)}
-@media(min-width:640px){.pm-ov{align-items:center;padding:16px}.pm-box{border-radius:24px}}
-.pm-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--bd);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:1rem;z-index:2}
-.pm-head{display:flex;align-items:center;gap:12px;padding-right:40px}
-.pm-head .lb-ava{width:56px;height:56px;font-size:1.4rem;flex-shrink:0}
-.pm-name{font-weight:800;font-size:1.15rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pm-sub{color:var(--text-dim);font-size:.82rem;margin-top:2px}
-.pm-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
-.pm-tile{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:14px;padding:10px 4px;text-align:center}
-.pm-tile .pm-ti{font-size:1.1rem}.pm-tile b{display:block;font-size:.88rem;margin-top:2px;word-break:break-word}.pm-tile span{font-size:.62rem;color:var(--text-dim)}
-.pm-h{font-weight:800;margin:6px 0 10px}
+.pm-ov{position:fixed;inset:0;z-index:9700;background:rgba(5,3,10,.85);backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;animation:ui-fade .25s}
+.pm-box{position:relative;width:100%;max-width:600px;max-height:93vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#1c1434,#0f0a1c);border:1px solid var(--bd-hi);border-radius:26px 26px 0 0;padding:0 14px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 50px rgba(0,0,0,.65)}
+@media(min-width:640px){.pm-ov{align-items:center;padding:16px}.pm-box{border-radius:26px}}
+.pm-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.35);color:#fff;cursor:pointer;font-size:1rem;z-index:3}
+.pm-banner{margin:0 -14px;padding:28px 16px 20px;text-align:center;background:radial-gradient(120% 120% at 50% 0%,rgba(168,85,247,.55),rgba(91,52,184,.25) 50%,transparent 80%);border-bottom:1px solid rgba(167,139,250,.2)}
+.pm-avawrap{position:relative;display:inline-block;margin-bottom:10px}
+.pm-avawrap .lb-ava{width:84px;height:84px;font-size:2.1rem;border:3px solid #c4b5fd;box-shadow:0 0 0 4px rgba(167,139,250,.2),0 0 30px rgba(167,139,250,.6)}
+.pm-lv{position:absolute;right:-14px;bottom:-4px;padding:3px 9px;border-radius:999px;font-size:.72rem;font-weight:900;color:#241a00;background:linear-gradient(90deg,#ffd700,#fbbf24);box-shadow:0 2px 10px rgba(0,0,0,.5)}
+.pm-name{font-weight:900;font-size:1.35rem;letter-spacing:-.3px;padding:0 30px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-sub{color:#b8b2d6;font-size:.82rem;margin-top:3px}
+.pm-hero{margin:16px 0 12px;padding:16px;text-align:center;border-radius:20px;background:linear-gradient(135deg,rgba(255,215,0,.14),rgba(139,92,246,.18));border:1px solid rgba(255,215,0,.35);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.pm-hl{font-size:.7rem;letter-spacing:2px;color:#cbbfe8;font-weight:700}
+.pm-hv{font-size:2rem;font-weight:900;letter-spacing:-.5px;margin-top:4px;background:linear-gradient(90deg,#fff,#ffe58a,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.pm-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pm-tile{--c:#a78bfa;position:relative;overflow:hidden;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(165deg,color-mix(in srgb,var(--c) 22%,#1d1632),#140e22 85%);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.pm-tile .pm-ti{grid-row:1/3;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:color-mix(in srgb,var(--c) 30%,#120d20);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}
+.pm-tile b{font-size:1.02rem;font-weight:900;font-variant-numeric:tabular-nums;align-self:end;word-break:break-word}
+.pm-tile span{font-size:.64rem;color:#aab3c5;align-self:start}
+.pm-sec{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:18px 0 8px}
+.pm-h{font-weight:900;font-size:1.05rem}.pm-best{font-size:.75rem;color:#fbbf24;font-weight:700}
+.pm-cap{font-size:.7rem;color:var(--text-dim);margin-bottom:8px}
+.pm-rbar{display:flex;height:8px;border-radius:999px;overflow:hidden;gap:2px;margin-bottom:10px}.pm-rbar i{display:block;min-width:4px}
+.pm-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pm-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#e5e7eb;font-size:.7rem;cursor:pointer;font-family:inherit}
+.pm-chip i{width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c)}.pm-chip b{opacity:.7}
+.pm-chip.on{background:color-mix(in srgb,var(--c,#a855f7) 30%,#1d1632);border-color:var(--c,#a855f7);color:#fff}
 .pm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px}
 .pm-item{position:relative;overflow:hidden;text-align:center;padding:12px 6px 8px;border-radius:14px;background:linear-gradient(170deg,color-mix(in srgb,var(--c) 18%,#1d1632),#140e22 75%);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 .pm-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--c);box-shadow:0 0 8px var(--c)}
@@ -889,33 +903,6 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 .pm-in{font-size:.68rem;font-weight:700;line-height:1.2;margin-top:2px}
 .pm-ir{font-size:.58rem;color:var(--c);margin-top:2px}
 .pm-ip{font-size:.78rem;color:var(--accent-color);font-weight:800;margin-top:2px}
-
-/* ===== КРАСИВАЯ СТАТИСТИКА ===== */
-#profile-tab.active{display:flex;flex-direction:column;gap:14px}
-#profile-tab>*{margin-top:0!important}
-#profile-tab .page-head{order:0}#profile-tab .stat-hero{order:1}#profile-tab .level-card{order:2}#profile-tab .stats-grid{order:3}#profile-tab>.btn{order:4}
-#profile-tab .stat-hero{padding:28px 18px 24px;border-radius:24px;border:1px solid rgba(196,181,253,.5);background:radial-gradient(120% 140% at 50% 0%,rgba(139,92,246,.45),transparent 60%),linear-gradient(160deg,#2a1f4d,#140e22);box-shadow:0 14px 40px rgba(0,0,0,.5),0 0 40px rgba(139,92,246,.25)}
-#profile-tab .stat-hero-label{font-weight:700;letter-spacing:2.5px;font-size:.75rem}
-#profile-tab .stat-hero-value{font-size:2.6rem;font-weight:900;letter-spacing:-1px;font-variant-numeric:tabular-nums;filter:drop-shadow(0 4px 18px rgba(167,139,250,.5))}
-/* уровень */
-#profile-tab .level-card{border-radius:24px;padding:18px;background:linear-gradient(160deg,rgba(255,215,0,.10),transparent 55%),linear-gradient(160deg,#20183a,#140e22);border:1px solid rgba(255,215,0,.4);box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 30px rgba(255,215,0,.08)}
-#profile-tab .level-badge{--p:0;position:relative;isolation:isolate;width:74px;height:74px;font-size:1.7rem;font-weight:900;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6);background:conic-gradient(#ffd700 calc(var(--p)*1%),rgba(255,255,255,.12) 0);box-shadow:0 0 24px rgba(255,215,0,.45)}
-#profile-tab .level-badge::before{content:'';position:absolute;inset:6px;border-radius:50%;z-index:-1;background:radial-gradient(circle at 30% 25%,#7c3aed,#2a1a52 70%)}
-#profile-tab .level-title{font-size:1.1rem;font-weight:800}
-#profile-tab .level-bar{height:14px;border-radius:999px;background:rgba(0,0,0,.45);border:1px solid rgba(255,215,0,.25)}
-#profile-tab .level-fill{border-radius:999px;background:linear-gradient(90deg,#f59e0b,#ffd700,#fde68a);background-size:200% 100%;animation:rd-flow 3s linear infinite alternate}
-#profile-tab .level-sub{color:#aab3c5;font-variant-numeric:tabular-nums}
-/* плитки */
-#profile-tab .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px}
-#profile-tab .stat-card{--c:#a78bfa;padding:16px 8px 14px;background:linear-gradient(165deg,color-mix(in srgb,var(--c) 22%,#1d1632),#140e22 80%)!important;border:1px solid color-mix(in srgb,var(--c) 45%,transparent)!important;box-shadow:0 6px 18px rgba(0,0,0,.4)}
-#profile-tab .stat-card::before{background:var(--c);height:3px;box-shadow:0 0 10px var(--c)}
-#profile-tab .stat-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 24px color-mix(in srgb,var(--c) 40%,transparent);border-color:var(--c)!important}
-#profile-tab .stat-icon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;font-size:1.5rem;background:color-mix(in srgb,var(--c) 28%,#120d20);box-shadow:0 0 18px color-mix(in srgb,var(--c) 40%,transparent)}
-#profile-tab .stat-value{color:#fff;font-size:1.35rem;font-weight:900;font-variant-numeric:tabular-nums;margin-top:8px;word-break:break-word}
-#profile-tab .stat-label{color:#aab3c5;font-size:.72rem;margin-top:3px}
-#profile-tab .stat-card:nth-child(1){--c:#38bdf8}#profile-tab .stat-card:nth-child(2){--c:#f59e0b}#profile-tab .stat-card:nth-child(3){--c:#ec4899}
-#profile-tab .stat-card:nth-child(4){--c:#22c55e}#profile-tab .stat-card:nth-child(5){--c:#a78bfa}#profile-tab .stat-card:nth-child(6){--c:#fbbf24}
-#profile-tab>.btn{margin-top:0}
 </style></head>
 <body>
 
@@ -1482,7 +1469,8 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 
         <!-- ПРОФИЛЬ -->
         <section id="profile-tab" class="tab-content">
-            <div class="page-head" style="--c:#a78bfa;"><div class="ph-ico">👤</div><div><h2>Профиль</h2><div class="sub-dim">Твоя игровая статистика</div></div></div>
+            <h2>Профиль</h2>
+            <div class="sub-dim">Твоя игровая статистика</div>
 
             <div class="stat-hero">
                 <div class="stat-hero-shine"></div>
@@ -1511,16 +1499,6 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                     <div class="stat-icon">🎒</div>
                     <div class="stat-value" id="inv-count">0</div>
                     <div class="stat-label">предметов в инвентаре</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-value" id="inv-total">0</div>
-                    <div class="stat-label">стоимость инвентаря</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👑</div>
-                    <div class="stat-value" id="inv-best">—</div>
-                    <div class="stat-label">самый дорогой скин</div>
                 </div>
             </div>
 
@@ -1896,10 +1874,6 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             const note = $('level-next-note');
             if (note) note.textContent = `Для уровня ${li.level + 1} потребуется ${fmt(li.next)} $ (+15%)`;
             $('inv-count').textContent = state.inventory.length;
-            $('level-badge').style.setProperty('--p', (li.cur / li.need * 100).toFixed(1));
-            const _t = $('inv-total'), _b = $('inv-best');
-            if (_t) _t.textContent = fmt(state.inventory.reduce((a, i) => a + i.price, 0)) + ' $';
-            if (_b) { const m = state.inventory.reduce((a, i) => Math.max(a, i.price), 0); _b.textContent = m ? fmt(m) + ' $' : '—'; }
         }
 
         function openGame(id) { $('game-' + id).classList.add('open'); }
@@ -4311,26 +4285,54 @@ function showP(d,note){
  const ov=el('div','pm-ov'),box=el('div','pm-box');
  ov.onclick=e=>{if(e.target===ov)closeP()};
  const x=el('button','pm-x','✕');x.onclick=closeP;
- const head=el('div','pm-head'),hm=el('div','pm-hm');
- hm.append(el('div','pm-name',d.name+(d.me?' (ты)':'')),el('div','pm-sub','⭐ Ур. '+d.level+(d.username?' · @'+d.username:'')));
- head.append(ava(d.name,'',d.photo),hm);
+ /* баннер: аватар, имя, уровень */
+ const ban=el('div','pm-banner'),aw=el('div','pm-avawrap');
+ aw.append(ava(d.name,'',d.photo),el('div','pm-lv','⭐ '+d.level));
+ ban.append(aw,el('div','pm-name',d.name+(d.me?' (ты)':'')),el('div','pm-sub',(d.username?'@'+d.username+' · ':'')+'Уровень '+d.level));
+ /* главная сумма */
+ const hero=el('div','pm-hero');hero.append(el('div','pm-hl','💎 ВСЕГО ЗАРАБОТАНО'),el('div','pm-hv',fmt(d.earned)+' $'));
+ /* плитки */
  const tiles=el('div','pm-tiles');
- [['💎','Заработано',fmt(d.earned)+' $'],['📦','Кейсов открыто',fmt(d.cases)],['👆','Кликов',fmt(d.clicks)],['🎒','Предметов',fmt(d.count)],['💰','Стоимость инвентаря',fmt(d.total)+' $'],['👑','Самый дорогой',d.best?fmt(d.best)+' $':'—']].forEach(t=>{
-  const c=el('div','pm-tile');c.append(el('div','pm-ti',t[0]),el('b',null,t[2]),el('span',null,t[1]));tiles.append(c)});
- const h=el('div','pm-h','🎒 Инвентарь'+(d.items.length<d.count?' (топ '+d.items.length+' из '+fmt(d.count)+')':''));
- const g=el('div','pm-grid');
- if(!d.items.length)g.append(el('div','lb-note','Инвентарь пуст'));
- d.items.forEach(o=>{
-  const it={name:o.n,price:o.p,rarity:o.r,wear:o.w,fl:o.f,st:!!o.s},R=RARITY[it.rarity]||{name:'',color:'#8a94a6'};
-  const c=el('div','pm-item');c.style.setProperty('--c',R.color);
-  const im=document.createElement('img');im.alt='';im.src=SKIN_IMG[it.name]||SKIN_IMG[baseName(it.name)]||'';im.onerror=()=>{im.style.visibility='hidden'};
-  const nm=el('div','pm-in');nm.innerHTML=nmH(it);
-  c.append(el('i','pm-bar'),im,nm,el('div','pm-ir',R.name+(it.wear?' · '+it.wear:'')),el('div','pm-ip',fmt(it.price)+' $'));
-  g.append(c);
- });
- box.append(x,head,tiles);
+ [['📦','Кейсов открыто',fmt(d.cases),'#f59e0b'],['👆','Кликов',fmt(d.clicks),'#ec4899'],['🎒','Предметов',fmt(d.count),'#22c55e'],['💰','Стоимость инвентаря',fmt(d.total)+' $','#38bdf8']].forEach(t=>{
+  const c=el('div','pm-tile');c.style.setProperty('--c',t[3]);c.append(el('div','pm-ti',t[0]),el('b',null,t[2]),el('span',null,t[1]));tiles.append(c)});
+ box.append(x,ban,hero,tiles);
  if(note)box.append(el('div','lb-note',note));
- box.append(h,g);ov.append(box);document.body.append(ov);pmEl=ov;document.body.style.overflow='hidden';
+ /* инвентарь */
+ const rank=o=>Object.keys(RARITY).indexOf(o.r);
+ const items=d.items.slice();
+ const sec=el('div','pm-sec');
+ sec.append(el('div','pm-h','🎒 Инвентарь'),el('div','pm-best',d.best?'👑 Самый дорогой: '+fmt(d.best)+' $':''));
+ box.append(sec);
+ if(d.items.length<d.count)box.append(el('div','pm-cap','Показаны '+d.items.length+' самых дорогих из '+fmt(d.count)));
+ const cnt={};items.forEach(o=>cnt[o.r]=(cnt[o.r]||0)+1);
+ const keys=Object.keys(RARITY).filter(k=>cnt[k]);
+ let flt='';
+ const g=el('div','pm-grid'),chips=el('div','pm-chips');
+ if(items.length&&keys.length){
+  const bar=el('div','pm-rbar');keys.forEach(k=>{const b=el('i');b.style.flex=cnt[k];b.style.background=RARITY[k].color;bar.append(b)});box.append(bar);
+ }
+ function draw(){
+  chips.replaceChildren();
+  if(keys.length>1){
+   [['','Все',items.length,null]].concat(keys.map(k=>[k,RARITY[k].name,cnt[k],RARITY[k].color])).forEach(a=>{
+    const b=el('button','pm-chip'+(flt===a[0]?' on':''));if(a[3])b.style.setProperty('--c',a[3]);
+    b.append(a[3]?el('i'):document.createTextNode(''),document.createTextNode(a[1]+' '),el('b',null,a[2]));
+    b.onclick=()=>{flt=a[0];draw()};chips.append(b)});
+  }
+  g.replaceChildren();
+  const list=items.filter(o=>!flt||o.r===flt);
+  if(!list.length)g.append(el('div','lb-note','Инвентарь пуст'));
+  list.forEach(o=>{
+   const it={name:o.n,price:o.p,rarity:o.r,wear:o.w,fl:o.f,st:!!o.s},R=RARITY[it.rarity]||{name:'',color:'#8a94a6'};
+   const c=el('div','pm-item');c.style.setProperty('--c',R.color);
+   const im=document.createElement('img');im.alt='';im.src=SKIN_IMG[it.name]||SKIN_IMG[baseName(it.name)]||'';im.onerror=()=>{im.style.visibility='hidden'};
+   const nm=el('div','pm-in');nm.innerHTML=nmH(it);
+   c.append(el('i','pm-bar'),im,nm,el('div','pm-ir',R.name+(it.wear?' · '+it.wear:'')),el('div','pm-ip',fmt(it.price)+' $'));
+   g.append(c);
+  });
+ }
+ box.append(chips,g);draw();
+ ov.append(box);document.body.append(ov);pmEl=ov;document.body.style.overflow='hidden';
 }
 async function openP(r){
  if(r.me){showP(ownProfile());return}
