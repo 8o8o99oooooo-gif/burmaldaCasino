@@ -738,7 +738,8 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
 .lb-row>.lb-bar{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(167,139,250,.24),rgba(167,139,250,0));pointer-events:none}
 .lb-row.me{border-color:var(--accent-color);box-shadow:0 0 16px rgba(167,139,250,.38)}
 .lb-rank{width:30px;text-align:center;font-weight:800;color:var(--text-dim)}
-.lb-ava{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.lb-ava{position:relative;overflow:hidden;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.lb-ava img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .lb-main{flex:1;min-width:0}
 .lb-name{font-weight:bold;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-sub{font-size:.72rem;color:var(--text-dim)}
@@ -4025,23 +4026,30 @@ function send(){
 
 /* ---------- рейтинг ---------- */
 const hue=s=>{let x=0;for(const c of String(s||'?'))x=(x*31+c.charCodeAt(0))%360;return x};
-function ava(name,cls){
+function ava(name,cls,photo){
  const a=el('div','lb-ava'+(cls?' '+cls:''),(Array.from(String(name||'?').trim())[0]||'?').toUpperCase());
  const h=hue(name);
  a.style.background='linear-gradient(135deg,hsl('+h+',70%,55%),hsl('+((h+50)%360)+',70%,42%))';
+ if(photo){ // фото Telegram поверх буквы; если не загрузилось — останется буква
+  const im=document.createElement('img');
+  im.referrerPolicy='no-referrer';im.alt='';
+  im.onerror=()=>im.remove();
+  im.src=photo;
+  a.append(im);
+ }
  return a;
 }
 function pod(r,cls,medal,i){
  const d=el('div','lb-pod '+cls+(r.me?' me':''));
  d.style.animationDelay=(i*0.1)+'s';
- d.append(el('div','lb-medal',medal),ava(r.name),el('div','lb-pod-name',r.name),el('div','lb-pod-val',fmt(r.value)+unit[sort]),el('div','lb-pod-lv','⭐ Ур. '+r.level));
+ d.append(el('div','lb-medal',medal),ava(r.name,'',r.photo),el('div','lb-pod-name',r.name),el('div','lb-pod-val',fmt(r.value)+unit[sort]),el('div','lb-pod-lv','⭐ Ур. '+r.level));
  return d;
 }
 function row(r,max,i){
  const d=el('div','lb-row'+(r.me?' me':''));
  d.style.animationDelay=(Math.min(i,12)*0.04)+'s';
  const bar=el('div','lb-bar');bar.style.width=Math.max(6,Math.min(100,r.value/(max||1)*100))+'%';
- d.append(bar,el('div','lb-rank','#'+r.rank),ava(r.name));
+ d.append(bar,el('div','lb-rank','#'+r.rank),ava(r.name,'',r.photo));
  const m=el('div','lb-main');
  m.append(el('div','lb-name',r.name+(r.me?' (ты)':'')),el('div','lb-sub','⭐ Ур. '+r.level+(r.username?' · @'+r.username:'')));
  d.append(m,el('div','lb-val',fmt(r.value)+unit[sort]));
@@ -4140,7 +4148,7 @@ function pickPlayer(id,name){
 function pRow(p){
  const d=el('div','lb-row'+(picked&&picked.id===p.id?' me':''));
  d.dataset.id=p.id;
- d.append(ava(p.name));
+ d.append(ava(p.name,'',p.photo));
  const m=el('div','lb-main');
  m.append(el('div','lb-name',p.name),el('div','lb-sub','ID '+p.id+(p.username?' · @'+p.username:'')+' · ⭐'+p.level+' · '+fmt(p.earned)+' $'));
  d.append(m);
@@ -4209,6 +4217,33 @@ setTimeout(send,3000);
 setInterval(send,30000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)send()});
 window.addEventListener('pagehide',send);
+})();
+</script>
+<script>
+/* ===== ФОТО КЕЙСОВ =====
+   Положите картинки в папку cases/ рядом с index.html, имя файла = id кейса
+   (например cases/clutch.png). Поддерживаются .png, .jpg, .webp.
+   Если файла нет — остаётся нарисованная иконка. */
+(()=>{
+ const exts=['png','jpg','webp'];
+ const probe=id=>new Promise(res=>{
+  let i=0;
+  const next=()=>{
+   if(i>=exts.length)return res(false);
+   const url='cases/'+id+'.'+exts[i++];
+   const im=new Image();
+   im.onload=()=>{CASE_IMG[id]=url;res(true)};
+   im.onerror=next;
+   im.src=url;
+  };
+  next();
+ });
+ Promise.all(CASES.map(c=>probe(c.id))).then(r=>{
+  if(!r.some(Boolean))return;
+  try{renderCases()}catch(e){}
+  try{renderMyCases()}catch(e){}
+  try{renderQuests()}catch(e){}
+ });
 })();
 </script>
 </body>
