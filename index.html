@@ -709,26 +709,58 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
 }
 
 /* ===== ЛИДЕРЫ ===== */
-.lb-chips{display:flex;gap:6px;margin:12px 0}
-.lb-chip{flex:1;padding:9px 4px;border-radius:10px;border:1px solid #232a36;background:var(--card-bg);color:var(--text-dim);font-weight:bold;font-size:.78rem;cursor:pointer}
-.lb-chip.active{color:var(--accent-color);border-color:var(--accent-color)}
-.lb-row{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;background:var(--card-bg);border:1px solid #232a36;border-radius:12px}
-.lb-row.me{border-color:var(--accent-color);background:rgba(167,139,250,.12)}
-.lb-rank{width:32px;text-align:center;font-weight:bold;color:var(--text-dim)}
-.lb-ava{width:36px;height:36px;border-radius:50%;background:var(--accent-pink);display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0}
+.lb-hero{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.lb-hero h2{margin:0}
+.lb-hero-ic{width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;background:linear-gradient(135deg,#7c3aed,#c026d3);box-shadow:0 0 24px rgba(192,38,211,.6)}
+.lb-chips{display:flex;gap:4px;margin:12px 0;padding:4px;background:rgba(255,255,255,.05);border:1px solid #232a36;border-radius:14px}
+.lb-chip{flex:1;padding:10px 4px;border-radius:11px;border:0;background:transparent;color:var(--text-dim);font-weight:bold;font-size:.78rem;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent}
+.lb-chip.active{background:linear-gradient(110deg,#7c3aed,#c026d3 60%,#f472b6);color:#fff;box-shadow:0 0 18px rgba(192,38,211,.65)}
+.lb-chip:active{filter:brightness(.65);transform:scale(.97)}
+.lb-me-card{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:14px;border-radius:14px;background:linear-gradient(110deg,rgba(124,58,237,.38),rgba(192,38,211,.22));border:1px solid rgba(192,132,252,.55);box-shadow:0 0 22px rgba(167,139,250,.28)}
+.lb-me-rank{font-size:1.5rem;font-weight:800;color:#fff;min-width:54px;text-align:center}
+.lb-me-t{font-size:.72rem;color:var(--text-dim)}
+.lb-me-v{font-weight:800;color:#fff}
+.lb-podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:16px 0 14px}
+.lb-pod{flex:1;min-width:0;text-align:center;padding:12px 6px 10px;border-radius:16px;background:var(--card-bg);border:1px solid #232a36;animation:lb-up .5s both}
+.lb-pod.p1{padding-top:20px;padding-bottom:14px;border-color:#fbbf24;background:linear-gradient(180deg,rgba(251,191,36,.2),var(--card-bg));box-shadow:0 0 28px rgba(251,191,36,.38)}
+.lb-pod.p2{border-color:#cbd5e1;background:linear-gradient(180deg,rgba(203,213,225,.15),var(--card-bg));box-shadow:0 0 18px rgba(203,213,225,.22)}
+.lb-pod.p3{border-color:#fb923c;background:linear-gradient(180deg,rgba(251,146,60,.15),var(--card-bg));box-shadow:0 0 18px rgba(251,146,60,.28)}
+.lb-pod.me{outline:2px solid var(--accent-color)}
+.lb-medal{font-size:1.5rem;line-height:1}
+.lb-pod.p1 .lb-medal{font-size:2.1rem}
+.lb-pod .lb-ava{margin:6px auto;width:46px;height:46px;font-size:1.1rem}
+.lb-pod.p1 .lb-ava{width:58px;height:58px;font-size:1.35rem;box-shadow:0 0 18px rgba(251,191,36,.6)}
+.lb-pod-name{font-weight:bold;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-pod-val{font-weight:800;font-size:.85rem;color:var(--accent-color);margin-top:2px;white-space:nowrap}
+.lb-pod-lv{font-size:.68rem;color:var(--text-dim)}
+.lb-row{position:relative;display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;background:var(--card-bg);border:1px solid #232a36;border-radius:14px;overflow:hidden;animation:lb-up .4s both}
+.lb-row>:not(.lb-bar){position:relative}
+.lb-row>.lb-bar{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(167,139,250,.24),rgba(167,139,250,0));pointer-events:none}
+.lb-row.me{border-color:var(--accent-color);box-shadow:0 0 16px rgba(167,139,250,.38)}
+.lb-rank{width:30px;text-align:center;font-weight:800;color:var(--text-dim)}
+.lb-ava{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45)}
 .lb-main{flex:1;min-width:0}
 .lb-name{font-weight:bold;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-sub{font-size:.72rem;color:var(--text-dim)}
-.lb-val{font-weight:bold;color:var(--accent-color);white-space:nowrap}
+.lb-val{font-weight:800;color:var(--accent-color);white-space:nowrap}
 .lb-note{text-align:center;color:var(--text-dim);font-size:.85rem;padding:14px}
+@keyframes lb-up{from{opacity:0;transform:translateY(10px)}}
+/* светящиеся кнопки: при нажатии темнеют */
+.ad-btn{display:block;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:linear-gradient(110deg,#7c3aed,#c026d3 55%,#f472b6);color:#fff;font-weight:bold;font-size:.9rem;cursor:pointer;box-shadow:0 0 18px rgba(192,38,211,.6),0 4px 14px rgba(124,58,237,.4);transition:filter .12s,transform .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+.ad-btn:active{filter:brightness(.5);transform:scale(.96);box-shadow:none}
+.ad-btn.red{background:linear-gradient(110deg,#dc2626,#f43f5e 60%,#fb7185);box-shadow:0 0 18px rgba(244,63,94,.6),0 4px 14px rgba(220,38,38,.4)}
+.ad-btn.red:active{box-shadow:none}
+.ad-btn.full{width:100%}
+/* админ */
 .lb-admin{background:var(--card-bg);border:1px dashed var(--accent-color);border-radius:12px;padding:12px;margin-bottom:12px}
 .lb-admin-t{font-weight:bold;font-size:.9rem;margin-bottom:8px;color:var(--accent-color)}
-.lb-a-btns{display:flex;gap:6px}
+.lb-a-btns{display:flex;gap:8px;margin-top:6px}
+.lb-a-btns .ad-btn{flex:1}
 .ad-in{width:100%;margin:6px 0;padding:10px;border-radius:8px;border:1px solid #232a36;background:#0b0e14;color:#fff;font-size:.9rem;user-select:text;-webkit-user-select:text}
-.ad-block{border-top:1px solid #232a36;padding-top:10px;margin-top:10px}
-.ad-search{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.ad-block{border-top:1px solid #232a36;padding-top:10px;margin-top:12px}
+.ad-search{display:flex;gap:8px;margin-bottom:10px;align-items:center}
 .ad-search .ad-in{margin:0;flex:1}
-.ad-chk{display:flex;align-items:center;gap:6px;font-size:.85rem;margin:4px 0 6px}
+.ad-chk{display:flex;align-items:center;gap:6px;font-size:.85rem;margin:4px 0 8px}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -1236,16 +1268,16 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
 
         <!-- ЛИДЕРЫ -->
         <section id="leaderboard-tab" class="tab-content">
-            <h2>🏆 Таблица лидеров</h2>
-            <div class="sub-dim" id="lb-total">Лучшие игроки</div>
+            <div class="lb-hero"><div class="lb-hero-ic">🏆</div><div><h2>Таблица лидеров</h2><div class="sub-dim" id="lb-total">Лучшие игроки</div></div></div>
             <div class="lb-chips" id="lb-chips">
                 <button class="lb-chip active" data-s="earned">💎 Заработано</button>
                 <button class="lb-chip" data-s="cases">📦 Кейсы</button>
                 <button class="lb-chip" data-s="clicks">👆 Клики</button>
             </div>
             <div id="lb-me"></div>
+            <div id="lb-podium" class="lb-podium"></div>
             <div id="lb-list"></div>
-            <button class="btn" id="lb-refresh" style="margin-top:10px;">🔄 Обновить</button>
+            <button class="ad-btn full" id="lb-refresh" style="margin-top:12px;">🔄 Обновить</button>
         </section>
 
         <!-- АДМИН -->
@@ -1256,23 +1288,23 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
                 <div class="lb-admin-t" id="ad-sel">Игрок не выбран</div>
                 <b>💰 Деньги</b>
                 <input class="ad-in" id="ad-money" type="number" inputmode="numeric" placeholder="Сумма, $">
-                <div class="lb-a-btns"><button class="lb-chip" id="ad-give">➕ Выдать</button><button class="lb-chip" id="ad-take">➖ Списать</button></div>
-                <div class="ad-block"><b>🔫 Скин</b>
+                <div class="lb-a-btns"><button class="ad-btn" id="ad-give">➕ Выдать</button><button class="ad-btn red" id="ad-take">➖ Списать</button></div>
+                <div class="ad-block"><b>🔫 Скин</b> <span class="sub-dim" id="ad-sk-n"></span>
                     <input class="ad-in" id="ad-sf" placeholder="Фильтр по названию">
-                    <select class="ad-in" id="ad-skin" size="6"></select>
+                    <select class="ad-in" id="ad-skin" size="8"></select>
                     <label class="ad-chk"><input type="checkbox" id="ad-stt"> StatTrak™</label>
                     <input class="ad-in" id="ad-skin-n" type="number" inputmode="numeric" value="1" placeholder="Количество">
-                    <button class="lb-chip" id="ad-skin-go" style="width:100%">Выдать скин</button>
+                    <button class="ad-btn full" id="ad-skin-go">Выдать скин</button>
                 </div>
                 <div class="ad-block"><b>📦 Кейс</b>
                     <select class="ad-in" id="ad-case"></select>
                     <input class="ad-in" id="ad-case-n" type="number" inputmode="numeric" value="1" placeholder="Количество">
-                    <button class="lb-chip" id="ad-case-go" style="width:100%">Выдать кейс</button>
+                    <button class="ad-btn full" id="ad-case-go">Выдать кейс</button>
                 </div>
                 <div class="lb-note" id="ad-r"></div>
             </div>
-            <div class="ad-search"><input class="ad-in" id="ad-q" placeholder="Поиск: имя, @username или ID"><button class="lb-chip" id="ad-go" style="flex:0 0 52px">🔍</button></div>
-            <button class="lb-chip" id="ad-me" style="width:100%;margin-bottom:8px">👤 Выбрать себя</button>
+            <div class="ad-search"><input class="ad-in" id="ad-q" placeholder="Поиск: имя, @username или ID"><button class="ad-btn" id="ad-go" style="flex:0 0 52px">🔍</button></div>
+            <button class="ad-btn full" id="ad-me" style="margin-bottom:10px">👤 Выбрать себя</button>
             <div id="ad-list"></div>
         </section>
 
@@ -3992,10 +4024,24 @@ function send(){
 }
 
 /* ---------- рейтинг ---------- */
-function row(r){
+const hue=s=>{let x=0;for(const c of String(s||'?'))x=(x*31+c.charCodeAt(0))%360;return x};
+function ava(name,cls){
+ const a=el('div','lb-ava'+(cls?' '+cls:''),(Array.from(String(name||'?').trim())[0]||'?').toUpperCase());
+ const h=hue(name);
+ a.style.background='linear-gradient(135deg,hsl('+h+',70%,55%),hsl('+((h+50)%360)+',70%,42%))';
+ return a;
+}
+function pod(r,cls,medal,i){
+ const d=el('div','lb-pod '+cls+(r.me?' me':''));
+ d.style.animationDelay=(i*0.1)+'s';
+ d.append(el('div','lb-medal',medal),ava(r.name),el('div','lb-pod-name',r.name),el('div','lb-pod-val',fmt(r.value)+unit[sort]),el('div','lb-pod-lv','⭐ Ур. '+r.level));
+ return d;
+}
+function row(r,max,i){
  const d=el('div','lb-row'+(r.me?' me':''));
- d.append(el('div','lb-rank',r.rank<=3?['🥇','🥈','🥉'][r.rank-1]:r.rank));
- d.append(el('div','lb-ava',(r.name||'?').charAt(0).toUpperCase()));
+ d.style.animationDelay=(Math.min(i,12)*0.04)+'s';
+ const bar=el('div','lb-bar');bar.style.width=Math.max(6,Math.min(100,r.value/(max||1)*100))+'%';
+ d.append(bar,el('div','lb-rank','#'+r.rank),ava(r.name));
  const m=el('div','lb-main');
  m.append(el('div','lb-name',r.name+(r.me?' (ты)':'')),el('div','lb-sub','⭐ Ур. '+r.level+(r.username?' · @'+r.username:'')));
  d.append(m,el('div','lb-val',fmt(r.value)+unit[sort]));
@@ -4003,18 +4049,29 @@ function row(r){
 }
 async function load(){
  if(busy)return;busy=true;
- const list=$l('lb-list'),me=$l('lb-me');
+ const list=$l('lb-list'),me=$l('lb-me'),pd=$l('lb-podium');
  list.replaceChildren(el('div','lb-note','Загрузка…'));
  try{
   await send();
   const j=await post('/api/top',{sort});
-  list.replaceChildren(...(j.top.length?j.top.map(row):[el('div','lb-note','Пока никого нет — стань первым!')]));
+  const t=j.top||[],max=t.length?t[0].value:1;
   $l('lb-total').textContent='Игроков в рейтинге: '+fmt(j.total);
+  const pods=[[t[1],'p2','🥈',1],[t[0],'p1','👑',0],[t[2],'p3','🥉',2]].filter(x=>x[0]);
+  pd.replaceChildren(...pods.map(x=>pod(x[0],x[1],x[2],x[3])));
+  list.replaceChildren(...(t.length?t.slice(3).map((r,i)=>row(r,max,i)):[el('div','lb-note','Пока никого нет — стань первым!')]));
   me.replaceChildren();
-  if(j.me&&!j.top.some(r=>r.me))me.append(row({rank:j.me.rank,name:tgUser.first_name||'Ты',level:j.me.level,value:j.me.value,me:true}));
+  if(j.me){
+   const c=el('div','lb-me-card'),tx=el('div');
+   tx.append(el('div','lb-me-t','Твоё место · ⭐ Ур. '+j.me.level),el('div','lb-me-v',fmt(j.me.value)+unit[sort]));
+   c.append(el('div','lb-me-rank','#'+j.me.rank),tx);
+   me.append(c);
+  }else if(j.hidden){
+   me.append(el('div','lb-note','🛠 Ты администратор — в рейтинге не отображаешься'));
+  }
   const M={noinit:'⚠️ Telegram не передал данные пользователя (initData пуст). Открой игру через кнопку меню бота или Mini App-ссылку.',auth:'⚠️ Сервер не принял подпись Telegram (ошибка auth). Проверь BOT_TOKEN в Cloudflare — он должен быть от того же бота, через которого открыта игра.','bad data':'⚠️ Сервер отклонил данные результата.',net:'⚠️ Не удалось отправить твой результат на сервер.'};
   if(sendErr)me.append(el('div','lb-note',M[sendErr]||('⚠️ Ошибка: '+sendErr)));
  }catch(e){
+  pd.replaceChildren();
   list.replaceChildren(el('div','lb-note','Не удалось загрузить рейтинг. Проверь интернет и нажми «Обновить».'));
  }
  busy=false;
@@ -4066,9 +4123,11 @@ const ERRS={forbidden:'⛔ Сервер не считает вас админо�
 const errText=e=>ERRS[e]||('⚠️ Ошибка: '+e);
 function fillSkins(){
  const f=$l('ad-sf').value.trim().toLowerCase();
- const items=getCatalog().filter(x=>!f||x.name.toLowerCase().includes(f)).slice(0,200);
+ const all=getCatalog().slice().sort((x,y)=>y.price-x.price);
+ const items=all.filter(x=>!f||x.name.toLowerCase().includes(f));
  $l('ad-skin').replaceChildren(...items.map(x=>{const o=el('option',null,x.name+' — '+fmt(x.price)+' $');o.value=x.name;return o}));
  if(items.length)$l('ad-skin').selectedIndex=0;
+ $l('ad-sk-n').textContent='('+items.length+' из '+all.length+')';
 }
 function pickPlayer(id,name){
  picked={id,name};
@@ -4081,7 +4140,7 @@ function pickPlayer(id,name){
 function pRow(p){
  const d=el('div','lb-row'+(picked&&picked.id===p.id?' me':''));
  d.dataset.id=p.id;
- d.append(el('div','lb-ava',(p.name||'?').charAt(0).toUpperCase()));
+ d.append(ava(p.name));
  const m=el('div','lb-main');
  m.append(el('div','lb-name',p.name),el('div','lb-sub','ID '+p.id+(p.username?' · @'+p.username:'')+' · ⭐'+p.level+' · '+fmt(p.earned)+' $'));
  d.append(m);
@@ -4142,6 +4201,7 @@ window.openTab=function(id){
  if(IS_ADMIN&&id==='admin-tab'&&$l(id).classList.contains('active'))aOpen();
  return r;
 };
+document.addEventListener('touchstart',()=>{},{passive:true});
 setTimeout(pull,4000);
 setInterval(pull,30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
