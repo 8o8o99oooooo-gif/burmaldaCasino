@@ -762,6 +762,10 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
 .ad-search{display:flex;gap:8px;margin-bottom:10px;align-items:center}
 .ad-search .ad-in{margin:0;flex:1}
 .ad-chk{display:flex;align-items:center;gap:6px;font-size:.85rem;margin:4px 0 8px}
+.ph-prev{display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+.ph-prev img{width:110px;height:80px;object-fit:contain;background:#0b0e14;border:1px solid #232a36;border-radius:10px}
+details.lb-admin>summary{list-style:none;cursor:pointer}
+details.lb-admin>summary::-webkit-details-marker{display:none}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -1285,6 +1289,7 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
         <section id="admin-tab" class="tab-content">
             <h2>🛠 Админ-панель</h2>
             <div class="sub-dim" id="ad-total">Игроки</div>
+            <button class="ad-btn full" id="ad-photos" style="margin-bottom:12px">🖼 Фото скинов и кейсов</button>
             <div class="lb-admin" id="ad-actions" style="display:none">
                 <div class="lb-admin-t" id="ad-sel">Игрок не выбран</div>
                 <b>💰 Деньги</b>
@@ -1307,6 +1312,24 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
             <div class="ad-search"><input class="ad-in" id="ad-q" placeholder="Поиск: имя, @username или ID"><button class="ad-btn" id="ad-go" style="flex:0 0 52px">🔍</button></div>
             <button class="ad-btn full" id="ad-me" style="margin-bottom:10px">👤 Выбрать себя</button>
             <div id="ad-list"></div>
+        </section>
+
+<!-- ФОТО -->
+        <section id="photos-tab" class="tab-content">
+            <h2>🖼 Фото скинов и кейсов</h2>
+            <div class="sub-dim">Выбери предмет и загрузи для него фото из галереи</div>
+            <div class="lb-admin" id="ph-box" style="margin-top:12px">
+                <div class="lb-chips" id="ph-types" style="margin-top:0">
+                    <button class="lb-chip active" data-t="skin">🔫 Скины</button>
+                    <button class="lb-chip" data-t="case">📦 Кейсы</button>
+                </div>
+                <input class="ad-in" id="ph-f" placeholder="Фильтр по названию">
+                <select class="ad-in" id="ph-sel" size="8"></select>
+                <div class="ph-prev"><img id="ph-prev" alt="" style="visibility:hidden"><div class="sub-dim" id="ph-info"></div></div>
+                <div class="lb-a-btns"><button class="ad-btn" id="ph-up">📤 Загрузить фото</button><button class="ad-btn red" id="ph-del">🗑 Убрать</button></div>
+                <input type="file" id="ph-file" accept="image/*" style="display:none">
+                <div class="lb-note" id="ph-r"></div>
+            </div>
         </section>
 
         <!-- ПРОФИЛЬ -->
@@ -1370,6 +1393,7 @@ header::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(1
         <button class="nav-btn" onclick="openTab('profile-tab', this)"><span class="nav-icon">👤</span><span>Профиль</span></button>
         <button class="nav-btn" onclick="openTab('leaderboard-tab', this)"><span class="nav-icon">🏆</span><span>Лидеры</span></button>
         <button class="nav-btn" onclick="openTab('admin-tab', this)"><span class="nav-icon">🛠</span><span>Админ</span></button>
+        <button class="nav-btn" onclick="openTab('photos-tab', this)"><span class="nav-icon">🖼</span><span>Фото</span></button>
     </nav>
 
     <div class="fuse-fx" id="fuse-fx"><div id="fuse-fx-stage"></div><div id="fuse-fx-big" style="display:none;"><div class="fx-title">🔮 ФЬЮЗ</div></div><div class="fx-result" id="fuse-fx-res"></div><div class="fx-hint" id="fuse-fx-hint">нажми, чтобы закрыть</div><div id="fuse-fx-flash"></div></div>
@@ -3950,7 +3974,7 @@ renderInventory();
 (()=>{
 const nav=document.querySelector('nav');if(!nav)return;
 const MAIN=['cases-tab','clicker-tab','games-tab','inventory-tab'];
-const INFO={'upgrader-tab':'Улучши скин','fuse-tab':'3 скина → 1','quests-tab':'Награды и кейсы','profile-tab':'Статистика и уровень','leaderboard-tab':'Топ игроков','admin-tab':'Игроки, деньги, скины, кейсы'};
+const INFO={'upgrader-tab':'Улучши скин','fuse-tab':'3 скина → 1','quests-tab':'Награды и кейсы','profile-tab':'Статистика и уровень','leaderboard-tab':'Топ игроков','admin-tab':'Игроки, деньги, скины, кейсы','photos-tab':'Фото скинов и кейсов'};
 const btnBy={};
 nav.querySelectorAll('.nav-btn').forEach(b=>{
  const m=(b.getAttribute('onclick')||'').match(/'([\w-]+-tab)'/);if(!m)return;
@@ -4011,8 +4035,8 @@ const post=(p,b)=>fetch(API+p,{method:'POST',headers:{'Content-Type':'applicatio
 
 /* вкладка админа видна только админу */
 if(!IS_ADMIN){
- document.querySelectorAll('.ms-tile[data-tab="admin-tab"]').forEach(t=>t.remove());
- const s=$l('admin-tab');if(s)s.remove();
+ document.querySelectorAll('.ms-tile[data-tab="admin-tab"],.ms-tile[data-tab="photos-tab"]').forEach(t=>t.remove());
+ ['admin-tab','photos-tab'].forEach(i=>{const s=$l(i);if(s)s.remove()});
 }
 
 /* ---------- отправка очков ---------- */
@@ -4127,7 +4151,7 @@ async function pull(){
 
 /* ---------- вкладка «Админ» ---------- */
 let picked=null,adInit=false;
-const ERRS={forbidden:'⛔ Сервер не считает вас админом. Проверьте, что в worker.js в ADMIN_ID стоит ваш Telegram ID, и задеплойте Worker.','not found':'⚠️ Worker не обновлён: вставьте новый worker.js в Cloudflare и нажмите Deploy.','player not found':'Игрок не найден (он должен хотя бы раз открыть игру).','bad amount':'Неверное количество или сумма.','bad item':'Не выбран предмет.','bad kind':'Неверный тип подарка.','auth':'⚠️ Сервер не принял подпись Telegram.','bad signature':'⚠️ Подпись Telegram не прошла проверку: токен бота в Cloudflare не совпадает с ботом игры.','no initData':'⚠️ Открой игру через Telegram.'};
+const ERRS={forbidden:'⛔ Сервер не считает вас админом. Проверьте, что в worker.js в ADMIN_ID стоит ваш Telegram ID, и задеплойте Worker.','not found':'⚠️ Worker не обновлён: вставьте новый worker.js в Cloudflare и нажмите Deploy.','player not found':'Игрок не найден (он должен хотя бы раз открыть игру).','bad amount':'Неверное количество или сумма.','bad item':'Не выбран предмет.','bad kind':'Неверный тип подарка.','bad image':'Файл не подходит (нужна картинка PNG, JPG или WebP).','auth':'⚠️ Сервер не принял подпись Telegram.','bad signature':'⚠️ Подпись Telegram не прошла проверку: токен бота в Cloudflare не совпадает с ботом игры.','no initData':'⚠️ Открой игру через Telegram.'};
 const errText=e=>ERRS[e]||('⚠️ Ошибка: '+e);
 function fillSkins(){
  const f=$l('ad-sf').value.trim().toLowerCase();
@@ -4170,6 +4194,7 @@ function aOpen(){
  if(!adInit){
   adInit=true;
   fillSkins();
+  $l('ad-photos').onclick=()=>{const b=document.querySelector('.nav-btn[onclick*="photos-tab"]');if(b)b.click()};
   $l('ad-case').replaceChildren(...CASES.map(c=>{const o=el('option',null,c.title+' — '+fmt(c.price)+' $');o.value=c.id;return o}));
   $l('ad-sf').oninput=fillSkins;
   $l('ad-go').onclick=aLoad;
@@ -4201,12 +4226,103 @@ async function gift(kind,item,amount,st){
  }catch(e){r.textContent='⚠️ Нет связи с сервером'}
 }
 
+/* ---------- фото скинов и кейсов (загрузка админом) ---------- */
+let phType='skin',custom={skin:{},case:{}};const orig={skin:{},case:{}};
+const tgtMap=()=>phType==='skin'?SKIN_IMG_BASE:CASE_IMG;
+function rerender(){for(const f of ['renderCases','renderMyCases','renderInventory','renderQuests','renderIndex']){try{if(window[f])window[f]()}catch(e){}}}
+async function loadImages(redraw){
+ try{
+  const j=await post('/api/images',{});
+  custom={skin:{},case:{}};let n=0;
+  for(const it of (j.items||[])){
+   const u=API+'/img/'+it.id+'?v='+it.v,map=it.kind==='skin'?SKIN_IMG_BASE:it.kind==='case'?CASE_IMG:null;
+   if(!map)continue;
+   if(!(it.key in orig[it.kind]))orig[it.kind][it.key]=map[it.key];
+   map[it.key]=u;custom[it.kind][it.key]=1;n++;
+  }
+  if(n&&redraw)rerender();
+ }catch(e){}
+}
+window.__loadImages=loadImages;
+const enc=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
+const b64=b=>new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res({mime:b.type,data:String(f.result).split(',')[1]});f.onerror=rej;f.readAsDataURL(b)});
+async function shrink(file){ // уменьшаем фото до ~70 КБ
+ const url=URL.createObjectURL(file);
+ const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+ URL.revokeObjectURL(url);
+ for(const MAX of [320,256,192,128]){
+  const sc=Math.min(1,MAX/Math.max(img.naturalWidth,img.naturalHeight));
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(img.naturalWidth*sc));c.height=Math.max(1,Math.round(img.naturalHeight*sc));
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  for(const [t,q] of [['image/webp',.85],['image/webp',.65],['image/png'],['image/jpeg',.8],['image/jpeg',.55]]){
+   const b=await enc(c,t,q);
+   if(b&&b.type===t&&b.size<=70000)return b64(b);
+  }
+ }
+ throw new Error('big');
+}
+function phFill(){
+ const f=$l('ph-f').value.trim().toLowerCase(),s=$l('ph-sel');
+ let items=phType==='skin'?getCatalog().slice().sort((a,b)=>b.price-a.price).map(x=>[x.name,x.name+' — '+fmt(x.price)+' $']):CASES.map(c=>[c.id,c.title]);
+ items=items.filter(x=>!f||x[1].toLowerCase().includes(f));
+ s.replaceChildren(...items.map(x=>{const o=el('option',null,(custom[phType][x[0]]?'🖼 ':'')+x[1]);o.value=x[0];return o}));
+ if(items.length)s.selectedIndex=0;
+ phPrev();
+}
+function phPrev(){
+ const k=$l('ph-sel').value,u=k?tgtMap()[k]:'',im=$l('ph-prev');
+ if(u){im.src=u;im.style.visibility='visible'}else im.style.visibility='hidden';
+ $l('ph-info').textContent=k?(custom[phType][k]?'🖼 Загружено своё фото':'Стандартная иконка'):'';
+}
+function phInit(){
+ $l('ph-types').addEventListener('click',e=>{
+  const b=e.target.closest('.lb-chip');if(!b)return;
+  phType=b.dataset.t;
+  $l('ph-types').querySelectorAll('.lb-chip').forEach(x=>x.classList.toggle('active',x===b));
+  phFill();
+ });
+ $l('ph-f').oninput=phFill;
+ $l('ph-sel').onchange=phPrev;
+ $l('ph-up').onclick=()=>{if(!$l('ph-sel').value){$l('ph-r').textContent='Сначала выбери из списка';return}$l('ph-file').click()};
+ $l('ph-file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const r=$l('ph-r'),key=$l('ph-sel').value,kind=phType;
+  r.textContent='Обработка фото…';
+  try{
+   const {mime,data}=await shrink(f);
+   const j=await post('/api/admin/image',{kind,key,mime,data});
+   if(j.ok){r.textContent='✅ Фото сохранено ('+Math.round(data.length*0.75/1024)+' КБ)';await loadImages(true);phFill();[...$l('ph-sel').options].forEach((o,i)=>{if(o.value===key)$l('ph-sel').selectedIndex=i});phPrev()}
+   else r.textContent=errText(j.error);
+  }catch(err){r.textContent='⚠️ Не удалось обработать или отправить фото'}
+ };
+ $l('ph-del').onclick=async()=>{
+  const key=$l('ph-sel').value,kind=phType,r=$l('ph-r');
+  if(!key)return;
+  if(!custom[kind][key]){r.textContent='Своего фото у этого предмета нет';return}
+  try{
+   const j=await post('/api/admin/image',{kind,key,delete:true});
+   if(j.ok){
+    const map=kind==='skin'?SKIN_IMG_BASE:CASE_IMG,o=orig[kind][key];
+    if(o===undefined)delete map[key];else map[key]=o;
+    delete custom[kind][key];
+    r.textContent='🗑 Фото убрано, вернулась стандартная иконка';
+    rerender();phFill();
+   }else r.textContent=errText(j.error);
+  }catch(err){r.textContent='⚠️ Нет связи с сервером'}
+ };
+ phFill();
+}
+
+let phReady=false;
+function phOpen(){if(!phReady){phReady=true;phInit()}else phFill()}
 /* ---------- хуки ---------- */
 const _open=window.openTab;
 window.openTab=function(id){
  const r=_open.apply(this,arguments);
  if(id==='leaderboard-tab'&&$l(id).classList.contains('active'))load();
  if(IS_ADMIN&&id==='admin-tab'&&$l(id).classList.contains('active'))aOpen();
+ if(IS_ADMIN&&id==='photos-tab'&&$l(id).classList.contains('active'))phOpen();
  return r;
 };
 document.addEventListener('touchstart',()=>{},{passive:true});
@@ -4239,10 +4355,12 @@ window.addEventListener('pagehide',send);
   next();
  });
  Promise.all(CASES.map(c=>probe(c.id))).then(r=>{
-  if(!r.some(Boolean))return;
-  try{renderCases()}catch(e){}
-  try{renderMyCases()}catch(e){}
-  try{renderQuests()}catch(e){}
+  if(r.some(Boolean)){
+   try{renderCases()}catch(e){}
+   try{renderMyCases()}catch(e){}
+   try{renderQuests()}catch(e){}
+  }
+  if(window.__loadImages)window.__loadImages(true); // фото, загруженные админом, главнее
  });
 })();
 </script>
