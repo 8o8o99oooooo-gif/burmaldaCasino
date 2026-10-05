@@ -1471,9 +1471,9 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             <div class="sub-dim">Выбери предмет и загрузи для него фото из галереи</div>
             <div class="lb-admin" id="ph-box" style="margin-top:12px">
                 <div class="lb-chips" id="ph-types" style="margin-top:0">
-                    <button class="lb-chip active" data-t="skin">🔫 Скины</button>
-                    <button class="lb-chip" data-t="case">📦 Кейсы</button>
-                    <button class="lb-chip" data-t="bp">🏆 Battle Pass</button>
+                    <button class="lb-chip active" data-t="skin" onclick="setPhotoType('skin');return false;">🔫 Скины</button>
+                    <button class="lb-chip" data-t="case" onclick="setPhotoType('case');return false;">📦 Кейсы</button>
+                    <button class="lb-chip" data-t="bp" onclick="setPhotoType('bp');return false;">🏆 Battle Pass</button>
                 </div>
                 <input class="ad-in" id="ph-f" placeholder="Фильтр по названию">
                 <select class="ad-in" id="ph-sel" size="8"></select>
@@ -4531,12 +4531,17 @@ function phPrev(){
  if(u){im.src=u;im.style.visibility='visible'}else im.style.visibility='hidden';
  $l('ph-info').textContent=k?(custom[phType][k]?'🖼 Загружено своё фото':'Стандартная иконка'):'';
 }
+function setPhotoType(type){
+  if(!['skin','case','bp'].includes(type))return;
+  phType=type;
+  const box=$l('ph-types');
+  if(box)box.querySelectorAll('.lb-chip').forEach(x=>x.classList.toggle('active',x.dataset.t===type));
+  phFill();
+}
 function phInit(){
  $l('ph-types').addEventListener('click',e=>{
   const b=e.target.closest('.lb-chip');if(!b)return;
-  phType=b.dataset.t;
-  $l('ph-types').querySelectorAll('.lb-chip').forEach(x=>x.classList.toggle('active',x===b));
-  phFill();
+  setPhotoType(b.dataset.t);
  });
  $l('ph-f').oninput=phFill;
  $l('ph-sel').onchange=phPrev;
