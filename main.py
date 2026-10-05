@@ -19,7 +19,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 # ======================= НАСТРОЙКИ =======================
 # Токен лучше хранить в переменной окружения BOT_TOKEN.
 # Можно временно вставить прямо сюда: BOT_TOKEN = "123456:ABC..."
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8691327822:AAFBuwwT1T7TnkfJs6wFekwUCPThYPTW_pQ")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8691327822:AAHREP1hlS96J0IHipMrXbUE0Lk9j316Tsg")
 
 # Адрес игры на GitHub Pages.
 # WEBAPP_FILE — точное имя html-файла, который лежит в репозитории.
