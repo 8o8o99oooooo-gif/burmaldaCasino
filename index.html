@@ -1473,6 +1473,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                 <div class="lb-chips" id="ph-types" style="margin-top:0">
                     <button class="lb-chip active" data-t="skin">🔫 Скины</button>
                     <button class="lb-chip" data-t="case">📦 Кейсы</button>
+                    <button class="lb-chip" data-t="bp">🏆 Battle Pass</button>
                 </div>
                 <input class="ad-in" id="ph-f" placeholder="Фильтр по названию">
                 <select class="ad-in" id="ph-sel" size="8"></select>
@@ -1801,6 +1802,8 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 
         // StatTrak-версии берут картинку обычного скина
         const ST_PREFIX = 'StatTrak™ ';
+        /* ===== ИЗОБРАЖЕНИЯ НАГРАД BATTLE PASS ===== */
+        const BP_IMG_BASE = { mystery:'', flask:'', coins:'', level1:'', level2:'', level3:'', level4:'', allnothing:'', oneThird:'' };
         const SKIN_IMG = new Proxy(SKIN_IMG_BASE, { get(t, k) { return typeof k === 'string' ? t[k.replace(ST_PREFIX, '')] : t[k]; } });
         const baseName = n => n.replace(ST_PREFIX, '');
         function makeST(it) { return { ...it, name: ST_PREFIX + it.name, price: it.price * 2, st: true }; }
@@ -2307,6 +2310,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             if (clicker.energy < 1) { showToast('⚡ Нет энергии! Подожди или купи хранилище'); return; }
             clicker.energy -= 1;
             addMoney(clickValue());
+            if (typeof window.bpAddXP === 'function') window.bpAddXP(0.2, 'кликер', true);
             spawnClickFloat(ev);
             state.stats.clicks++;
             clickBonusStep();
@@ -3978,21 +3982,21 @@ function paintLvl(){const li=levelInfo(state.stats.totalEarned),r=rank(li.level)
 const _up=window.updateProfileStats;
 window.updateProfileStats=function(){_up.apply(this,arguments);paintLvl()};
 paintLvl();
-/* кликер: комбо до x5, криты 8% (×5) */
-let cmb=0,last=0,mx=1,on=false;const mult=()=>on?2:1;
+/* кликер: комбо на 30 быстрых кликов, крит 8% */
+let cmb=0,last=0,mx=1,on=false;const COMBO_MAX=30;const mult=()=>on?2:1;
 const box=document.createElement('div');box.id='cmb';
-box.innerHTML='<div class="x" id="cmb-x">x1</div><div class="m"><b>Комбо</b>: кликай быстрее, множитель до x2<div class="bar"><i id="cmb-f"></i></div>Крит: 8% шанс, награда ×2</div><button id="cmb-s" title="Звук"></button>';
+box.innerHTML='<div class="x" id="cmb-x">x1</div><div class="m"><b>Комбо</b>: сделай 30 быстрых кликов подряд → x2<div class="bar"><i id="cmb-f"></i></div><span id="cmb-text">0 / 30 кликов</span> · Крит: 8% шанс, награда ×2</div><button id="cmb-s" title="Звук"></button>';
 const st=document.querySelector('.click-stats');st.parentNode.insertBefore(box,st);
 const paintMute=()=>$('cmb-s').textContent=mute?'🔇':'🔊';paintMute();
 $('cmb-s').onclick=()=>{mute=!mute;try{localStorage.setItem('rd_mute',mute?'1':'0')}catch(e){}paintMute()};
-function paintCmb(){if(!on&&cmb>=5)on=true;else if(on&&cmb<3)on=false;box.classList.toggle('on',on);const m=mult();if(m!==mx){mx=m;$('cmb-x').textContent='x'+m;box.classList.remove('pop');void box.offsetWidth;box.classList.add('pop')}
- $('cmb-f').style.width=Math.min(100,cmb/10*100)+'%';$('click-btn').style.setProperty('--h',m-1)}
+function paintCmb(){if(!on&&cmb>=COMBO_MAX)on=true;else if(on&&cmb<20)on=false;box.classList.toggle('on',on);const m=mult();if(m!==mx){mx=m;$('cmb-x').textContent='x'+m;box.classList.remove('pop');void box.offsetWidth;box.classList.add('pop');if(on){showToast('🔥 КОМБО 30! Множитель клика ×2');if(navigator.vibrate)navigator.vibrate([30,40,30])}}
+ $('cmb-f').style.width=Math.min(100,cmb/COMBO_MAX*100)+'%';$('cmb-text').textContent=on?'🔥 КОМБО АКТИВНО · '+Math.floor(cmb)+' / 30':Math.floor(cmb)+' / 30 кликов';$('click-btn').style.setProperty('--h',m-1)}
 setInterval(()=>{if(cmb>0&&performance.now()-last>500){cmb=Math.max(0,cmb-.6);paintCmb()}},100);
 const _dc=window.doClick;
 window.doClick=function(ev){
  const e0=clicker.energy;_dc.call(this,ev);if(clicker.energy>=e0)return;
  const now=performance.now(),gap=now-last;last=now;
- cmb=Math.min(10,cmb+(gap<350?1:gap<600?.5:0));paintCmb();
+ cmb=Math.min(COMBO_MAX,cmb+(gap<350?1:gap<600?.5:0));paintCmb();
  const m=mult(),crit=Math.random()<.08,base=clickValue(),total=base*m*(crit?2:1);
  if(total>base)addMoney(total-base);
  const f=$('click-wrap').lastElementChild;
@@ -4479,15 +4483,15 @@ async function gift(kind,item,amount,st){
 }
 
 /* ---------- фото скинов и кейсов (загрузка админом) ---------- */
-let phType='skin',custom={skin:{},case:{}};const orig={skin:{},case:{}};
-const tgtMap=()=>phType==='skin'?SKIN_IMG_BASE:CASE_IMG;
+let phType='skin',custom={skin:{},case:{},bp:{}};const orig={skin:{},case:{},bp:{}};
+const tgtMap=()=>phType==='skin'?SKIN_IMG_BASE:phType==='case'?CASE_IMG:BP_IMG_BASE;
 function rerender(){for(const f of ['renderCases','renderMyCases','renderInventory','renderQuests','renderIndex']){try{if(window[f])window[f]()}catch(e){}}}
 async function loadImages(redraw){
  try{
   const j=await post('/api/images',{});
   custom={skin:{},case:{}};let n=0;
   for(const it of (j.items||[])){
-   const u=API+'/img/'+it.id+'?v='+it.v,map=it.kind==='skin'?SKIN_IMG_BASE:it.kind==='case'?CASE_IMG:null;
+   const u=API+'/img/'+it.id+'?v='+it.v,map=it.kind==='skin'?SKIN_IMG_BASE:it.kind==='case'?CASE_IMG:it.kind==='bp'?BP_IMG_BASE:null;
    if(!map)continue;
    if(!(it.key in orig[it.kind]))orig[it.kind][it.key]=map[it.key];
    map[it.key]=u;custom[it.kind][it.key]=1;n++;
@@ -4516,7 +4520,7 @@ async function shrink(file){ // уменьшаем фото до ~70 КБ
 }
 function phFill(){
  const f=$l('ph-f').value.trim().toLowerCase(),s=$l('ph-sel');
- let items=phType==='skin'?getCatalog().slice().sort((a,b)=>b.price-a.price).map(x=>[x.name,x.name+' — '+fmt(x.price)+' $']):CASES.map(c=>[c.id,c.title]);
+ let items;if(phType==='skin')items=getCatalog().slice().sort((a,b)=>b.price-a.price).map(x=>[x.name,x.name+' — '+fmt(x.price)+' $']);else if(phType==='case')items=CASES.map(c=>[c.id,c.title]);else items=[['mystery','❓ Кейс ?'],['flask','🧪 Колбочка ?'],['coins','🪙 Кейс монет'],['level1','Ⅰ Кейс уровня 1'],['level2','Ⅱ Кейс уровня 2'],['level3','Ⅲ Кейс уровня 3'],['level4','Ⅳ Кейс уровня 4'],['allnothing','⚫ Всё или ничего'],['oneThird','🎯 Кейс 1/3']];
  items=items.filter(x=>!f||x[1].toLowerCase().includes(f));
  s.replaceChildren(...items.map(x=>{const o=el('option',null,(custom[phType][x[0]]?'🖼 ':'')+x[1]);o.value=x[0];return o}));
  if(items.length)s.selectedIndex=0;
@@ -4555,7 +4559,7 @@ function phInit(){
   try{
    const j=await post('/api/admin/image',{kind,key,delete:true});
    if(j.ok){
-    const map=kind==='skin'?SKIN_IMG_BASE:CASE_IMG,o=orig[kind][key];
+    const map=kind==='skin'?SKIN_IMG_BASE:kind==='case'?CASE_IMG:BP_IMG_BASE,o=orig[kind][key];
     if(o===undefined)delete map[key];else map[key]=o;
     delete custom[kind][key];
     r.textContent='🗑 Фото убрано, вернулась стандартная иконка';
@@ -4660,5 +4664,85 @@ window.playCoinflip=function(side){
  return _play.apply(this,arguments)};
 })();
 </script>
+
+<style>
+/* ===== BATTLE PASS ===== */
+.bp-wrap{width:100%;margin:16px 0 18px;border:1px solid rgba(250,204,21,.35);border-radius:20px;background:radial-gradient(circle at 15% 0%,rgba(250,204,21,.15),transparent 40%),linear-gradient(160deg,#211936,#120d20);box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 35px rgba(250,204,21,.04);overflow:hidden}
+.bp-head{padding:16px 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}.bp-title{font-size:1.05rem;font-weight:900;color:#fde68a}.bp-sub{font-size:.72rem;color:var(--text-dim);margin-top:3px}.bp-lvl{min-width:78px;text-align:center;padding:8px 10px;border-radius:14px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.3);font-weight:900;color:#fde68a}
+.bp-progress{padding:0 16px 14px}.bp-progress-top{display:flex;justify-content:space-between;font-size:.74rem;color:var(--text-dim);margin-bottom:7px}.bp-bar{height:14px;border-radius:999px;background:#0b0714;border:1px solid #30233f;overflow:hidden}.bp-fill{height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#fde047,#f97316);box-shadow:0 0 16px rgba(250,204,21,.6);transition:width .35s}
+.bp-scroll{overflow-x:auto;padding:0 14px 14px;scrollbar-width:thin}.bp-track{display:flex;gap:9px;min-width:max-content}.bp-node{width:112px;min-height:154px;border-radius:15px;padding:10px 8px;text-align:center;position:relative;background:linear-gradient(180deg,#251b3e,#160f25);border:1px solid rgba(167,139,250,.2);display:flex;flex-direction:column;align-items:center}.bp-node.unlocked{border-color:rgba(250,204,21,.55);box-shadow:0 0 18px rgba(250,204,21,.11)}.bp-node.claimed{border-color:rgba(34,197,94,.45);opacity:.78}.bp-num{position:absolute;left:7px;top:6px;font-size:.65rem;font-weight:900;color:#c4b5fd}.bp-ico{font-size:2rem;margin:14px 0 6px}.bp-rname{font-size:.69rem;font-weight:800;line-height:1.15;min-height:33px}.bp-need{font-size:.61rem;color:var(--text-dim);margin:5px 0 7px}.bp-claim{margin-top:auto;width:100%;padding:7px 5px;border:0;border-radius:9px;font-size:.67rem;font-weight:900;cursor:pointer;background:linear-gradient(90deg,#d97706,#facc15);color:#211400}.bp-claim:disabled{cursor:default;background:#2a2142;color:#777}.bp-claim.done{background:rgba(34,197,94,.16);color:#86efac;border:1px solid rgba(34,197,94,.28)}
+.bp-reward-img{width:54px;height:54px;object-fit:contain;display:block;filter:drop-shadow(0 5px 10px rgba(0,0,0,.55));margin:8px auto 4px}.bp-ico:has(.bp-reward-img){height:68px;display:flex;align-items:center;justify-content:center}
+.bp-card{display:inline-flex;align-items:center;justify-content:center;width:74px;height:46px;border-radius:9px;font-weight:1000;color:#15100b;text-shadow:0 1px rgba(255,255,255,.25);box-shadow:inset 0 0 10px rgba(255,255,255,.3)}.bp-card.bronze{background:linear-gradient(135deg,#7c3f1d,#d38b55)}.bp-card.silver{background:linear-gradient(135deg,#8b93a1,#e5e7eb)}.bp-card.gold{background:linear-gradient(135deg,#b77905,#fde047)}
+@media(max-width:420px){.bp-node{width:105px}}
+</style>
+<script>
+/* ===== BATTLE PASS 50 LEVELS ===== */
+(()=>{
+ const BP_BOX_INFO={
+  mystery:{name:'Кейс ?',ico:'❓'}, flask:{name:'Колбочка ?',ico:'🧪'}, coins:{name:'Кейс монет',ico:'🪙'},
+  level1:{name:'Кейс уровня 1',ico:'Ⅰ'}, level2:{name:'Кейс уровня 2',ico:'Ⅱ'}, level3:{name:'Кейс уровня 3',ico:'Ⅲ'}, level4:{name:'Кейс уровня 4',ico:'Ⅳ'},
+  allnothing:{name:'Всё или ничего',ico:'⚫'}, oneThird:{name:'1/3',ico:'🎯'}
+ };
+ const BP_REWARDS={
+  1:[['box','mystery']],2:[['box','flask']],3:[['case','aurora']],4:[['box','coins']],5:[['box','level1']],6:[['box','coins']],7:[['case','aurora']],8:[['case','midas']],9:[['card',5]],10:[['box','mystery']],
+  11:[['box','level1']],12:[['box','coins']],13:[['money',150000]],14:[['box','flask']],15:[['money',150000]],16:[['box','coins']],17:[['money',150000]],18:[['box','allnothing']],19:[['box','mystery']],20:[['box','level2']],
+  21:[['box','flask']],22:[['box','coins']],23:[['money',230000]],24:[['card',10]],25:[['box','allnothing']],26:[['box','flask']],27:[['box','oneThird']],28:[['box','level2'],['money',230000]],29:[['box','coins']],30:[['box','mystery']],
+  31:[['money',230000]],32:[['box','coins']],33:[],34:[['box','allnothing']],35:[['box','oneThird']],36:[['box','coins']],37:[['money',320000]],38:[['money',320000]],39:[['box','oneThird']],40:[['box','mystery']],
+  41:[['money',320000]],42:[['money',320000]],43:[['box','level3']],44:[['box','allnothing']],45:[['box','coins']],46:[['money',320000]],47:[['box','coins']],48:[],49:[['card',15]],50:[['box','level4']]
+ };
+ const COINS=[10,50,100,500,1000,1500,5000,10000,30000,50000,80000,150000,250000,500000];
+ function bp(){
+  if(!state.battlePass) state.battlePass={xp:0,claimed:{},boxes:{}};
+  if(!state.battlePass.claimed) state.battlePass.claimed={};
+  if(!state.battlePass.boxes) state.battlePass.boxes={};
+  return state.battlePass;
+ }
+ function req(level){ if(level<=0)return 0; return level<=49?level*500:49*500+1500; }
+ function unlocked(){let x=bp().xp,l=0;for(let i=1;i<=50;i++){if(x>=req(i))l=i;else break}return l}
+ function nextData(){const l=unlocked();if(l>=50)return {l:50,cur:1,txt:'MAX'};const a=req(l),b=req(l+1),x=bp().xp;return {l,cur:Math.max(0,Math.min(1,(x-a)/(b-a))),txt:`${fmt(x-a)} / ${fmt(b-a)} XP`}}
+ function rewardName(level){const a=BP_REWARDS[level]||[];if(!a.length)return 'Без награды';return a.map(r=>{if(r[0]==='box')return BP_BOX_INFO[r[1]].name;if(r[0]==='case')return r[1]==='aurora'?'Aurora Vault':'Midas Touch';if(r[0]==='money')return fmt(r[1])+' ₽';if(r[0]==='card')return `Карточка +${r[1]}%`;return ''}).join(' + ')}
+ function bpRewardImg(r){if(!r)return '';const key=r[0]==='box'?r[1]:r[0]==='case'?r[1]:'';if(r[0]==='case')return CASE_IMG[key]||'';if(r[0]==='box')return BP_IMG_BASE[key]||'';return ''}
+ function rewardIco(level){const a=BP_REWARDS[level]||[];if(!a.length)return '—';const r=a[0],u=bpRewardImg(r);if(u)return `<img class="bp-reward-img" src="${u}" alt="">`;if(r[0]==='box')return BP_BOX_INFO[r[1]].ico;if(r[0]==='case')return r[1]==='aurora'?'🌌':'💰';if(r[0]==='money')return '💵';if(r[0]==='card')return r[1]===5?'🥉':r[1]===10?'🥈':'🥇';return '🎁'}
+ function cardItem(p){return {name:`Карточка шанса +${p}%`,price:0,rarity:p===15?'special':p===10?'covert':'classified',bpCard:p,wear:'BP'} }
+ function grant(r){const b=bp();if(r[0]==='box'){b.boxes[r[1]]=(b.boxes[r[1]]||0)+1;return `${BP_BOX_INFO[r[1]].name} ×1`}
+  if(r[0]==='case'){state.cases[r[1]]=(state.cases[r[1]]||0)+1;try{renderMyCases()}catch(e){}return (CASES.find(c=>c.id===r[1])||{title:r[1]}).title+' ×1'}
+  if(r[0]==='money'){addMoney(r[1]);return fmt(r[1])+' ₽'}
+  if(r[0]==='card'){state.inventory.push(cardItem(r[1]));try{renderInventory()}catch(e){}return `Карточка +${r[1]}%`}
+ }
+ window.bpClaim=function(level){const b=bp();if(b.claimed[level])return;if(bp().xp<req(level)){showToast('🔒 Уровень ещё не открыт');return}const rewards=BP_REWARDS[level]||[];const got=rewards.map(grant).filter(Boolean);b.claimed[level]=true;saveGame();renderBP();showToast(got.length?'🎁 '+got.join(' + '):`✅ Уровень ${level} отмечен`)};
+ function nearest(target,min,max){const arr=getCatalog().filter(x=>x.price>=min&&x.price<=max);if(!arr.length)return getCatalog().reduce((a,c)=>Math.abs(c.price-target)<Math.abs(a.price-target)?c:a);return arr.reduce((a,c)=>Math.abs(c.price-target)<Math.abs(a.price-target)?c:a)}
+ function pool8(min,max,n=8){const arr=getCatalog().filter(x=>x.price>=min&&x.price<=max).sort((a,b)=>a.price-b.price);if(!arr.length)return [];const out=[];for(let i=0;i<n;i++)out.push(arr[Math.round(i*(arr.length-1)/Math.max(1,n-1))]);return [...new Map(out.map(x=>[x.name,x])).values()]}
+ function weighted(items){if(!items.length)return null;const ws=items.map((x,i)=>1/Math.pow(1+i,1.18)),sum=ws.reduce((a,b)=>a+b,0);let r=Math.random()*sum;for(let i=0;i<items.length;i++){r-=ws[i];if(r<=0)return items[i]}return items[items.length-1]}
+ function topOnePercent(items){const s=[...items].sort((a,b)=>a.price-b.price);if(!s.length)return null;if(Math.random()<.01)return s[s.length-1];return weighted(s.slice(0,-1).sort((a,b)=>a.price-b.price))||s[0]}
+ function addSkin(it,title){if(!it)return;const o={...it};state.inventory.push(o);try{renderInventory()}catch(e){}try{showSkinNotify(o,title)}catch(e){showToast(title+' '+o.name)}return `${o.name} (${fmt(o.price)} ₽)`}
+ window.bpOpenBox=function(type){const b=bp();if(!(b.boxes[type]>0))return;b.boxes[type]--;let msg='';
+  if(type==='coins'){const v=COINS[Math.floor(Math.random()*COINS.length)];addMoney(v);msg=`🪙 Выпало ${fmt(v)} ₽`}
+  else if(type==='flask'){const cs=CASES.filter(c=>c.price<=500000).sort((a,b)=>a.price-b.price);let c;if(Math.random()<.01)c=cs[cs.length-1];else c=weighted(cs.slice(0,-1))||cs[0];state.cases[c.id]=(state.cases[c.id]||0)+1;try{renderMyCases()}catch(e){}msg=`🧪 Выпал кейс: ${c.title}`}
+  else if(type==='mystery'){const it=topOnePercent(getCatalog().filter(x=>x.price>=500&&x.price<=150000));msg='❓ '+addSkin(it,'❓ Кейс со знаком вопроса:')}
+  else if(type==='allnothing'){const it=Math.random()<.05?nearest(500000,350000,650000):nearest(100,50,250);msg='⚫ '+addSkin(it,'⚫ Всё или ничего:')}
+  else if(type==='oneThird'){const p=[nearest(85000,65000,120000),nearest(100000,70000,130000),nearest(115000,80000,150000)];const u=[...new Map(p.map(x=>[x.name,x])).values()];const it=u[Math.floor(Math.random()*u.length)];msg='🎯 '+addSkin(it,'🎯 Кейс 1/3:')}
+  else {const cfg={level1:[5000,250000,8],level2:[25000,500000,8],level3:[250000,2000000,8],level4:[1000000,10000000,5]}[type];const p=pool8(cfg[0],cfg[1],cfg[2]).sort((a,b)=>a.price-b.price);const it=weighted(p);msg=`🎁 ${addSkin(it,BP_BOX_INFO[type].name+':')}`}
+  b.xp+=5;saveGame();renderBP();showToast(msg+' · ⭐ +5 XP')};
+ window.bpAddXP=function(n,why,silent=false){if(!Number.isFinite(n)||n<=0)return;bp().xp+=n;saveGame();renderBP();if(!silent)showToast(`⭐ +${n} XP${why?' · '+why:''}`)};
+ function renderBP(){let host=document.getElementById('battle-pass');if(!host)return;const d=nextData(),b=bp(),ul=unlocked();
+  host.innerHTML=`<div class="bp-head"><div><div class="bp-title">🏆 BATTLE PASS</div><div class="bp-sub">50 уровней · прогресс сохраняется автоматически</div></div><div class="bp-lvl">LVL ${ul}/50</div></div><div class="bp-progress"><div class="bp-progress-top"><span>Всего: ${fmt(b.xp)} XP</span><span>${d.txt}</span></div><div class="bp-bar"><div class="bp-fill" style="width:${d.cur*100}%"></div></div></div><div class="bp-scroll"><div class="bp-track">${Array.from({length:50},(_,i)=>{const l=i+1,u=b.xp>=req(l),c=!!b.claimed[l];return `<div class="bp-node ${u?'unlocked':''} ${c?'claimed':''}"><div class="bp-num">${l}</div><div class="bp-ico">${rewardIco(l)}</div><div class="bp-rname">${rewardName(l)}</div><div class="bp-need">${l===50?'49→50: 1 500 XP':'500 XP'}</div><button class="bp-claim ${c?'done':''}" ${(!u||c)?'disabled':''} onclick="bpClaim(${l})">${c?'Получено':u?'Забрать':'Закрыто'}</button></div>`}).join('')}</div></div>`}
+ function mount(){const sec=document.getElementById('cases-tab'),list=document.getElementById('cases-list');if(!sec||!list)return;let h=document.getElementById('battle-pass');if(!h){h=document.createElement('div');h.id='battle-pass';h.className='bp-wrap';list.parentNode.insertBefore(h,list)}bp();renderBP()}
+ // XP за открытие кейсов
+ const _spin=window.spinCase;window.spinCase=function(){if(spinning||!currentCase)return _spin.apply(this,arguments);const n=openCount||1,price=currentCase.price||0,owned=(state.cases&&state.cases[currentCase.id])||0,cost=price*Math.max(0,n-Math.min(owned,n));if(state.balance<cost)return _spin.apply(this,arguments);const before=spinning,r=_spin.apply(this,arguments);if(!before&&spinning){const each=price>=100000?50:price>=10000?20:5;bpAddXP(each*n,`открыто кейсов: ${n}`)}return r};
+ // Карточки шанса: считаются как +5/+10/+15 процентных пунктов и расходуются за один апгрейд
+ const _chance=window.upgChance;window.upgChance=function(){const base=_chance.apply(this,arguments),bonus=upg.list.reduce((s,it)=>s+(it.bpCard||0),0);return Math.min(95,base+bonus)};
+ const _pickOwn=window.pickOwn;window.pickOwn=function(idx){const it=state.inventory[idx];if(it&&it.bpCard&&upg.list.some(x=>x.bpCard&&x!==it)){showToast('Можно использовать только одну карточку шанса за апгрейд');return}return _pickOwn.apply(this,arguments)};
+ const _rop=window.renderOwnPicker;window.renderOwnPicker=function(){_rop.apply(this,arguments);document.querySelectorAll('#own-picker .picker-row').forEach((row,i)=>{});return};
+ // XP за победы. Проверяем текст результата после завершения анимации. Ракета и плинко намеренно не подключены.
+ const seen={};function watch(key,id,delay,rx){setTimeout(()=>{const el=document.getElementById(id),t=el?el.textContent:'';if(rx.test(t)){const sig=key+'|'+t;if(seen[key]!==sig){seen[key]=sig;bpAddXP(10,'победа в мини-игре')}}},delay)}
+ const wrap=(name,id,delay,rx)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(){const r=f.apply(this,arguments);watch(name,id,delay,rx);return r}};
+ wrap('cashoutMines','mines-result',80,/забра|выиг|побед/i);wrap('cashoutTower','tower-result',80,/забра|выиг|побед/i);wrap('playCoinflip','coinflip-result',1800,/угадал|побед|выиг/i);wrap('spinWheel','wheel-result',4200,/побед|выиг|\+/i);wrap('playDice','dice-result',1000,/победа/i);wrap('playSlots','slots-result',1900,/ДЖЕКПОТ/i);wrap('playRoulette','roulette-result',2100,/победа/i);
+ const _bj=window.bjFinish;if(typeof _bj==='function')window.bjFinish=function(){const r=_bj.apply(this,arguments);watch('bjFinish','bj-result',30,/БЛЭКДЖЕК|Победа/i);return r};
+ // Красивое отображение карточек в инвентаре/апгрейдере без внешних картинок
+ const _rinv=window.renderInventory;window.renderInventory=function(){const r=_rinv.apply(this,arguments);document.querySelectorAll('#inventory-list .inv-card').forEach(card=>{const txt=card.textContent||'';const m=txt.match(/Карточка шанса \+(5|10|15)%/);if(m){const img=card.querySelector('img');if(img){img.style.display='none';const d=document.createElement('div');d.className='bp-card '+(m[1]==='5'?'bronze':m[1]==='10'?'silver':'gold');d.textContent='+'+m[1]+'%';img.parentNode.insertBefore(d,img)}}});return r};
+ mount();try{renderInventory()}catch(e){};
+})();
+</script>
+
 </body>
 </html>
