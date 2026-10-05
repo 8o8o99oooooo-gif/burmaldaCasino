@@ -1276,6 +1276,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                 <div class="ugx-mid">
                     <div class="ugx-val"><span id="ugx-money">0</span> <small>/ <span id="ugx-max">0</span> ₽</small></div>
                     <input id="ugx-range" type="range" min="0" max="0" value="0" step="1" oninput="ugxMoney(this.value)">
+                    <div id="ugx-hint" style="margin-top:8px;font-size:.78rem;color:#8d93a6;font-weight:600;"></div>
                 </div>
                 <button onclick="ugxStep(1)" aria-label="больше">+</button>
             </div>
@@ -1319,6 +1320,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                     <div class="upg-panel-title">💡 Как это работает</div>
                     <ul class="upg-tips">
                         <li>🎯 <b>Шанс</b> = твоя ставка / цена цели. Ставка — скины и/или деньги с ползунка.</li>
+                        <li>💰 Деньги можно докинуть только до ближайшего порога шанса: до 35%, 55% или 75%. Например, нужно +18% — докинешь максимум 18% от цены цели.</li>
                         <li>⚡ Кнопки x2…x25 сами подбирают цель, 🔀 — случайная цель.</li>
                         <li>🔒 Во время апгрейда нельзя уйти с вкладки — дождись результата.</li>
                         <li>💀 При неудаче ставка сгорает, при успехе ты получаешь цель.</li>
@@ -2119,7 +2121,19 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         const UPG_MAX = 9;
         const UPG_UP = '<div class="ug-up"><svg viewBox="0 0 100 100"><defs><linearGradient id="ugg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9d5ff"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs><path fill="url(#ugg)" d="M8 46 50 14 92 46V62L50 30 8 62Z"/><path fill="url(#ugg)" d="M8 80 50 48 92 80V96L50 64 8 96Z"/></svg></div>';
         function mkFT(it) { const o = { ...it }; o.wear = 'FT'; o.fl = +(0.15 + Math.random() * 0.23).toFixed(4); return o; }
+        // Сумма выбранных скинов: цель должна стоить дороже
+        function upgSkinsSum() { return upg.list.reduce((a, it) => a + it.price, 0); }
         function upgStake() { return upg.list.reduce((a, it) => a + it.price, 0) + (upg.money || 0); }
+        // Сколько денег можно докинуть: шанс (без денег) поднимается максимум до ближайшего порога 35 / 55 / 75 %
+        function upgMoneyInfo() {
+            const t = upg.target;
+            if (!t || !(t.price > 0)) return { cap: 0, tier: 0, base: 0, noTarget: true };
+            const bonus = upg.list.reduce((s, it) => s + (it.bpCard || 0), 0);
+            const base = upg.list.reduce((s, it) => s + it.price, 0) / t.price * 100 + bonus;
+            const tier = base < 35 ? 35 : base < 55 ? 55 : base < 75 ? 75 : 0;
+            const tierCap = tier ? Math.max(0, Math.floor(t.price * (tier - base) / 100 + 1e-6)) : 0;
+            return { cap: Math.max(0, Math.min(Math.floor(state.balance), tierCap)), tierCap, tier, base };
+        }
 
         const $ = id => document.getElementById(id);
         const fmt = n => Math.round(n).toLocaleString('ru-RU');
@@ -2745,7 +2759,8 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 
         function renderTargetPicker() {
             const el = $('target-picker');
-            const all = getCatalog().map(it => ({ it }));
+            const minP = upgSkinsSum();
+            const all = getCatalog().filter(it => !(minP > 0) || it.price > minP).map(it => ({ it }));
             const list = ugxFilter(all), part = list.slice(0, UGX.lim.target);
             el.innerHTML = part.length
                 ? part.map(o => ugxCard(o.it, !!(upg.target && upg.target.name === o.it.name), `pickTarget('${o.it.name.replace(/'/g, "\\'")}')`)).join('') + ugxMore('target', list.length, part.length)
@@ -2790,21 +2805,31 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         // Деньги в ставку
         function ugxSync() {
             const r = $('ugx-range'); if (!r) return;
-            const mx = Math.max(0, Math.floor(state.balance));
+            const inf = upgMoneyInfo(), mx = inf.cap;
             r.max = mx; r.value = Math.min(upg.money || 0, mx);
             r.style.setProperty('--p', (mx ? (r.value / mx * 100) : 0) + '%');
             $('ugx-money').textContent = fmt(upg.money || 0);
-            $('ugx-max').textContent = fmt(state.balance);
+            $('ugx-max').textContent = fmt(mx);
+            const h = $('ugx-hint');
+            if (h) {
+                if (inf.noTarget) h.textContent = 'Сначала выбери желаемый предмет';
+                else if (!inf.tier) h.textContent = 'Шанс уже 75% и выше — докинуть деньги нельзя';
+                else h.textContent = 'Можно докинуть до ' + inf.tier + '% шанса (+' + (inf.tier - inf.base).toFixed(2) + '%)' + (inf.cap < inf.tierCap ? ' · ограничено балансом' : '');
+            }
         }
         function ugxMoney(v) {
             if (upg.spinning) return;
-            upg.money = Math.max(0, Math.min(Math.floor(state.balance), Math.round(+v) || 0));
+            const want = Math.round(+v) || 0, inf = upgMoneyInfo();
+            if (want > 0 && inf.noTarget) showToast('Сначала выбери желаемый предмет');
+            else if (want > inf.cap && inf.cap < inf.tierCap) showToast('Не хватает баланса');
+            else if (want > inf.cap && !inf.tier) showToast('Шанс уже 75%+ — докинуть деньги нельзя');
+            upg.money = Math.max(0, Math.min(inf.cap, want));
             autoPickTarget();
             UGX.skip = true; updateUpgUI(); UGX.skip = false;
         }
         function ugxStep(dir) {
             if (upg.spinning) return;
-            const step = Math.max(1, Math.round(state.balance / 10));
+            const step = Math.max(1, Math.round(upgMoneyInfo().cap / 10));
             ugxMoney((upg.money || 0) + dir * step);
         }
         function ugxRandom() {
@@ -2835,6 +2860,8 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         function pickTarget(name) {
             if (upg.spinning) return;
             const it = getCatalog().find(i => i.name === name);
+            if (!it) return;
+            if (upgSkinsSum() > 0 && it.price <= upgSkinsSum()) { showToast('Цель должна стоить дороже выбранных скинов'); return; }
             upg.target = { ...it };
             upg.upShown = false;
             upg.mode = null;
@@ -2888,8 +2915,9 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         function updateUpgUI() {
             if (!$('upg-own-box')) return;
             if (!upg.spinning) upg.list = upg.list.filter(it => state.inventory.indexOf(it) >= 0 && !it.lock);
+            if (!upg.spinning && upg.target && upgSkinsSum() > 0 && upg.target.price <= upgSkinsSum()) { upg.target = null; upg.upShown = false; }
             upg.money = upg.money || 0;
-            if (!upg.spinning) upg.money = Math.max(0, Math.min(upg.money, Math.floor(state.balance)));
+            if (!upg.spinning) upg.money = Math.max(0, Math.min(upg.money, upgMoneyInfo().cap));
             const L = upg.list, top = L.slice().sort((a, b) => b.price - a.price)[0];
             const ownImg = $('own-box-img'), ownGrid = $('own-box-grid');
             const ownEmoji = document.querySelector('#upg-own-box .box-emoji');
@@ -2997,6 +3025,8 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             fast = fast === true;
             if (upg.spinning) return;
             upg.list = upg.list.filter(it => state.inventory.indexOf(it) >= 0 && !it.lock);
+            if ((!upg.list.length && !(upg.money > 0)) || !upg.target) { showToast('Выбери свой предмет (или сумму) и желаемый!'); return; }
+            if (upg.money > 0) { const cap = upgMoneyInfo().cap; if (upg.money > cap) { upg.money = cap; updateUpgUI(); showToast('Сумма уменьшена до допустимой'); } }
             if ((!upg.list.length && !(upg.money > 0)) || !upg.target) { showToast('Выбери свой предмет (или сумму) и желаемый!'); return; }
             const chance = upgChance();
             if (chance <= 0) { showToast('Шанс 0%! Выбери скин дешевле'); return; }
@@ -4766,7 +4796,8 @@ const tg=window.Telegram&&Telegram.WebApp;
 if(tg){try{tg.ready();tg.expand()}catch(e){}}
 const initData=(tg&&tg.initData)||'';
 const tgUser=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
-const IS_ADMIN=tgUser.id===ADMIN_UI_ID;
+const IS_ADMIN=Number(tgUser.id)===ADMIN_UI_ID;
+window.BD_IS_ADMIN=IS_ADMIN;
 let sort='earned',lastSent='',busy=false,sendErr='';
 const $l=id=>document.getElementById(id);
 const unit={earned:' ₽',cases:'',clicks:''};
@@ -4777,6 +4808,7 @@ const post=(p,b)=>fetch(API+p,{method:'POST',headers:{'Content-Type':'applicatio
 if(!IS_ADMIN){
  document.querySelectorAll('.ms-tile[data-tab="admin-tab"],.ms-tile[data-tab="photos-tab"]').forEach(t=>t.remove());
  ['admin-tab','photos-tab'].forEach(i=>{const s=$l(i);if(s)s.remove()});
+ document.querySelectorAll('.nav-btn[onclick*="admin-tab"],.nav-btn[onclick*="photos-tab"]').forEach(b=>b.remove());
 }
 
 /* ---------- отправка очков ---------- */
@@ -5618,7 +5650,7 @@ body.upg-locked #upgrader-tab .ugx-panel,body.upg-locked #upgrader-tab .ugx-mone
  users=['shui55373','gojo1','Crispy Dog','otadada994','LUISITO','optikvfraer','gtursunova928','simpala1212'];
  function add(){if(!names.length)return;var k=names[Math.floor(Math.random()*names.length)],p=k.split(' | '),d=document.createElement('div');
   d.className='bd-t';d.style.setProperty('--c',cols[Math.floor(Math.random()*cols.length)]);
-  d.innerHTML='<u>'+users[Math.floor(Math.random()*users.length)]+'</u><img src="'+(SKIN_IMG_BASE[k]||'')+'" alt=""><small>'+(p[1]?p[0]:'')+'</small><b>'+(p[1]||p[0])+'</b>';
+  d.innerHTML='<u>'+users[Math.floor(Math.random()*users.length)]+'</u><img src="'+(SKIN_IMG_BASE[k]||'')+'" alt=""><div class="bd-nm"><small>'+(p[1]?p[0]:'')+'</small><b>'+(p.length>1?p.slice(1).join(' | '):p[0])+'</b></div>';
   tk.prepend(d);while(tk.children.length>14)tk.lastChild.remove()}
  for(var i=0;i<10;i++)add();setInterval(add,3500);
 })();
@@ -5817,7 +5849,7 @@ html body #bp-overlay{background:#101014!important;padding:0 0 120px!important;z
  pill('bonus','🎁','Бонусы',null,listMenu([['👆','Кликер',function(){go('clicker-tab')}],['📜','Задания',function(){go('quests-tab')}],['🏆','Battle Pass',function(){window.bdOpenBP()}]]));
  pill('inv','🎒','Инвентарь',function(){go('inventory-tab')});
  pill('lb','🏆','Лидеры',function(){go('leaderboard-tab')});
- pill('more','⋯','Ещё',null,listMenu([['🎟','Промокод',function(){go('promo-tab')}],['🛠','Админ',function(){go('admin-tab')}],['🖼','Фото',function(){go('photos-tab')}]]));
+ pill('more','⋯','Ещё',null,listMenu([['🎟','Промокод',function(){go('promo-tab')}]].concat(window.BD_IS_ADMIN?[['🛠','Админ',function(){go('admin-tab')}],['🖼','Фото',function(){go('photos-tab')}]]:[])));
  var lg=document.createElement('button');lg.id='bd-login';lg.textContent='Профиль';lg.onclick=function(){go('profile-tab')};rt.appendChild(lg);
  document.addEventListener('click',closeM);addEventListener('resize',closeM);
  var grp={'cases-tab':'cases','upgrader-tab':'play','fuse-tab':'play','games-tab':'play','clicker-tab':'bonus','quests-tab':'bonus','inventory-tab':'inv','leaderboard-tab':'lb','admin-tab':'more','photos-tab':'more','promo-tab':'more','profile-tab':null};
@@ -5840,7 +5872,7 @@ html body #bp-overlay{background:#101014!important;padding:0 0 120px!important;z
  bpill('bonus','🎁','Бонусы',null,listMenu([['👆','Кликер',function(){go('clicker-tab')}],['📜','Задания',function(){go('quests-tab')}],['🏆','Battle Pass',function(){window.bdOpenBP()}]]));
  bpill('play','🎮','Игры',null,pills.play._g);
  bpill('inv','🎒','Инвентарь',function(){go('inventory-tab')});
- bpill('menu','☰','Меню',null,listMenu([['👤','Профиль',function(){go('profile-tab')}],['🎟','Промокод',function(){go('promo-tab')}],['🏆','Лидеры',function(){go('leaderboard-tab')}],['🛠','Админ',function(){go('admin-tab')}],['🖼','Фото',function(){go('photos-tab')}]]));
+ bpill('menu','☰','Меню',null,listMenu([['👤','Профиль',function(){go('profile-tab')}],['🎟','Промокод',function(){go('promo-tab')}],['🏆','Лидеры',function(){go('leaderboard-tab')}]].concat(window.BD_IS_ADMIN?[['🛠','Админ',function(){go('admin-tab')}],['🖼','Фото',function(){go('photos-tab')}]]:[])));
  var gp={'cases-tab':'cases','upgrader-tab':'play','fuse-tab':'play','games-tab':'play','clicker-tab':'bonus','quests-tab':'bonus','inventory-tab':'inv','leaderboard-tab':'menu','admin-tab':'menu','photos-tab':'menu','promo-tab':'menu','profile-tab':'menu'};
  function sync2(){Object.keys(bp2).forEach(function(k){bp2[k].classList.remove('on')});for(var t in orig){if(orig[t].classList.contains('active')&&gp[t])bp2[gp[t]].classList.add('on')}}
  var mo2=new MutationObserver(sync2);Object.keys(orig).forEach(function(t){mo2.observe(orig[t],{attributes:true,attributeFilter:['class']})});sync2();
@@ -6014,6 +6046,22 @@ html body .bd-l:hover{background:#2a2b2e!important}
 html body .bd-m2 .bar{background:none!important}
 html body .bd-m2 .bar::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-mask-image:linear-gradient(180deg,transparent,#000 55%);mask-image:linear-gradient(180deg,transparent,#000 55%)}
 html body .bd-m2 .bar .lv,html body .bd-m2 .bar .xp{background:rgba(255,255,255,.06)!important;-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);border:1px solid rgba(255,255,255,.14)}
+</style>
+<style id="bd-ticker-fix">
+/* лента дропа: названия показываются полностью, переносятся на новую строку */
+#bd-ticker .bd-t{height:146px!important}
+#bd-ticker .bd-t img{top:41%!important;height:52px!important}
+#bd-ticker .bd-t .bd-nm{position:absolute;left:12px;right:10px;bottom:9px;z-index:2;display:flex;flex-direction:column;gap:2px;min-width:0}
+#bd-ticker .bd-t .bd-nm small,#bd-ticker .bd-t .bd-nm b{position:static!important;display:block!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.2;word-break:break-word;overflow-wrap:anywhere}
+#bd-ticker .bd-t .bd-nm small:empty{display:none!important}
+@media(max-width:820px){
+ #bd-ticker .bd-t{height:122px!important}
+ #bd-ticker .bd-t small{display:block!important}
+ #bd-ticker .bd-t img{top:33%!important;height:42px!important}
+ #bd-ticker .bd-t .bd-nm{left:14px;right:10px;bottom:8px}
+ #bd-ticker .bd-t .bd-nm small{font-size:.66rem!important;color:#a9a9b6!important}
+ #bd-ticker .bd-t .bd-nm b{font-size:.8rem!important;font-weight:600!important;left:auto!important;bottom:auto!important}
+}
 </style>
 </body>
 </html>
