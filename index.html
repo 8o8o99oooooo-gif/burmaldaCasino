@@ -919,7 +919,12 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 .own-grid{gap:2px;min-height:0}
 .own-grid img{height:auto!important;max-height:100%;aspect-ratio:4/3;width:100%;object-fit:contain}
 .upg-box:has(.own-grid.c3) .box-title{display:none}
-</style></head>
+</style><style>
+.bp-inv-case .inv-img{height:78px;object-fit:contain;cursor:default}
+.bp-inv-case .inv-price{font-size:.78rem;color:#fde68a}
+#own-picker .picker-img{display:inline-block;visibility:visible;opacity:1}
+</style>
+</head>
 <body>
 
     <header>
@@ -2440,11 +2445,12 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                 return;
             }
             el.innerHTML = state.inventory.map((it, idx) => {
-                if (it.lock) return '';
-                const col = RARITY[it.rarity].color;
+                if (it.lock || it.bpBox) return '';
+                const col = (RARITY[it.rarity]||RARITY.special).color;
+                const img = window.__bpItemImg ? window.__bpItemImg(it) : (SKIN_IMG[it.name] || '');
                 return `<div class="picker-row${upg.list.indexOf(it) >= 0 ? ' ugsel' : ''}" onclick="pickOwn(${idx})">
-                    <span><img class="picker-img" src="${SKIN_IMG[it.name] || ''}" alt=""><span style="color:${col};">●</span> ${nmH(it)}</span>
-                    <span style="color:var(--accent-color);">${fmt(it.price)} $</span>
+                    <span><img class="picker-img" src="${img}" alt=""><span style="color:${col};">●</span> ${nmH(it)}</span>
+                    <span style="color:var(--accent-color);">${it.bpCard?`+${it.bpCard}%`:`${fmt(it.price)} $`}</span>
                 </div>`;
             }).join('');
         }
@@ -2527,7 +2533,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         }
 
         function updateUpgUI() {
-            if (!upg.spinning) upg.list = upg.list.filter(it => state.inventory.indexOf(it) >= 0 && !it.lock);
+            if (!upg.spinning) upg.list = upg.list.filter(it => state.inventory.indexOf(it) >= 0 && !it.lock && !it.bpBox);
             const L = upg.list, top = L.slice().sort((a, b) => b.price - a.price)[0];
             const ownImg = $('own-box-img');
             const ownEmoji = document.querySelector('#upg-own-box .box-emoji');
@@ -2535,12 +2541,12 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             let ownGrid = $('own-box-grid');
             if (!ownGrid) { ownGrid = document.createElement('div'); ownGrid.id = 'own-box-grid'; ownGrid.className = 'own-grid'; ownImg.insertAdjacentElement('afterend', ownGrid); }
             if (L.length === 1) {
-                ownImg.src = SKIN_IMG[top.name] || ''; ownImg.style.display = 'block'; ownImg.classList.add('big');
+                ownImg.src = (window.__bpItemImg ? window.__bpItemImg(top) : (SKIN_IMG[top.name] || '')); ownImg.style.display = 'block'; ownImg.classList.add('big');
                 ownGrid.style.display = 'none'; ownGrid.innerHTML = '';
             } else if (L.length > 1) {
                 ownImg.style.display = 'none'; ownImg.classList.remove('big');
                 ownGrid.className = 'own-grid ' + (L.length <= 4 ? 'c2' : 'c3');
-                ownGrid.innerHTML = L.map(it => `<img src="${SKIN_IMG[it.name] || ''}" alt="">`).join('');
+                ownGrid.innerHTML = L.map(it => `<img src="${window.__bpItemImg ? window.__bpItemImg(it) : (SKIN_IMG[it.name] || '')}" alt="">`).join('');
                 ownGrid.style.display = 'grid';
             } else { ownImg.style.display = 'none'; ownImg.classList.remove('big'); ownGrid.style.display = 'none'; ownGrid.innerHTML = ''; }
             if (ownEmoji) ownEmoji.style.display = top ? 'none' : '';
@@ -4096,8 +4102,23 @@ window.renderInventory=function(){updateProfileStats();renderMyCases();markSeen(
  const inv=state.inventory,tot=inv.reduce((a,i)=>a+i.price,0),best=inv.reduce((a,i)=>Math.max(a,i.price),0);
  $('inv-summary').innerHTML=`<div class="inv-sum-card"><b>${inv.length}</b><span>предметов</span></div><div class="inv-sum-card"><b>${fmt(tot)} $</b><span>общая стоимость</span></div><div class="inv-sum-card"><b>${best?fmt(best)+' $':'—'}</b><span>самый дорогой</span></div>`;
  const L=inv.map((it,i)=>({it,i})).filter(({it})=>(!F.q||baseName(it.name).toLowerCase().includes(F.q))&&(!F.r||it.rarity===F.r)&&(!F.w||it.wear===F.w)).sort(SORT[F.s]);
- $('inventory-list').innerHTML=L.length?L.map(({it,i})=>{const col=RARITY[it.rarity].color;
-  return `<div class="inventory-item inv-card${it.lock?' locked':''}" style="--c:${col};"><button class="inv-lock${it.lock?' on':''}" onclick="toggleLock(${i})" title="${it.lock?'Снять защиту':'Защитить от продажи'}">${it.lock?'🔒':'🔓'}</button><div class="inv-rar-bar"></div><img class="inv-img" onclick="svOpen(${i})" src="${SKIN_IMG[it.name]||''}" alt=""><div class="inv-name">${nmH(it)}</div><div class="inv-rarity">${RARITY[it.rarity].name}</div>${it.fl!=null?`<div class="inv-fl">float ${it.fl}</div>`:''}<div class="inv-price">${fmt(it.price)} $</div><div class="inv-btns"><button class="inv-btn upg" onclick="selectForUpgrade(${i})"${it.lock?' disabled':''}>⚡ Апгрейд</button><button class="inv-btn sell" onclick="sellItem(${i})"${it.lock?' disabled':''}>💰 Продать</button></div></div>`}).join(''):`<div class="inv-empty"><div style="font-size:3rem">📭</div><div style="font-weight:bold;margin-top:6px">${inv.length?'Ничего не найдено':'Инвентарь пуст'}</div></div>`;ivUI(L.length,inv)};
+ $('inventory-list').innerHTML=L.length?L.map(({it,i})=>{
+  const col=(RARITY[it.rarity]||RARITY.special).color;
+  if(it.bpBox){
+    const img=window.__bpItemImg?window.__bpItemImg(it):'';
+    return `<div class="inventory-item inv-card bp-inv-case" style="--c:${col};">
+      <div class="inv-rar-bar"></div>
+      <img class="inv-img" src="${img}" alt="">
+      <div class="inv-name">${it.name}</div>
+      <div class="inv-rarity">Кейс Battle Pass</div>
+      <div class="inv-price">🎁 ОТКРЫВАЕМЫЙ КЕЙС</div>
+      <div class="inv-btns"><button class="inv-btn upg" style="background:linear-gradient(90deg,#7c3aed,#c084fc);color:#fff" onclick="bpOpenBox('${it.bpBox}',${i})">🔓 Открыть кейс</button></div>
+    </div>`;
+  }
+  const img=window.__bpItemImg?window.__bpItemImg(it):(SKIN_IMG[it.name]||'');
+  const isCard=!!it.bpCard;
+  return `<div class="inventory-item inv-card${it.lock?' locked':''}" style="--c:${col};"><button class="inv-lock${it.lock?' on':''}" onclick="toggleLock(${i})" title="${it.lock?'Снять защиту':'Защитить от продажи'}">${it.lock?'🔒':'🔓'}</button><div class="inv-rar-bar"></div><img class="inv-img" onclick="svOpen(${i})" src="${img}" alt=""><div class="inv-name">${nmH(it)}</div><div class="inv-rarity">${RARITY[it.rarity].name}</div>${it.fl!=null?`<div class="inv-fl">float ${it.fl}</div>`:''}<div class="inv-price">${isCard?'🎯 Карточка шанса':fmt(it.price)+' $'}</div><div class="inv-btns"><button class="inv-btn upg" onclick="selectForUpgrade(${i})"${it.lock?' disabled':''}>⚡ Апгрейд</button><button class="inv-btn sell" onclick="sellItem(${i})"${it.lock?' disabled':''}>💰 Продать</button></div></div>`;
+}).join(''):`<div class="inv-empty"><div style="font-size:3rem">📭</div><div style="font-weight:bold;margin-top:6px">${inv.length?'Ничего не найдено':'Инвентарь пуст'}</div></div>`;ivUI(L.length,inv)};
 /* замочек: защита скина от продажи / апгрейда / фьюза / ставки */
 window.toggleLock=i=>{const it=state.inventory[i];if(!it)return;
  if(it.lock)delete it.lock;else it.lock=true;
@@ -4698,6 +4719,12 @@ window.playCoinflip=function(side){
  // список для раздела «Фото» → «Батл пасс»: ключ = id коробки или card5/card10/card15
  window.BP_ITEMS=[['pass','Burmaldapass — обложка кнопки']].concat(Object.keys(BP_BOX_INFO).map(k=>[k,BP_BOX_INFO[k].name])).concat([['card5','Карточка шанса +5%'],['card10','Карточка шанса +10%'],['card15','Карточка шанса +15%']]);
  const bpImg=k=>(window.BP_IMG||{})[k]||'';
+ window.__bpItemImg=it=>{
+   if(!it)return '';
+   if(it.bpCard)return bpImg('card'+it.bpCard);
+   if(it.bpBox)return bpImg(it.bpBox);
+   return (typeof SKIN_IMG!=='undefined'&&SKIN_IMG[it.name])||'';
+ };
  const icoHtml=(key,emoji)=>{const u=bpImg(key);return u?`<img class="bp-pic" src="${u}" alt="">`:emoji};
  const BP_REWARDS={
   1:[['box','mystery']],2:[['box','flask']],3:[['case','aurora']],4:[['box','coins']],5:[['box','level1']],6:[['box','coins']],7:[['case','aurora']],8:[['case','midas']],9:[['card',5]],10:[['box','mystery']],
@@ -4711,6 +4738,18 @@ window.playCoinflip=function(side){
   if(!state.battlePass) state.battlePass={xp:0,claimed:{},boxes:{}};
   if(!state.battlePass.claimed) state.battlePass.claimed={};
   if(!state.battlePass.boxes) state.battlePass.boxes={};
+  if(!state.inventory) state.inventory=[];
+  /* Старый формат хранил коробки отдельно от инвентаря.
+     Переносим их в обычный инвентарь один раз. */
+  for(const [k,n0] of Object.entries(state.battlePass.boxes)){
+    const n=Math.max(0,Math.trunc(Number(n0)||0));
+    if(n&&BP_BOX_INFO[k]){
+      for(let i=0;i<Math.min(n,1000);i++) state.inventory.push({
+        name:BP_BOX_INFO[k].name, price:0, rarity:'special', bpBox:k, wear:'BP'
+      });
+      state.battlePass.boxes[k]=0;
+    }
+  }
   return state.battlePass;
  }
  function req(level){ if(level<=0)return 0; return level<=49?level*500:49*500+1500; }
@@ -4719,8 +4758,16 @@ window.playCoinflip=function(side){
  function rewardName(level){const a=BP_REWARDS[level]||[];if(!a.length)return 'Без награды';return a.map(r=>{if(r[0]==='box')return BP_BOX_INFO[r[1]].name;if(r[0]==='case')return r[1]==='aurora'?'Aurora Vault':'Midas Touch';if(r[0]==='money')return fmt(r[1])+' ₽';if(r[0]==='card')return `Карточка +${r[1]}%`;return ''}).join(' + ')}
  function rewardIco(level){const a=BP_REWARDS[level]||[];if(!a.length)return '—';const r=a[0];if(r[0]==='box')return icoHtml(r[1],BP_BOX_INFO[r[1]].ico);if(r[0]==='case'){const u=(typeof CASE_IMG!=='undefined'&&CASE_IMG[r[1]])||'';return u?`<img class="bp-pic" src="${u}" alt="">`:(r[1]==='aurora'?'🌌':'💰')}if(r[0]==='money')return '💵';if(r[0]==='card')return icoHtml('card'+r[1],r[1]===5?'🥉':r[1]===10?'🥈':'🥇');return '🎁'}
  function cardItem(p){return {name:`Карточка шанса +${p}%`,price:0,rarity:p===15?'special':p===10?'covert':'classified',bpCard:p,wear:'BP'} }
- function grant(r){const b=bp();if(r[0]==='box'){b.boxes[r[1]]=(b.boxes[r[1]]||0)+1;return `${BP_BOX_INFO[r[1]].name} ×1`}
-  if(r[0]==='case'){state.cases[r[1]]=(state.cases[r[1]]||0)+1;try{renderMyCases()}catch(e){}return (CASES.find(c=>c.id===r[1])||{title:r[1]}).title+' ×1'}
+ function grant(r){const b=bp();if(r[0]==='box'){
+   state.inventory.push({name:BP_BOX_INFO[r[1]].name,price:0,rarity:'special',bpBox:r[1],wear:'BP'});
+   try{renderInventory()}catch(e){}
+   return `${BP_BOX_INFO[r[1]].name} ×1`;
+  }
+  if(r[0]==='case'){
+   state.cases[r[1]]=(state.cases[r[1]]||0)+1;
+   try{renderMyCases()}catch(e){}
+   return (CASES.find(c=>c.id===r[1])||{title:r[1]}).title+' ×1';
+  }
   if(r[0]==='money'){addMoney(r[1]);return fmt(r[1])+' ₽'}
   if(r[0]==='card'){state.inventory.push(cardItem(r[1]));try{renderInventory()}catch(e){}return `Карточка +${r[1]}%`}
  }
@@ -4730,16 +4777,52 @@ window.playCoinflip=function(side){
  function weighted(items){if(!items.length)return null;const ws=items.map((x,i)=>1/Math.pow(1+i,1.18)),sum=ws.reduce((a,b)=>a+b,0);let r=Math.random()*sum;for(let i=0;i<items.length;i++){r-=ws[i];if(r<=0)return items[i]}return items[items.length-1]}
  function topOnePercent(items){const s=[...items].sort((a,b)=>a.price-b.price);if(!s.length)return null;if(Math.random()<.01)return s[s.length-1];return weighted(s.slice(0,-1).sort((a,b)=>a.price-b.price))||s[0]}
  function addSkin(it,title){if(!it)return;const o={...it};state.inventory.push(o);try{renderInventory()}catch(e){}try{showSkinNotify(o,title)}catch(e){showToast(title+' '+o.name)}return `${o.name} (${fmt(o.price)} ₽)`}
- window.bpOpenBox=function(type){const b=bp();if(!(b.boxes[type]>0))return;b.boxes[type]--;let msg='';
-  if(type==='coins'){const v=COINS[Math.floor(Math.random()*COINS.length)];addMoney(v);msg=`🪙 Выпало ${fmt(v)} ₽`}
-  else if(type==='flask'){const cs=CASES.filter(c=>c.price<=500000).sort((a,b)=>a.price-b.price);let c;if(Math.random()<.01)c=cs[cs.length-1];else c=weighted(cs.slice(0,-1))||cs[0];state.cases[c.id]=(state.cases[c.id]||0)+1;try{renderMyCases()}catch(e){}msg=`🧪 Выпал кейс: ${c.title}`}
-  else if(type==='mystery'){const it=topOnePercent(getCatalog().filter(x=>x.price>=500&&x.price<=150000));msg='❓ '+addSkin(it,'❓ Кейс со знаком вопроса:')}
-  else if(type==='allnothing'){const it=Math.random()<.05?nearest(500000,350000,650000):nearest(100,50,250);msg='⚫ '+addSkin(it,'⚫ Всё или ничего:')}
-  else if(type==='oneThird'){const p=[nearest(85000,65000,120000),nearest(100000,70000,130000),nearest(115000,80000,150000)];const u=[...new Map(p.map(x=>[x.name,x])).values()];const it=u[Math.floor(Math.random()*u.length)];msg='🎯 '+addSkin(it,'🎯 Кейс 1/3:')}
-  else {const cfg={level1:[5000,250000,8],level2:[25000,500000,8],level3:[250000,2000000,8],level4:[1000000,10000000,5]}[type];const p=pool8(cfg[0],cfg[1],cfg[2]).sort((a,b)=>a.price-b.price);const it=weighted(p);msg=`🎁 ${addSkin(it,BP_BOX_INFO[type].name+':')}`}
-  b.xp+=5;saveGame();renderBP();showToast(msg+' · ⭐ +5 XP')};
+ window.bpOpenBox=function(type,invIndex){
+  const b=bp();
+  let idx=Number.isInteger(invIndex)?invIndex:-1;
+  if(idx<0||!state.inventory[idx]||state.inventory[idx].bpBox!==type){
+    idx=state.inventory.findIndex(it=>it&&it.bpBox===type);
+  }
+  if(idx<0){showToast('📦 Такого кейса нет в инвентаре');return}
+  state.inventory.splice(idx,1);
+  let msg='';
+  if(type==='coins'){
+    const v=COINS[Math.floor(Math.random()*COINS.length)];
+    addMoney(v);msg=`🪙 Выпало ${fmt(v)} ₽`;
+  } else if(type==='flask'){
+    const cs=CASES.filter(c=>c.price<=500000).sort((a,b)=>a.price-b.price);
+    let c;if(Math.random()<.01)c=cs[cs.length-1];else c=weighted(cs.slice(0,-1))||cs[0];
+    state.cases[c.id]=(state.cases[c.id]||0)+1;
+    try{renderMyCases()}catch(e){}
+    msg=`🧪 Выпал кейс: ${c.title}`;
+  } else if(type==='mystery'){
+    const it=topOnePercent(getCatalog().filter(x=>x.price>=500&&x.price<=150000));
+    msg='❓ '+addSkin(it,'❓ Кейс со знаком вопроса:');
+  } else if(type==='allnothing'){
+    const it=Math.random()<.05?nearest(500000,350000,650000):nearest(100,50,250);
+    msg='⚫ '+addSkin(it,'⚫ Всё или ничего:');
+  } else if(type==='oneThird'){
+    const p=[nearest(85000,65000,120000),nearest(100000,70000,130000),nearest(115000,80000,150000)];
+    const u=[...new Map(p.map(x=>[x.name,x])).values()];
+    const it=u[Math.floor(Math.random()*u.length)];
+    msg='🎯 '+addSkin(it,'🎯 Кейс 1/3:');
+  } else {
+    const cfg={level1:[5000,250000,8],level2:[25000,500000,8],level3:[250000,2000000,8],level4:[1000000,10000000,5]}[type];
+    const p=pool8(cfg[0],cfg[1],cfg[2]).sort((a,b)=>a.price-b.price);
+    const it=weighted(p);
+    msg=`🎁 ${addSkin(it,BP_BOX_INFO[type].name+':')}`;
+  }
+  b.xp+=5;
+  saveGame();
+  try{renderInventory()}catch(e){}
+  renderBP();
+  showToast(msg+' · ⭐ +5 XP');
+};
  window.bpAddXP=function(n,why,silent=false){if(!Number.isFinite(n)||n<=0)return;bp().xp+=n;saveGame();renderBP();if(!silent)showToast(`⭐ +${n} XP${why?' · '+why:''}`)};
- function boxesHtml(b){const ks=Object.keys(BP_BOX_INFO).filter(k=>b.boxes[k]>0);if(!ks.length)return '';return `<div class="bp-boxes"><div class="bp-bt">🎁 Мои коробки (за открытие +5 XP)</div><div class="bp-brow">${ks.map(k=>`<button class="bp-box" title="${BP_BOX_INFO[k].name}" onclick="bpOpenBox('${k}')"><span class="bp-bi">${icoHtml(k,BP_BOX_INFO[k].ico)}</span><i>×${b.boxes[k]}</i><em>Открыть</em></button>`).join('')}</div></div>`}
+ function boxesHtml(b){
+  const n=state.inventory.filter(it=>it&&it.bpBox).length;
+  return n?`<div class="bp-boxes"><div class="bp-bt">🎁 Кейсы Battle Pass уже находятся в <b>Инвентаре</b> · всего ${n}. Открывай их там.</div></div>`:'';
+}
  let bpOpen=false;window.bpToggle=function(){bpOpen=!bpOpen;renderBP()};
  function renderBP(){let host=document.getElementById('battle-pass');if(!host)return;
   host.innerHTML=`<div class="bp-cover" onclick="bpToggle()"><div class="bp-cimg">${icoHtml('pass','🏆')}</div><div class="bp-ctext"><b>Burmaldapass</b><span>Открыть</span></div><div class="bp-carr">›</div></div>`;
