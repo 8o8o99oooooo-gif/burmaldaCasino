@@ -919,12 +919,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 .own-grid{gap:2px;min-height:0}
 .own-grid img{height:auto!important;max-height:100%;aspect-ratio:4/3;width:100%;object-fit:contain}
 .upg-box:has(.own-grid.c3) .box-title{display:none}
-</style><style>
-.bp-inv-case .inv-img{height:78px;object-fit:contain;cursor:default}
-.bp-inv-case .inv-price{font-size:.78rem;color:#fde68a}
-#own-picker .picker-img{display:inline-block;visibility:visible;opacity:1}
-</style>
-</head>
+</style></head>
 <body>
 
     <header>
@@ -1978,7 +1973,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             let r = Math.random() * total;
             let picked = caseData.items[caseData.items.length - 1];
             for (const it of caseData.items) { r -= it.w; if (r <= 0) { picked = it; break; } }
-            return Math.random() < 1 / 11 ? makeST(picked) : picked;
+            return (!caseData.noST && Math.random() < 1 / 11) ? makeST(picked) : picked;
         }
 
         // ================== КЕЙСЫ ==================
@@ -2006,7 +2001,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
 
         function renderCases() {
             const tierColor = p => p < 2000 ? '#60a5fa' : p < 5000 ? '#a78bfa' : p < 15000 ? '#f472b6' : p < 30000 ? '#fb923c' : '#fbbf24';
-            $('cases-list').innerHTML = CASES.filter(c => !c.bpType).map(c => {
+            $('cases-list').innerHTML = CASES.filter(c => !c.bp).map(c => {
                 const best = Math.max(...c.items.map(i => i.price));
                 return `<div class="case-card" style="--c:${tierColor(c.price)};" onclick="openCaseView('${c.id}')">
                     <div class="case-glow"></div>
@@ -2032,6 +2027,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             lastDrops = []; hideSellDropBtn();
             renderCaseContents();
             renderRouletteIdle();
+            { const cv = $('cc-ver'); if (cv) cv.style.display = currentCase.noST ? 'none' : ''; }
         }
 
         function closeCaseView() {
@@ -2056,7 +2052,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                 .map(base => {
                     const it = caseSt ? makeST(base) : base;
                     const col = RARITY[it.rarity].color;
-                    const p = base.w / total * 100 * (caseSt ? 1 / 11 : 10 / 11);
+                    const p = base.w / total * 100 * (currentCase.noST ? 1 : caseSt ? 1 / 11 : 10 / 11);
                     return `<div class="cc-row" style="border-left:3px solid ${col};">
                         <img class="cc-img" src="${SKIN_IMG[it.name] || ''}" alt="">
                         <span class="cc-dot" style="background:${col};"></span>
@@ -2155,18 +2151,18 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                 state.stats.casesOpened += n;
                 $('cases-opened').textContent = state.stats.casesOpened;
                 const _caseId = currentCase ? currentCase.id : null;
-                if (_caseId) questTrack('open', { caseId: _caseId, n, drops });
+                if (_caseId) questTrack('open', { caseId: _caseId, n, drops: drops.filter(d => !d.caseId && !d.money) });
                 const objs = drops.map(d => ({ ...d }));
-                objs.forEach(o => state.inventory.push(o));
-                lastDrops = objs;
+                objs.forEach(o => { if (o.caseId) addCaseToInventory(o.caseId, 1); else if (o.money) addMoney(o.money); else state.inventory.push(o); });
+                lastDrops = objs.filter(o => !o.caseId && !o.money);
                 showSellDropBtn();
                 renderInventory();
                 const col = RARITY[winner.rarity].color;
                 if (n === 1) {
-                    $('spin-result').innerHTML = `Выпало: <span style="color:${col};">${nmH(winner)}</span> (+${fmt(winner.price)} $)`;
+                    $('spin-result').innerHTML = `Выпало: <span style="color:${col};">${nmH(winner)}</span> (${winner.caseId ? 'кейс добавлен в «Мои кейсы»' : winner.money ? 'зачислено на баланс' : '+' + fmt(winner.price) + ' $'})`;
                     showToast(`🎉 ${winner.name}`);
                 } else {
-                    const total = objs.reduce((a, o) => a + o.price, 0);
+                    const total = objs.filter(o => !o.caseId && !o.money).reduce((a, o) => a + o.price, 0);
                     const diff = total - cost;
                     $('spin-result').innerHTML = `Лучший дроп: <span style="color:${col};">${nmH(winner)}</span>`;
                     $('multi-results').innerHTML = `<div class="mr-box">
@@ -2180,11 +2176,17 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                 $('open-btn').disabled = false;
                 $('open-fast-btn').disabled = false;
                 updateOpenBtn();
+                // кейс из Burmaldapass закончился — закрываем его после короткой паузы, чтобы увидеть дроп
+                const _bc = currentCase;
+                if (_bc && _bc.bp && !((state.cases && state.cases[_bc.id]) || 0)) {
+                    setTimeout(() => { if (!spinning && currentCase === _bc && !((state.cases && state.cases[_bc.id]) || 0)) closeCaseView(); }, 1500);
+                }
             }, fast ? 1060 : 5300);
         }
 
         function showSellDropBtn() {
             const b = $('sell-drop-btn'); if (!b) return;
+            if (!lastDrops.length) { b.style.display = 'none'; return; }
             const total = lastDrops.filter(o => !o.lock).reduce((a, o) => a + o.price, 0);
             b.textContent = `Продать за ${fmt(total)} $`;
             b.style.display = 'block';
@@ -2419,7 +2421,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         // ================== АПГРЕЙДЕР ==================
         function getCatalog() {
             const map = new Map();
-            CASES.forEach(c => c.items.forEach(it => { if (!map.has(it.name)) map.set(it.name, it); }));
+            CASES.forEach(c => { if (c.bp) return; c.items.forEach(it => { if (!map.has(it.name)) map.set(it.name, it); }); });
             EXTRA_SKINS.forEach(it => { if (!map.has(it.name)) map.set(it.name, it); });
             return Array.from(map.values()).sort((a, b) => a.price - b.price);
         }
@@ -2445,12 +2447,11 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
                 return;
             }
             el.innerHTML = state.inventory.map((it, idx) => {
-                if (it.lock || it.bpBox) return '';
-                const col = (RARITY[it.rarity]||RARITY.special).color;
-                const img = window.__bpItemImg ? window.__bpItemImg(it) : (SKIN_IMG[it.name] || '');
+                if (it.lock) return '';
+                const col = RARITY[it.rarity].color;
                 return `<div class="picker-row${upg.list.indexOf(it) >= 0 ? ' ugsel' : ''}" onclick="pickOwn(${idx})">
-                    <span><img class="picker-img" src="${img}" alt=""><span style="color:${col};">●</span> ${nmH(it)}</span>
-                    <span style="color:var(--accent-color);">${it.bpCard?`+${it.bpCard}%`:`${fmt(it.price)} $`}</span>
+                    <span><img class="picker-img" src="${SKIN_IMG[it.name] || ''}" alt=""><span style="color:${col};">●</span> ${nmH(it)}</span>
+                    <span style="color:var(--accent-color);">${fmt(it.price)} $</span>
                 </div>`;
             }).join('');
         }
@@ -2533,7 +2534,7 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         }
 
         function updateUpgUI() {
-            if (!upg.spinning) upg.list = upg.list.filter(it => state.inventory.indexOf(it) >= 0 && !it.lock && !it.bpBox);
+            if (!upg.spinning) upg.list = upg.list.filter(it => state.inventory.indexOf(it) >= 0 && !it.lock);
             const L = upg.list, top = L.slice().sort((a, b) => b.price - a.price)[0];
             const ownImg = $('own-box-img');
             const ownEmoji = document.querySelector('#upg-own-box .box-emoji');
@@ -2541,12 +2542,12 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
             let ownGrid = $('own-box-grid');
             if (!ownGrid) { ownGrid = document.createElement('div'); ownGrid.id = 'own-box-grid'; ownGrid.className = 'own-grid'; ownImg.insertAdjacentElement('afterend', ownGrid); }
             if (L.length === 1) {
-                ownImg.src = (window.__bpItemImg ? window.__bpItemImg(top) : (SKIN_IMG[top.name] || '')); ownImg.style.display = 'block'; ownImg.classList.add('big');
+                ownImg.src = SKIN_IMG[top.name] || ''; ownImg.style.display = 'block'; ownImg.classList.add('big');
                 ownGrid.style.display = 'none'; ownGrid.innerHTML = '';
             } else if (L.length > 1) {
                 ownImg.style.display = 'none'; ownImg.classList.remove('big');
                 ownGrid.className = 'own-grid ' + (L.length <= 4 ? 'c2' : 'c3');
-                ownGrid.innerHTML = L.map(it => `<img src="${window.__bpItemImg ? window.__bpItemImg(it) : (SKIN_IMG[it.name] || '')}" alt="">`).join('');
+                ownGrid.innerHTML = L.map(it => `<img src="${SKIN_IMG[it.name] || ''}" alt="">`).join('');
                 ownGrid.style.display = 'grid';
             } else { ownImg.style.display = 'none'; ownImg.classList.remove('big'); ownGrid.style.display = 'none'; ownGrid.innerHTML = ''; }
             if (ownEmoji) ownEmoji.style.display = top ? 'none' : '';
@@ -3766,26 +3767,21 @@ nav .nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(196,181,253,.8));t
         function renderMyCases() {
             const box = $('my-cases');
             if (!box) return;
-            const ids = Object.keys(state.cases || {}).filter(id => state.cases[id] > 0 && (CASES.some(c => c.id === id) || (id.startsWith('bp_') && window.BP_BOX_INFO && window.BP_BOX_INFO[id.slice(3)])));
+            const ids = Object.keys(state.cases || {}).filter(id => state.cases[id] > 0 && CASES.some(c => c.id === id));
             if (!ids.length) { box.innerHTML = ''; return; }
             box.innerHTML = `<div class="my-cases-title">📦 Мои кейсы</div><div class="mc-grid">` + ids.map(id => {
-                if(id.startsWith('bp_') && window.BP_BOX_INFO){
-                    const k=id.slice(3), info=window.BP_BOX_INFO[k], img=(window.BP_IMG||{})[k];
-                    const src=img?`<img src="${img}" alt="">`:`<div class="mc-emoji">${info.ico}</div>`;
-                    return `<div class="mc-card bp-mc-card" style="--c:#a855f7;"><div class="mc-count">x${state.cases[id]}</div>${src}<div class="mc-name">${info.name}</div><button class="mc-btn" onclick="openOwnedCase('${id}')">Открыть</button></div>`;
-                }
                 const c = CASES.find(x => x.id === id);
                 const img = CASE_IMG[id] ? `<img src="${CASE_IMG[id]}" alt="">` : `<div class="mc-emoji">${c.emoji}</div>`;
                 return `<div class="mc-card" style="--c:${caseTierColor(c.price)};"><div class="mc-count">x${state.cases[id]}</div>${img}<div class="mc-name">${c.title}</div><button class="mc-btn" onclick="openOwnedCase('${id}')">Открыть</button></div>`;
             }).join('') + `</div>`;
         }
+
         function caseTierColor(p) { return p < 2000 ? '#60a5fa' : p < 5000 ? '#a78bfa' : p < 15000 ? '#f472b6' : p < 30000 ? '#fb923c' : '#fbbf24'; }
 
         function openOwnedCase(id) {
             if (spinning) { showToast('Дождись конца открытия!'); return; }
             if (upg.spinning || fuse.busy) { showToast('🔒 Сейчас нельзя сменить вкладку'); return; }
             openTab('cases-tab', document.querySelectorAll('nav .nav-btn')[0]);
-            if(id.startsWith('bp_') && typeof window.openBPCaseAnimated==='function') { window.openBPCaseAnimated(id.slice(3)); return; }
             openCaseView(id);
         }
 
@@ -4057,7 +4053,7 @@ wrap('startFuse',()=>{if(!fuse.busy||fb)return;fb=true;const r=state.pendingFuse
 const $=id=>document.getElementById(id), BIG=10000, RK={common:0,rare:1,classified:2,covert:3,special:4};
 const WEARS=[['FN','Factory New',1.4,.05,0,.07],['MW','Minimal Wear',1.15,.15,.07,.15],['FT','Field-Tested',1,.35,.15,.38],['WW','Well-Worn',.8,.25,.38,.45],['BS','Battle-Scarred',.6,.2,.45,1]];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function applyWear(it){if(!it||it.wear)return it;let r=Math.random(),w=WEARS[2];for(const x of WEARS){if((r-=x[3])<0){w=x;break}}
+function applyWear(it){if(!it||it.wear||it.noWear)return it;let r=Math.random(),w=WEARS[2];for(const x of WEARS){if((r-=x[3])<0){w=x;break}}
  it.wear=w[0];it.price=Math.max(1,Math.round(it.price*w[2]));it.fl=+(w[4]+Math.random()*(w[5]-w[4])).toFixed(4);return it}
 /* износ */
 const _pick=window.pickItem;window.pickItem=c=>applyWear({..._pick(c)});
@@ -4068,8 +4064,12 @@ document.body.insertAdjacentHTML('beforeend',`<div id="cfm"><div class="cfm-box"
 let cfmCb=null;function askConfirm(t,cb){$('cfm-t').innerHTML=t;cfmCb=cb;$('cfm').style.display='flex'}
 $('cfm-n').onclick=()=>{$('cfm').style.display='none';cfmCb=null};
 $('cfm-y').onclick=()=>{$('cfm').style.display='none';const f=cfmCb;cfmCb=null;f&&f()};
-const _si=window.sellItem;window.sellItem=i=>{const it=state.inventory[i];if(it&&it.lock){showToast('🔒 Скин защищён — сними замочек, чтобы продать');return}if(it&&it.price>=BIG)askConfirm(`Продать ${nmH(it)} за <b>${fmt(it.price)} $</b>?`,()=>_si(i));else _si(i)};
-const _sd=window.sellDrops;window.sellDrops=()=>{const fr=lastDrops.filter(o=>!o.lock);if(!fr.length){showToast('🔒 Скин защищён замочком');return}const t=fr.reduce((a,o)=>a+o.price,0);if(fr.some(o=>o.price>=BIG))askConfirm(`Продать выпавшее за <b>${fmt(t)} $</b>? Среди предметов есть дорогой.`,_sd);else _sd()};
+const _si=window.sellItem;window.sellItem=i=>{const it=state.inventory[i];if(it&&it.lock){showToast('🔒 Скин защищён — сними замочек, чтобы продать');return}_si(i)};
+const _sd=window.sellDrops;window.sellDrops=()=>{const fr=lastDrops.filter(o=>!o.lock);if(!fr.length){showToast('🔒 Скин защищён замочком');return}const t=fr.reduce((a,o)=>a+o.price,0);
+if(!window._sdArmed){window._sdArmed=true;const lbl='⚠️ Подтвердить продажу (+'+fmt(t)+' $)';const b=$('sell-drop-btn');if(b)b.textContent='Подтвердить';document.querySelectorAll('#multi-results .btn-gray').forEach(x=>{if(x.textContent.indexOf('Продать')>-1)x.textContent='⚠️ Подтвердить ('+fmt(t)+' $)'});clearTimeout(window._sdTimer);window._sdTimer=setTimeout(()=>{window._sdArmed=false;if(lastDrops.length){showSellDropBtn();document.querySelectorAll('#multi-results .btn-gray').forEach(x=>{if(x.textContent.indexOf('Подтвердить')>-1)x.textContent='💰 Продать всё (+'+fmt(t)+' $)'})}},3500);return}
+clearTimeout(window._sdTimer);window._sdArmed=false;_sd()};
+const _ssb=window.showSellDropBtn;window.showSellDropBtn=function(){window._sdArmed=false;clearTimeout(window._sdTimer);_ssb()};
+const _hsb=window.hideSellDropBtn;window.hideSellDropBtn=function(){window._sdArmed=false;clearTimeout(window._sdTimer);_hsb()};
 /* просмотр скина */
 let rx=-8,ry=20,vx=0,vy=.4,drag=false,lx=0,ly=0,raf=0;
 window.svOpen=i=>{const it=state.inventory[i];if(!it)return;const col=RARITY[it.rarity].color,w=WEARS.find(x=>x[0]===it.wear);
@@ -4107,23 +4107,8 @@ window.renderInventory=function(){updateProfileStats();renderMyCases();markSeen(
  const inv=state.inventory,tot=inv.reduce((a,i)=>a+i.price,0),best=inv.reduce((a,i)=>Math.max(a,i.price),0);
  $('inv-summary').innerHTML=`<div class="inv-sum-card"><b>${inv.length}</b><span>предметов</span></div><div class="inv-sum-card"><b>${fmt(tot)} $</b><span>общая стоимость</span></div><div class="inv-sum-card"><b>${best?fmt(best)+' $':'—'}</b><span>самый дорогой</span></div>`;
  const L=inv.map((it,i)=>({it,i})).filter(({it})=>(!F.q||baseName(it.name).toLowerCase().includes(F.q))&&(!F.r||it.rarity===F.r)&&(!F.w||it.wear===F.w)).sort(SORT[F.s]);
- $('inventory-list').innerHTML=L.length?L.map(({it,i})=>{
-  const col=(RARITY[it.rarity]||RARITY.special).color;
-  if(it.bpBox){
-    const img=window.__bpItemImg?window.__bpItemImg(it):'';
-    return `<div class="inventory-item inv-card bp-inv-case" style="--c:${col};">
-      <div class="inv-rar-bar"></div>
-      <img class="inv-img" src="${img}" alt="">
-      <div class="inv-name">${it.name}</div>
-      <div class="inv-rarity">Кейс Battle Pass</div>
-      <div class="inv-price">🎁 ОТКРЫВАЕМЫЙ КЕЙС</div>
-      <div class="inv-btns"><button class="inv-btn upg" style="background:linear-gradient(90deg,#7c3aed,#c084fc);color:#fff" onclick="bpOpenBox('${it.bpBox}',${i})">🔓 Открыть кейс</button></div>
-    </div>`;
-  }
-  const img=window.__bpItemImg?window.__bpItemImg(it):(SKIN_IMG[it.name]||'');
-  const isCard=!!it.bpCard;
-  return `<div class="inventory-item inv-card${it.lock?' locked':''}" style="--c:${col};"><button class="inv-lock${it.lock?' on':''}" onclick="toggleLock(${i})" title="${it.lock?'Снять защиту':'Защитить от продажи'}">${it.lock?'🔒':'🔓'}</button><div class="inv-rar-bar"></div><img class="inv-img" onclick="svOpen(${i})" src="${img}" alt=""><div class="inv-name">${nmH(it)}</div><div class="inv-rarity">${RARITY[it.rarity].name}</div>${it.fl!=null?`<div class="inv-fl">float ${it.fl}</div>`:''}<div class="inv-price">${isCard?'🎯 Карточка шанса':fmt(it.price)+' $'}</div><div class="inv-btns"><button class="inv-btn upg" onclick="selectForUpgrade(${i})"${it.lock?' disabled':''}>⚡ Апгрейд</button><button class="inv-btn sell" onclick="sellItem(${i})"${it.lock?' disabled':''}>💰 Продать</button></div></div>`;
-}).join(''):`<div class="inv-empty"><div style="font-size:3rem">📭</div><div style="font-weight:bold;margin-top:6px">${inv.length?'Ничего не найдено':'Инвентарь пуст'}</div></div>`;ivUI(L.length,inv)};
+ $('inventory-list').innerHTML=L.length?L.map(({it,i})=>{const col=RARITY[it.rarity].color;
+  return `<div class="inventory-item inv-card${it.lock?' locked':''}" style="--c:${col};"><button class="inv-lock${it.lock?' on':''}" onclick="toggleLock(${i})" title="${it.lock?'Снять защиту':'Защитить от продажи'}">${it.lock?'🔒':'🔓'}</button><div class="inv-rar-bar"></div><img class="inv-img" onclick="svOpen(${i})" src="${SKIN_IMG[it.name]||''}" alt=""><div class="inv-name">${nmH(it)}</div><div class="inv-rarity">${RARITY[it.rarity].name}</div>${it.fl!=null?`<div class="inv-fl">float ${it.fl}</div>`:''}<div class="inv-price">${fmt(it.price)} $</div><div class="inv-btns"><button class="inv-btn upg" onclick="selectForUpgrade(${i})"${it.lock?' disabled':''}>⚡ Апгрейд</button><button class="inv-btn sell" onclick="sellItem(${i})"${it.lock?' disabled':''}>💰 Продать</button></div></div>`}).join(''):`<div class="inv-empty"><div style="font-size:3rem">📭</div><div style="font-weight:bold;margin-top:6px">${inv.length?'Ничего не найдено':'Инвентарь пуст'}</div></div>`;ivUI(L.length,inv)};
 /* замочек: защита скина от продажи / апгрейда / фьюза / ставки */
 window.toggleLock=i=>{const it=state.inventory[i];if(!it)return;
  if(it.lock)delete it.lock;else it.lock=true;
@@ -4546,7 +4531,7 @@ async function shrink(file){ // уменьшаем фото до ~70 КБ
 }
 function phFill(){
  const f=$l('ph-f').value.trim().toLowerCase(),s=$l('ph-sel');
- let items=phType==='skin'?getCatalog().slice().sort((a,b)=>b.price-a.price).map(x=>[x.name,x.name+' — '+fmt(x.price)+' $']):phType==='bp'?(window.BP_ITEMS||[]).map(x=>[x[0],x[1]]):CASES.map(c=>[c.id,c.title]);
+ let items=phType==='skin'?getCatalog().slice().sort((a,b)=>b.price-a.price).map(x=>[x.name,x.name+' — '+fmt(x.price)+' $']):phType==='bp'?(window.BP_ITEMS||[]).map(x=>[x[0],x[1]]):CASES.filter(c=>!c.bp).map(c=>[c.id,c.title]);
  items=items.filter(x=>!f||x[1].toLowerCase().includes(f));
  s.replaceChildren(...items.map(x=>{const o=el('option',null,(custom[phType][x[0]]?'🖼 ':'')+x[1]);o.value=x[0];return o}));
  if(items.length)s.selectedIndex=0;
@@ -4721,16 +4706,9 @@ window.playCoinflip=function(side){
   level1:{name:'Кейс уровня 1',ico:'Ⅰ'}, level2:{name:'Кейс уровня 2',ico:'Ⅱ'}, level3:{name:'Кейс уровня 3',ico:'Ⅲ'}, level4:{name:'Кейс уровня 4',ico:'Ⅳ'},
   allnothing:{name:'Всё или ничего',ico:'⚫'}, oneThird:{name:'1/3',ico:'🎯'}
  };
- window.BP_BOX_INFO=BP_BOX_INFO;
  // список для раздела «Фото» → «Батл пасс»: ключ = id коробки или card5/card10/card15
  window.BP_ITEMS=[['pass','Burmaldapass — обложка кнопки']].concat(Object.keys(BP_BOX_INFO).map(k=>[k,BP_BOX_INFO[k].name])).concat([['card5','Карточка шанса +5%'],['card10','Карточка шанса +10%'],['card15','Карточка шанса +15%']]);
  const bpImg=k=>(window.BP_IMG||{})[k]||'';
- window.__bpItemImg=it=>{
-   if(!it)return '';
-   if(it.bpCard)return bpImg('card'+it.bpCard);
-   if(it.bpBox)return bpImg(it.bpBox);
-   return (typeof SKIN_IMG!=='undefined'&&SKIN_IMG[it.name])||'';
- };
  const icoHtml=(key,emoji)=>{const u=bpImg(key);return u?`<img class="bp-pic" src="${u}" alt="">`:emoji};
  const BP_REWARDS={
   1:[['box','mystery']],2:[['box','flask']],3:[['case','aurora']],4:[['box','coins']],5:[['box','level1']],6:[['box','coins']],7:[['case','aurora']],8:[['case','midas']],9:[['card',5]],10:[['box','mystery']],
@@ -4744,24 +4722,7 @@ window.playCoinflip=function(side){
   if(!state.battlePass) state.battlePass={xp:0,claimed:{},boxes:{}};
   if(!state.battlePass.claimed) state.battlePass.claimed={};
   if(!state.battlePass.boxes) state.battlePass.boxes={};
-  if(!state.inventory) state.inventory=[];
-  if(!state.cases) state.cases={};
-  /* Все кейсы Battle Pass хранятся в том же разделе «Мои кейсы», что и обычные кейсы. */
-  for(const [k,n0] of Object.entries(state.battlePass.boxes)){
-    const n=Math.max(0,Math.trunc(Number(n0)||0));
-    if(n&&BP_BOX_INFO[k]){
-      state.cases['bp_'+k]=(state.cases['bp_'+k]||0)+Math.min(n,1000);
-      state.battlePass.boxes[k]=0;
-    }
-  }
-  /* Перенос старых сохранений, где BP-кейсы уже были положены в обычный инвентарь. */
-  for(let i=state.inventory.length-1;i>=0;i--){
-    const it=state.inventory[i];
-    if(it&&it.bpBox&&BP_BOX_INFO[it.bpBox]){
-      state.cases['bp_'+it.bpBox]=(state.cases['bp_'+it.bpBox]||0)+1;
-      state.inventory.splice(i,1);
-    }
-  }
+  const bb=state.battlePass.boxes;for(const k in bb){if(bb[k]>0&&BP_BOX_INFO[k])addCaseToInventory('bp_'+k,bb[k]);delete bb[k]}
   return state.battlePass;
  }
  function req(level){ if(level<=0)return 0; return level<=49?level*500:49*500+1500; }
@@ -4770,17 +4731,8 @@ window.playCoinflip=function(side){
  function rewardName(level){const a=BP_REWARDS[level]||[];if(!a.length)return 'Без награды';return a.map(r=>{if(r[0]==='box')return BP_BOX_INFO[r[1]].name;if(r[0]==='case')return r[1]==='aurora'?'Aurora Vault':'Midas Touch';if(r[0]==='money')return fmt(r[1])+' ₽';if(r[0]==='card')return `Карточка +${r[1]}%`;return ''}).join(' + ')}
  function rewardIco(level){const a=BP_REWARDS[level]||[];if(!a.length)return '—';const r=a[0];if(r[0]==='box')return icoHtml(r[1],BP_BOX_INFO[r[1]].ico);if(r[0]==='case'){const u=(typeof CASE_IMG!=='undefined'&&CASE_IMG[r[1]])||'';return u?`<img class="bp-pic" src="${u}" alt="">`:(r[1]==='aurora'?'🌌':'💰')}if(r[0]==='money')return '💵';if(r[0]==='card')return icoHtml('card'+r[1],r[1]===5?'🥉':r[1]===10?'🥈':'🥇');return '🎁'}
  function cardItem(p){return {name:`Карточка шанса +${p}%`,price:0,rarity:p===15?'special':p===10?'covert':'classified',bpCard:p,wear:'BP'} }
- function grant(r){const b=bp();if(r[0]==='box'){
-   const id='bp_'+r[1];
-   state.cases[id]=(state.cases[id]||0)+1;
-   try{renderMyCases()}catch(e){}
-   return `${BP_BOX_INFO[r[1]].name} ×1`;
-  }
-  if(r[0]==='case'){
-   state.cases[r[1]]=(state.cases[r[1]]||0)+1;
-   try{renderMyCases()}catch(e){}
-   return (CASES.find(c=>c.id===r[1])||{title:r[1]}).title+' ×1';
-  }
+ function grant(r){const b=bp();if(r[0]==='box'){addCaseToInventory('bp_'+r[1],1);try{renderMyCases()}catch(e){}return `${BP_BOX_INFO[r[1]].name} ×1`}
+  if(r[0]==='case'){state.cases[r[1]]=(state.cases[r[1]]||0)+1;try{renderMyCases()}catch(e){}return (CASES.find(c=>c.id===r[1])||{title:r[1]}).title+' ×1'}
   if(r[0]==='money'){addMoney(r[1]);return fmt(r[1])+' ₽'}
   if(r[0]==='card'){state.inventory.push(cardItem(r[1]));try{renderInventory()}catch(e){}return `Карточка +${r[1]}%`}
  }
@@ -4790,38 +4742,16 @@ window.playCoinflip=function(side){
  function weighted(items){if(!items.length)return null;const ws=items.map((x,i)=>1/Math.pow(1+i,1.18)),sum=ws.reduce((a,b)=>a+b,0);let r=Math.random()*sum;for(let i=0;i<items.length;i++){r-=ws[i];if(r<=0)return items[i]}return items[items.length-1]}
  function topOnePercent(items){const s=[...items].sort((a,b)=>a.price-b.price);if(!s.length)return null;if(Math.random()<.01)return s[s.length-1];return weighted(s.slice(0,-1).sort((a,b)=>a.price-b.price))||s[0]}
  function addSkin(it,title){if(!it)return;const o={...it};state.inventory.push(o);try{renderInventory()}catch(e){}try{showSkinNotify(o,title)}catch(e){showToast(title+' '+o.name)}return `${o.name} (${fmt(o.price)} ₽)`}
- function resolveBPReward(type){
-  const b=bp(); let msg='';
-  if(type==='coins'){
-    const v=COINS[Math.floor(Math.random()*COINS.length)]; addMoney(v); msg=`🪙 Выпало ${fmt(v)} ₽`;
-  } else if(type==='flask'){
-    const cs=CASES.filter(c=>!c.bpType&&c.price<=500000).sort((a,b)=>a.price-b.price);
-    const c=Math.random()<.01?cs[cs.length-1]:weighted(cs.slice(0,-1))||cs[0];
-    state.cases[c.id]=(state.cases[c.id]||0)+1; msg=`🧪 Выпал кейс: ${c.title}`;
-  } else if(type==='mystery'){
-    const it=topOnePercent(getCatalog().filter(x=>x.price>=500&&x.price<=150000)); msg='❓ '+addSkin(it,'❓ Кейс со знаком вопроса:');
-  } else if(type==='allnothing'){
-    const it=Math.random()<.05?nearest(500000,350000,650000):nearest(100,50,250); msg='⚫ '+addSkin(it,'⚫ Всё или ничего:');
-  } else if(type==='oneThird'){
-    const p=[nearest(85000,65000,120000),nearest(100000,70000,130000),nearest(115000,80000,150000)];
-    const u=[...new Map(p.map(x=>[x.name,x])).values()]; const it=u[Math.floor(Math.random()*u.length)]; msg='🎯 '+addSkin(it,'🎯 Кейс 1/3:');
-  } else {
-    const cfg={level1:[5000,250000,8],level2:[25000,500000,8],level3:[250000,2000000,8],level4:[1000000,10000000,5]}[type];
-    const it=weighted(pool8(cfg[0],cfg[1],cfg[2]).sort((a,b)=>a.price-b.price)); msg=`🎁 ${addSkin(it,BP_BOX_INFO[type].name+':')}`;
-  }
-  b.xp+=5; saveGame(); renderMyCases(); renderInventory(); renderBP(); showToast(msg+' · ⭐ +5 XP'); return msg;
- }
- window.bpOpenBox=function(type){
-  const id='bp_'+type; if((state.cases[id]||0)<=0){showToast('📦 Такого кейса нет в «Мои кейсы»');return}
-  if(window.openBPCaseAnimated){window.openBPCaseAnimated(type);return}
-  state.cases[id]--; if(state.cases[id]<=0)delete state.cases[id]; resolveBPReward(type);
- };
- window.__resolveBPReward=resolveBPReward;
+ window.bpOpenBox=function(type){const b=bp();if(!(b.boxes[type]>0))return;b.boxes[type]--;let msg='';
+  if(type==='coins'){const v=COINS[Math.floor(Math.random()*COINS.length)];addMoney(v);msg=`🪙 Выпало ${fmt(v)} ₽`}
+  else if(type==='flask'){const cs=CASES.filter(c=>c.price<=500000).sort((a,b)=>a.price-b.price);let c;if(Math.random()<.01)c=cs[cs.length-1];else c=weighted(cs.slice(0,-1))||cs[0];state.cases[c.id]=(state.cases[c.id]||0)+1;try{renderMyCases()}catch(e){}msg=`🧪 Выпал кейс: ${c.title}`}
+  else if(type==='mystery'){const it=topOnePercent(getCatalog().filter(x=>x.price>=500&&x.price<=150000));msg='❓ '+addSkin(it,'❓ Кейс со знаком вопроса:')}
+  else if(type==='allnothing'){const it=Math.random()<.05?nearest(500000,350000,650000):nearest(100,50,250);msg='⚫ '+addSkin(it,'⚫ Всё или ничего:')}
+  else if(type==='oneThird'){const p=[nearest(85000,65000,120000),nearest(100000,70000,130000),nearest(115000,80000,150000)];const u=[...new Map(p.map(x=>[x.name,x])).values()];const it=u[Math.floor(Math.random()*u.length)];msg='🎯 '+addSkin(it,'🎯 Кейс 1/3:')}
+  else {const cfg={level1:[5000,250000,8],level2:[25000,500000,8],level3:[250000,2000000,8],level4:[1000000,10000000,5]}[type];const p=pool8(cfg[0],cfg[1],cfg[2]).sort((a,b)=>a.price-b.price);const it=weighted(p);msg=`🎁 ${addSkin(it,BP_BOX_INFO[type].name+':')}`}
+  b.xp+=5;saveGame();renderBP();showToast(msg+' · ⭐ +5 XP')};
  window.bpAddXP=function(n,why,silent=false){if(!Number.isFinite(n)||n<=0)return;bp().xp+=n;saveGame();renderBP();if(!silent)showToast(`⭐ +${n} XP${why?' · '+why:''}`)};
- function boxesHtml(b){
-  const n=Object.keys(BP_BOX_INFO).reduce((a,k)=>a+(state.cases['bp_'+k]||0),0);
-  return n?`<div class="bp-boxes"><div class="bp-bt">🎁 Кейсы Battle Pass находятся в разделе <b>Мои кейсы</b> · всего ${n}. Открывай их там.</div></div>`:'';
- }
+ function boxesHtml(b){const ks=Object.keys(BP_BOX_INFO).filter(k=>b.boxes[k]>0);if(!ks.length)return '';return `<div class="bp-boxes"><div class="bp-bt">🎁 Мои коробки (за открытие +5 XP)</div><div class="bp-brow">${ks.map(k=>`<button class="bp-box" title="${BP_BOX_INFO[k].name}" onclick="bpOpenBox('${k}')"><span class="bp-bi">${icoHtml(k,BP_BOX_INFO[k].ico)}</span><i>×${b.boxes[k]}</i><em>Открыть</em></button>`).join('')}</div></div>`}
  let bpOpen=false;window.bpToggle=function(){bpOpen=!bpOpen;renderBP()};
  function renderBP(){let host=document.getElementById('battle-pass');if(!host)return;
   host.innerHTML=`<div class="bp-cover" onclick="bpToggle()"><div class="bp-cimg">${icoHtml('pass','🏆')}</div><div class="bp-ctext"><b>Burmaldapass</b><span>Открыть</span></div><div class="bp-carr">›</div></div>`;
@@ -4829,59 +4759,10 @@ window.playCoinflip=function(side){
   if(!bpOpen){ov.style.display='none';document.body.style.overflow='';return}
   ov.style.display='block';document.body.style.overflow='hidden';
   const d=nextData(),b=bp(),ul=unlocked();
-  ov.innerHTML=`<button class="bp-close" onclick="bpToggle()">← Назад</button><div class="bp-head"><div><div class="bp-title">🏆 Burmaldapass</div><div class="bp-sub">50 уровней · прогресс сохраняется автоматически</div></div><div class="bp-lvl">LVL ${ul}/50</div></div><div class="bp-progress"><div class="bp-progress-top"><span>Всего: ${fmt(b.xp)} XP</span><span>${d.txt}</span></div><div class="bp-bar"><div class="bp-fill" style="width:${d.cur*100}%"></div></div></div>${boxesHtml(b)}<div class="bp-scroll"><div class="bp-track">${Array.from({length:50},(_,i)=>{const l=i+1,u=b.xp>=req(l),c=!!b.claimed[l];return `<div class="bp-node ${u?'unlocked':''} ${c?'claimed':''}" title="${rewardName(l)}"><div class="bp-num">${l}</div><div class="bp-ico">${rewardIco(l)}</div><div class="bp-need">${l===50?'1 500 XP':'500 XP'}</div><button class="bp-claim ${c?'done':''}" ${(!u||c)?'disabled':''} onclick="bpClaim(${l})">${c?'Получено':u?'Забрать':'Закрыто'}</button></div>`}).join('')}</div></div>`}
- function ensureBPCases(){
-  const defs={mystery:[500,150000,8],flask:[500,500000,8],coins:[100,1000000,8],level1:[5000,250000,8],level2:[25000,500000,8],level3:[250000,2000000,8],level4:[1000000,10000000,5],allnothing:[50,500000,8],oneThird:[65000,120000,8]};
-  for(const [k,cfg] of Object.entries(defs)){
-    const id='bp_'+k;
-    if(!CASES.some(c=>c.id===id)){
-      const items=pool8(cfg[0],cfg[1],cfg[2]);
-      CASES.push({id,title:BP_BOX_INFO[k].name,price:0,emoji:BP_BOX_INFO[k].ico,items:items.length?items:getCatalog().slice(0,8),bpType:k});
-    }
-  }
- }
- window.openBPCaseAnimated=function(type,fast=false){
-  const id='bp_'+type;
-  if((state.cases[id]||0)<=0){showToast('📦 Кейса нет в «Мои кейсы»');return}
-  ensureBPCases();
-  currentCase=CASES.find(c=>c.id===id);
-  openCount=1;
-  document.getElementById('cases-list').style.display='none';
-  document.getElementById('case-view').style.display='block';
-  document.getElementById('current-case-title').textContent=currentCase.title;
-  document.getElementById('spin-result').textContent='';
-  document.getElementById('multi-results').innerHTML='';
-  caseSt=false; lastDrops=[]; hideSellDropBtn();
-  document.querySelectorAll('#cc-ver .opt-chip').forEach((b,i)=>b.classList.toggle('active',i===0));
-  renderCaseContents(); renderRouletteIdle();
-  if(fast)spinCase(true);
- };
- const _normalSpin=window.spinCase;
- window.spinCase=function(fast){
-   if(currentCase&&currentCase.bpType){
-     if(spinning)return;
-     const id=currentCase.id;
-     if((state.cases[id]||0)<=0){showToast('📦 Кейса нет в «Мои кейсы»');return;}
-     state.cases[id]--;if(state.cases[id]<=0)delete state.cases[id];
-     renderMyCases(); spinning=true; $('open-btn').disabled=true; $('open-fast-btn').disabled=true; $('spin-result').textContent=''; $('multi-results').innerHTML=''; lastDrops=[]; hideSellDropBtn();
-     const visual=currentCase.items[Math.floor(Math.random()*currentCase.items.length)]||getCatalog()[0], WIN_INDEX=55,CARDS=65,track=$('roulette-track');
-     track.style.transition='none';track.innerHTML='';
-     for(let i=0;i<CARDS;i++){const it=i===WIN_INDEX?visual:currentCase.items[Math.floor(Math.random()*currentCase.items.length)]||visual;const card=makeCard(it);if(i===WIN_INDEX)card.id='winner-card';track.appendChild(card)}
-     const W=track.parentElement.clientWidth,step=110,startX=W/2-165,j=(Math.random()*50-25),endX=W/2-(WIN_INDEX*step+55)+j;track.style.transform=`translateX(${startX}px)`;track.getBoundingClientRect();track.style.transition=`transform ${fast===true?1.04:5.2}s cubic-bezier(0.08,0.6,0.05,1)`;track.style.transform=`translateX(${endX}px)`;
-     setTimeout(()=>{const wc=$('winner-card');if(wc)wc.classList.add('winner');state.stats.casesOpened+=1;$('cases-opened').textContent=state.stats.casesOpened;const msg=window.__resolveBPReward(typeForBP(currentCase.id));$('spin-result').innerHTML=`<span style="color:#fbbf24;">${msg}</span>`;spinning=false;$('open-btn').disabled=false;$('open-fast-btn').disabled=false;renderMyCases();renderInventory();saveGame();},fast===true?1100:5300);
-     return;
-   }
-   return _normalSpin.apply(this,arguments);
- };
- function typeForBP(id){return id.slice(3)}
- function resetBPToLevel1(){
-  const b=bp();
-  if(b.__resetToLevel1_20261005)return;
-  b.xp=0; b.claimed={}; b.__resetToLevel1_20261005=true; saveGame();
- }
- function mount(){resetBPToLevel1();ensureBPCases();const sec=document.getElementById('cases-tab'),list=document.getElementById('cases-list');if(!sec||!list)return;let h=document.getElementById('battle-pass');if(!h){h=document.createElement('div');h.id='battle-pass';h.className='bp-wrap';list.parentNode.insertBefore(h,list)}bp();renderBP()}
+  ov.innerHTML=`<button class="bp-close" onclick="bpToggle()">← Назад</button><div class="bp-head"><div><div class="bp-title">🏆 Burmaldapass</div><div class="bp-sub">50 уровней · прогресс сохраняется автоматически</div></div><div class="bp-lvl">LVL ${ul}/50</div></div><div class="bp-progress"><div class="bp-progress-top"><span>Всего: ${fmt(b.xp)} XP</span><span>${d.txt}</span></div><div class="bp-bar"><div class="bp-fill" style="width:${d.cur*100}%"></div></div></div><div class="bp-scroll"><div class="bp-track">${Array.from({length:50},(_,i)=>{const l=i+1,u=b.xp>=req(l),c=!!b.claimed[l];return `<div class="bp-node ${u?'unlocked':''} ${c?'claimed':''}" title="${rewardName(l)}"><div class="bp-num">${l}</div><div class="bp-ico">${rewardIco(l)}</div><div class="bp-need">${l===50?'1 500 XP':'500 XP'}</div><button class="bp-claim ${c?'done':''}" ${(!u||c)?'disabled':''} onclick="bpClaim(${l})">${c?'Получено':u?'Забрать':'Закрыто'}</button></div>`}).join('')}</div></div>`}
+ function mount(){const sec=document.getElementById('cases-tab'),list=document.getElementById('cases-list');if(!sec||!list)return;let h=document.getElementById('battle-pass');if(!h){h=document.createElement('div');h.id='battle-pass';h.className='bp-wrap';list.parentNode.insertBefore(h,list)}bp();renderBP()}
  // XP за открытие кейсов
- const _spin=window.spinCase;window.spinCase=function(){if(spinning||!currentCase)return _spin.apply(this,arguments);const n=openCount||1,price=currentCase.price||0,owned=(state.cases&&state.cases[currentCase.id])||0,cost=price*Math.max(0,n-Math.min(owned,n));if(state.balance<cost)return _spin.apply(this,arguments);const before=spinning,r=_spin.apply(this,arguments);if(!before&&spinning){const each=price>=100000?50:price>=10000?20:5;bpAddXP(each*n,`открыто кейсов: ${n}`)}return r};
+ const _spin=window.spinCase;window.spinCase=function(){if(spinning||!currentCase)return _spin.apply(this,arguments);if(currentCase.bp&&((state.cases&&state.cases[currentCase.id])||0)<(openCount||1)){showToast('🏆 Этот кейс можно получить только в Burmaldapass');return}const n=openCount||1,price=currentCase.price||0,owned=(state.cases&&state.cases[currentCase.id])||0,cost=price*Math.max(0,n-Math.min(owned,n));if(state.balance<cost)return _spin.apply(this,arguments);const before=spinning,r=_spin.apply(this,arguments);if(!before&&spinning){const each=price>=100000?50:price>=10000?20:5;bpAddXP(each*n,`открыто кейсов: ${n}`)}return r};
  // Карточки шанса: считаются как +5/+10/+15 процентных пунктов и расходуются за один апгрейд
  const _chance=window.upgChance;window.upgChance=function(){const base=_chance.apply(this,arguments),bonus=upg.list.reduce((s,it)=>s+(it.bpCard||0),0);return Math.min(95,base+bonus)};
  const _pickOwn=window.pickOwn;window.pickOwn=function(idx){const it=state.inventory[idx];if(it&&it.bpCard&&upg.list.some(x=>x.bpCard&&x!==it)){showToast('Можно использовать только одну карточку шанса за апгрейд');return}return _pickOwn.apply(this,arguments)};
@@ -4894,6 +4775,44 @@ window.playCoinflip=function(side){
  // Красивое отображение карточек в инвентаре/апгрейдере без внешних картинок
  const _rinv=window.renderInventory;window.renderInventory=function(){const r=_rinv.apply(this,arguments);document.querySelectorAll('#inventory-list .inv-card').forEach(card=>{const txt=card.textContent||'';const m=txt.match(/Карточка шанса \+(5|10|15)%/);if(m){const img=card.querySelector('img');const cu=bpImg('card'+m[1]);if(img&&cu){img.src=cu}else if(img){img.style.display='none';const d=document.createElement('div');d.className='bp-card '+(m[1]==='5'?'bronze':m[1]==='10'?'silver':'gold');d.textContent='+'+m[1]+'%';img.parentNode.insertBefore(d,img)}}});return r};
  window.renderBP=renderBP;
+ // ===== Коробки пасса как настоящие кейсы (bp_*), карточки и спец-дропы =====
+ const svgUri=x=>'data:image/svg+xml;utf8,'+encodeURIComponent(x);
+ const boxSvg=e=>svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b2a66"/><stop offset="1" stop-color="#18191a"/></linearGradient></defs><rect x="14" y="30" width="132" height="100" rx="16" fill="url(#g)" stroke="#facc15" stroke-width="4"/><text x="80" y="104" font-size="62" text-anchor="middle" font-family="sans-serif" fill="#fde68a">${e}</text></svg>`);
+ const moneySvg=v=>svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 192"><text x="128" y="100" font-size="84" text-anchor="middle">🪙</text><text x="128" y="165" font-size="30" font-weight="900" text-anchor="middle" fill="#fde68a" font-family="sans-serif">${fmt(v)} $</text></svg>`);
+ const cardSvg=p=>{const c=p===5?['#7c3f1d','#d38b55']:p===10?['#8b93a1','#e5e7eb']:['#b77905','#fde047'];return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 192"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient></defs><rect x="28" y="44" width="200" height="104" rx="18" fill="url(#g)"/><text x="128" y="118" font-size="60" font-weight="900" text-anchor="middle" font-family="sans-serif" fill="#15100b">+${p}%</text></svg>`)};
+ const defGet=(obj,key,fn)=>{try{Object.defineProperty(obj,key,{get:fn,set(){},configurable:true,enumerable:false})}catch(e){}};
+ [5,10,15].forEach(p=>defGet(SKIN_IMG_BASE,`Карточка шанса +${p}%`,()=>bpImg('card'+p)||cardSvg(p)));
+ const rarByPrice=p=>p<1000?'common':p<10000?'rare':p<60000?'classified':p<300000?'covert':'special';
+ const wts=(n,i)=>1000/Math.pow(1+i,1.18);
+ (function buildBpCases(){
+  if(CASES.some(c=>c.bp))return;
+  const cat=getCatalog(),mk=(id,items,extra)=>{
+   const info=BP_BOX_INFO[id];
+   CASES.push(Object.assign({id:'bp_'+id,title:info.name,price:0,emoji:info.ico,bp:true,noST:true,items},extra||{}));
+   defGet(CASE_IMG,'bp_'+id,()=>bpImg(id)||boxSvg(info.ico));
+  };
+  const sk=(x,w)=>({name:x.name,price:x.price,rarity:x.rarity,w});
+  // уровневые кейсы
+  const cfg={level1:[5000,250000,8],level2:[25000,500000,8],level3:[250000,2000000,8],level4:[1000000,10000000,5]};
+  for(const k in cfg){const p=pool8(cfg[k][0],cfg[k][1],cfg[k][2]).sort((a,b)=>a.price-b.price);mk(k,p.map((x,i)=>sk(x,wts(0,i))))}
+  // Кейс ?  — 1% самый дорогой, иначе чаще дешёвые
+  {const pl=cat.filter(x=>x.price>=500&&x.price<=150000).sort((a,b)=>a.price-b.price);
+   if(pl.length>1){const top=pl[pl.length-1],rest=pl.slice(0,-1).slice(0,39),sum=rest.reduce((a,_,i)=>a+wts(0,i),0);
+    mk('mystery',rest.map((x,i)=>sk(x,wts(0,i))).concat([sk(top,sum*0.01/0.99)]))}}
+  // Всё или ничего
+  mk('allnothing',[sk(nearest(100,50,250),95),sk(nearest(500000,350000,650000),5)]);
+  // 1/3
+  {const p=[nearest(85000,65000,120000),nearest(100000,70000,130000),nearest(115000,80000,150000)];
+   mk('oneThird',[...new Map(p.map(x=>[x.name,x])).values()].map(x=>sk(x,1)))}
+  // Кейс монет — деньги сразу на баланс
+  mk('coins',COINS.map(v=>{const nm='🪙 '+fmt(v)+' $';defGet(SKIN_IMG_BASE,nm,()=>moneySvg(v));return {name:nm,price:v,rarity:rarByPrice(v),w:1,money:v,noWear:true}}));
+  // Колбочка ? — выпадает случайный кейс в «Мои кейсы»
+  {const cs=CASES.filter(c=>!c.bp&&c.price<=500000).sort((a,b)=>a.price-b.price);
+   if(cs.length>1){const top=cs[cs.length-1],rest=cs.slice(0,-1),sum=rest.reduce((a,_,i)=>a+wts(0,i),0);
+    const ci=(c,w)=>{defGet(SKIN_IMG_BASE,c.title,()=>CASE_IMG[c.id]||'');return {name:c.title,price:c.price,rarity:rarByPrice(c.price),w,caseId:c.id,noWear:true}};
+    mk('flask',rest.map((c,i)=>ci(c,wts(0,i))).concat([ci(top,sum*0.01/0.99)]))}}
+ })();
+
  mount();try{renderInventory()}catch(e){};
 })();
 </script>
