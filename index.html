@@ -6063,5 +6063,10 @@ html body .bd-m2 .bar .lv,html body .bd-m2 .bar .xp{background:rgba(255,255,255,
  #bd-ticker .bd-t .bd-nm b{font-size:.8rem!important;font-weight:600!important;left:auto!important;bottom:auto!important}
 }
 </style>
+<style id="upg-grid-fix">
+/* апгрейдер: скины в блоке «ваш предмет» не обрезаются (до 9 шт.) */
+html body #upgrader-tab .ugx-img .own-grid{height:100%!important;align-content:stretch!important;grid-auto-rows:minmax(0,1fr);gap:3px!important;overflow:hidden}
+html body #upgrader-tab .ugx-img .own-grid img{height:100%!important;max-height:none!important;min-height:0;width:100%!important;aspect-ratio:auto!important;object-fit:contain}
+</style>
 </body>
 </html>
