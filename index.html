@@ -5805,6 +5805,50 @@ html body #upgrader-tab .circle-info .ch-val{font-size:calc(var(--w)*.121)!impor
 html body #upgrader-tab .upg-arrow span{width:calc(var(--w)*.069);height:calc(var(--w)*.062)}
 html body #upgrader-tab .ugx-pad{width:calc(var(--w)*.586);height:calc(var(--w)*.19);padding:0;margin-top:calc(var(--w)*-.03);overflow:hidden}
 </style>
+<style id="clicker-quests-ui">
+/* ===== Кликер ===== */
+html body #clicker-tab h2{font-size:1.7rem;font-weight:800;letter-spacing:-.5px;margin-bottom:2px}
+html body #clicker-tab .clicker-area{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;display:flex;flex-direction:column;gap:14px}
+html body #clicker-tab .click-wrap{display:flex;justify-content:center;padding:18px 0 6px;position:relative}
+html body #clicker-tab .click-wrap::before{content:'';position:absolute;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.35),transparent 68%);filter:blur(8px);pointer-events:none}
+html body #clicker-tab .click-btn{position:relative;width:190px!important;height:190px!important;border-radius:50%!important;border:0!important;color:#fff;font-weight:900;font-size:1.35rem;line-height:1.25;letter-spacing:.5px;cursor:pointer;background:radial-gradient(circle at 32% 26%,#c4b5fd 0,#8b5cf6 38%,#5b21b6 100%)!important;box-shadow:0 0 0 10px rgba(139,92,246,.12),0 0 0 22px rgba(139,92,246,.06),0 18px 40px rgba(91,33,182,.55),inset 0 -10px 22px rgba(30,10,80,.45),inset 0 6px 14px rgba(255,255,255,.28)!important;text-shadow:0 2px 8px rgba(30,10,80,.6);transition:transform .08s,box-shadow .15s}
+html body #clicker-tab .click-btn:active{transform:scale(.95)!important}
+html body #clicker-tab .click-stats{display:grid!important;grid-template-columns:repeat(3,1fr);gap:10px}
+html body #clicker-tab .click-stat{padding:14px 8px;border-radius:18px;text-align:center;background:linear-gradient(180deg,#24242c,#1b1b21)!important;border:1px solid rgba(255,255,255,.06)!important}
+html body #clicker-tab .click-stat b{display:block;font-size:1.15rem;font-weight:800;background:linear-gradient(90deg,#c4b5fd,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent}
+html body #clicker-tab .click-stat span{display:block;margin-top:4px;font-size:.72rem;color:#8d93a6}
+html body #clicker-tab .cb-box{padding:16px;border-radius:22px;background:linear-gradient(135deg,rgba(139,92,246,.22),rgba(236,72,153,.12)),#1b1b21!important;border:1px solid rgba(167,139,250,.28)!important}
+html body #clicker-tab .cb-head{display:flex;justify-content:space-between;gap:10px;font-size:.88rem;font-weight:600;color:#e6e8f0}
+html body #clicker-tab .cb-head b{flex:none;color:#c4b5fd}
+html body #clicker-tab .cb-bar{height:12px;border-radius:99px;background:#14141a;margin-top:12px;overflow:hidden}
+html body #clicker-tab .cb-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#8b5cf6,#ec4899);box-shadow:0 0 14px rgba(236,72,153,.6)}
+html body #clicker-tab .energy-bar-wrap{padding:14px 16px;border-radius:20px;background:#1b1b21!important;border:1px solid rgba(255,255,255,.06)!important}
+html body #clicker-tab .energy-bar{position:relative;height:22px;border-radius:99px;background:#14141a!important;overflow:hidden;border:0!important}
+html body #clicker-tab .energy-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#facc15,#fb923c)!important;box-shadow:0 0 14px rgba(250,204,21,.45)}
+html body #clicker-tab .energy-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+html body #clicker-tab .shop-card{display:flex;align-items:center;gap:14px;margin-top:12px;padding:14px;border-radius:22px;background:linear-gradient(180deg,#22222a,#1b1b21)!important;border:1px solid rgba(255,255,255,.06)!important;box-shadow:none!important}
+html body #clicker-tab .shop-icon{flex:none;width:54px;height:54px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:linear-gradient(145deg,rgba(139,92,246,.35),rgba(236,72,153,.2))!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+html body #clicker-tab .shop-btn{flex:none;min-width:84px;height:44px;padding:0 16px;border:0!important;border-radius:14px!important;font-weight:800;font-size:.95rem;color:#fff;cursor:pointer;background:linear-gradient(135deg,#8b5cf6,#6d28d9)!important;box-shadow:0 6px 16px rgba(109,40,217,.45)!important}
+html body #clicker-tab .shop-btn:disabled{background:#2a2a32!important;color:#6b6f7c;box-shadow:none!important}
+/* ===== Задания ===== */
+html body #quests-tab .q-timer{display:inline-flex;align-items:center;gap:6px;margin:4px 0 14px;padding:8px 14px;border-radius:99px;background:#1d1d23;border:1px solid rgba(255,255,255,.06);font-size:.85rem;color:#a9afc2}
+html body #quests-tab .q-timer b{color:#fff;font-variant-numeric:tabular-nums}
+html body #quests-tab .q-list{display:flex;flex-direction:column;gap:12px}
+html body #quests-tab .q-card{position:relative;overflow:hidden;padding:16px 16px 16px 20px;border-radius:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 20%,#1d1d24),#17171d 70%)!important;border:1px solid color-mix(in srgb,var(--c) 28%,transparent)!important;box-shadow:none!important}
+html body #quests-tab .q-card::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:5px;border-radius:0 6px 6px 0;background:var(--c);box-shadow:0 0 14px var(--c)}
+html body #quests-tab .q-top{display:flex;justify-content:space-between;align-items:center}
+html body #quests-tab .q-diff{padding:5px 12px;border-radius:99px;font-size:.72rem;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
+html body #quests-tab .q-prog{font-size:.85rem;font-weight:700;color:#c9cddb}
+html body #quests-tab .q-text{margin:12px 0;font-size:1.02rem;font-weight:600;line-height:1.35;color:#fff}
+html body #quests-tab .q-bar{height:12px;border-radius:99px;background:#101015;overflow:hidden}
+html body #quests-tab .q-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 70%,#fff),var(--c));box-shadow:0 0 12px var(--c)}
+html body #quests-tab .q-reward{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 12px;border-radius:16px;background:rgba(0,0,0,.28);font-size:.88rem;color:#a9afc2}
+html body #quests-tab .q-reward img{width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+html body #quests-tab .q-reward b{color:#fff}
+html body #quests-tab .q-claim{width:100%;height:52px;margin-top:12px;border:0!important;border-radius:16px!important;font-size:1.05rem;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,#22c55e,#16a34a)!important;box-shadow:0 8px 22px rgba(34,197,94,.4)!important}
+html body #quests-tab .q-card.done:not(.claimed){border-color:#22c55e!important;box-shadow:0 0 26px rgba(34,197,94,.22)!important}
+html body #quests-tab .q-card.claimed{opacity:.55}
+</style>
 <style id="games-inline-tabs">
 /* мини-игры встроены во вкладку «Игры»: навигация всегда доступна, кнопки «Назад» нет */
 .game-full:not(#game-index){position:static;inset:auto;z-index:auto;overflow:visible;padding:0;background:none;display:none}
